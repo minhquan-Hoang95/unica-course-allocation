@@ -1,0 +1,177 @@
+\documentclass{rapport}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\usepackage{pifont}
+\usepackage{url}
+\usepackage[hypertexnames=false,colorlinks, citecolor=red!60!green, linkcolor=blue!60!green, urlcolor=magenta]{hyperref}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\newcommand{\llbracket}{[\![}
+\newcommand{\rrbracket}{]\!]}
+
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+\fancyfoot{}
+\fancyhead{}
+\fancyhead[L]{\textsl{\leftmark}}
+\fancyhead[R]{\textbf{\thepage}}
+\setlength{\headheight}{23pt}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+}
+
+\title{unica-course-allocation}
+\author{Promo Modélisation par des contraintes (2025-2026)}
+\supervisor{Arnaud Malapert}
+\date{}
+\type{Projet}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document constitue un début de rapport pour le projet \emph{unica-course-allocation} consacré à l'affectation des unités d'enseignement (UE) du Master Informatique. Il présente le contexte, les objectifs, les données disponibles et une formalisation mathématique des contraintes du problème. [à compléter avec les éléments que l'on va ajouter]
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\section{Introduction et problématique}
+\subsection{Introduction}
+Dans le Master Informatique de l'Université Côte d'Azur, les étudiantes et étudiants choisissent chaque semestre un ensemble d'UE à partir d'un catalogue commun aux parcours \emph{Informatique} et \emph{IA}. Le choix est contraint par :
+\begin{itemize}
+    \item des capacités limitées par UE,
+    \item des incompatibilités d'emploi du temps,
+    \item des UE obligatoires dépendant du parcours.
+\end{itemize}
+
+Le mécanisme actuel de type \og premier arrivé, premier servi \fg{} est simple mais peut générer des inégalités importantes. Le projet vise donc à proposer une méthode d'affectation plus \emph{équitable}, tout en restant explicable et opérationnelle.
+
+\subsection{Contexte et problématique}
+Le problème est \textbf{multiagent} (plusieurs étudiants avec des préférences différentes) et \textbf{multicritère} (respect des obligations, prise en compte des préférences, équité globale).
+
+Dans ce cadre, il n'existe pas nécessairement une solution unique optimale pour tous les critères simultanément. L'enjeu principal est alors de :
+\begin{enumerate}
+    \item définir une notion mesurable d'\textbf{équité},
+    \item proposer une procédure d'affectation compréhensible,
+    \item évaluer quantitativement la qualité des affectations obtenues.
+\end{enumerate}
+
+\subsection{Objectifs du projet}
+D'après la description du projet, la preuve de concept attendue doit :
+\begin{itemize}
+    \item définir le concept d'\emph{affectation équitable} et proposer des indicateurs quantitatifs,
+    \item améliorer le système d'affectation actuel par un processus simple et explicable,
+    \item rester flexible vis-à-vis des paramètres (nombre d'étudiants, d'UE, de parcours, de places, etc.),
+    \item présenter des résultats lisibles, cohérents et scientifiquement argumentés.
+\end{itemize}
+
+\section{Données}
+\subsection{Données disponibles}
+Les données exploitées dans le projet sont :
+\begin{itemize}
+    \item la liste des UE obligatoires et optionnelles selon les parcours,
+    \item les capacités d'accueil des UE (hors places réservées aux obligations de parcours),
+    \item les incompatibilités d'emploi du temps entre UE,
+    \item pour chaque étudiant : parcours, nombre maximum d'UE souhaitées, préférences sur les UE.
+\end{itemize}
+
+Notes :
+\begin{itemize}
+    \item certaines UE externes au processus principal peuvent être considérées à capacité \og illimitée \fg{},
+    \item toute UE non obligatoire dans un parcours est considérée comme optionnelle.
+\end{itemize}
+
+\subsection{Format des données}
+Soit $n$ le nombre d'étudiants, $m$ le nombre d'UE et $p$ le nombre de parcours.
+
+\subsubsection{Entrée}
+\begin{itemize}
+    \item \textbf{Cours :}
+    \begin{itemize}
+        \item $c_j \in \mathbb{N}$ : la capacité de l'UE $j \in \llbracket 1,m \rrbracket$.
+        \item $I^c_{j,j'} \in \{0,1\}$ : la matrice d'incompatibilité des UE $(j,j') \in \llbracket 1,m \rrbracket^2$, où la case $(j,j')$ vaut 1 si les cours sont incompatibles, 0 autrement.
+    \end{itemize}
+
+    \item \textbf{Parcours :}
+    \begin{itemize}
+        \item $m\!\min_k \in \mathbb{N}^*$ : le nombre minimum d'UE optionnelles à suivre dans le parcours $k \in \llbracket 1,p \rrbracket$.
+        \item $m_{j,k} \in \{0,1\}$ : indique si l'UE $j \in \llbracket 1,m \rrbracket$ est obligatoire dans le parcours $k \in \llbracket 1,p \rrbracket$.
+    \end{itemize}
+
+    \item \textbf{Étudiants :}
+    \begin{itemize}
+        \item $m\!\max_i$ : le nombre maximum d'UE souhaité par l'étudiant $i \in \llbracket 1,n \rrbracket$.
+        \item $p_i \in \llbracket 1,p \rrbracket$ : le parcours suivi par l'étudiant $i \in \llbracket 1,n \rrbracket$.
+        \item $r_i : \llbracket 1,m \rrbracket \to \llbracket 1,m \rrbracket$ : une fonction de rang indiquant les préférences d'un étudiant $i$, telle que plusieurs UE peuvent avoir le même rang, et que les rangs soient consécutifs.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Sortie}
+\begin{itemize}
+    \item $A_{i,j}$ : une affectation d'UE pour l'étudiant $i \in \llbracket 1,n \rrbracket$ ; 1 si le cours $j \in \llbracket 1,m \rrbracket$ est affecté, 0 sinon.
+\end{itemize}
+
+\subsubsection{Contraintes}
+\begin{itemize}
+    \item \textbf{(C1)} \og Pour chaque UE, la somme des affectations pour celle-ci ne dépasse pas sa capacité \fg{} :
+    \[
+    \forall j \in \llbracket 1,m \rrbracket : \sum_{i \in \llbracket 1,n \rrbracket} A_{i,j} \le c_j
+    \]
+
+    \item \textbf{(C2)} \og Une affectation ne peut accorder que des UE compatibles \fg{} :
+    \[
+    \forall (i,j,j') \in \llbracket 1,n \rrbracket \times \llbracket 1,m \rrbracket^2 : I^c_{j,j'} + A_{i,j} + A_{i,j'} \le 2
+    \]
+
+    \item \textbf{(C3)} \og Un étudiant inscrit dans un parcours $p$ doit se voir attribuer toutes les UE obligatoires du parcours $p$ \fg{} :
+    \[
+    \forall (i,j,k) \in \llbracket 1,n \rrbracket \times \llbracket 1,m \rrbracket \times \llbracket 1,p \rrbracket : A_{i,j} - \mathbf{1}_{p_i=k} - m_{j,k} \ge -1
+    \]
+
+    \item \textbf{(C4)} \og Un étudiant doit recevoir une affectation de 8 à 10 UE \fg{} :
+    \[
+    \forall i \in \llbracket 1,n \rrbracket : 8 \le \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le 10
+    \]
+
+    \item \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de cours qu'il a demandé \fg{} :
+    \[
+    \forall i \in \llbracket 1,n \rrbracket : \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le m\!\max_i
+    \]
+\end{itemize}
+
+\paragraph{Note.}
+$\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sinon.
+
+\section{Méthodologie et implémentation}
+\subsection{Méthode proposée}
+\textbf{À faire.}
+
+\subsection{Implémentation}
+\textbf{À faire.}
+
+\section{Expériences}
+\textbf{À faire.}
+
+\section{Résultats et discussions}
+\subsection{Résultats}
+\textbf{À faire.}
+
+\subsection{Discussion}
+\textbf{À faire.}
+
+\section{Conclusion}
+\textbf{À faire.}
+
+\end{document}
