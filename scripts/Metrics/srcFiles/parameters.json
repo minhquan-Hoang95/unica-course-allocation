@@ -1,0 +1,15 @@
+{
+    "n":75,
+    "m":18,
+    "s":2,
+    "spe":{
+        "AI_track":{
+            "minNj":3,
+            "maxNj":5
+        },
+        "CS_track":{
+            "minNj":7,
+            "maxNj":9
+        }
+    }
+}
