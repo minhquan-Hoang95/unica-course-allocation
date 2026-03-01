@@ -1,0 +1,1 @@
+# Make aggregation like sum of sum rank, mean of sum rank, mean of last rank, etc.
