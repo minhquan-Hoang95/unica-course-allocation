@@ -4,10 +4,13 @@ from typing import Optional, Callable
 from functools import partial
 import json
 
-DEFAULT_AFFECTATIONS_PATH = "srcFiles/FCFSaffectation.csv"
-DEFAULT_PREFERENCES_PATH = "srcFiles/studentsRandom.csv"
-DEFAULT_COURSES_PATH = "srcFiles/courses.csv"
-DEFAULT_PARAMETERS_PATH = "srcFiles/parameters.json"
+DEFAULT_IN_AFFECTATIONS_PATH = "srcFiles/FCFSaffectation.csv"
+DEFAULT_IN_PREFERENCES_PATH = "srcFiles/studentsRandom.csv"
+DEFAULT_IN_COURSES_PATH = "srcFiles/courses.csv"
+DEFAULT_IN_PARAMETERS_PATH = "srcFiles/parameters.json"
+
+DEFAULT_OUT_COURSES_VEC_PATH = "out/coursesVectors.csv"
+DEFAULT_OUT_STUDENTS_VEC_PATH = "out/studentsVectors.csv"
 
 
 
@@ -46,9 +49,9 @@ def getStudentsMandatoryLecturesFromTrack(courses:pd.DataFrame, studentsTrack:li
         mandatoryCourses.append(list(map(lambda x: f"Rg{x}", trackCourses)))
     return mandatoryCourses
 
-def computeBaseMetrics(rankMatrix:np.ndarray,
+def computeBaseVectors(rankMatrix:np.ndarray,
                        additional_fnc:Optional[dict[str, partial | Callable]] = None,
-                       *post_aggregation_fnc:dict[str, partial | Callable],
+                       *post_df_fnc:dict[str, partial | Callable],
                        onStudent:bool = True
                        ) -> pd.DataFrame:
     """Function that compute the basic statistics values on the ranks. This include the sum, mean, var, std, median, quartiles, n, the first and last rank granted.
@@ -60,7 +63,7 @@ def computeBaseMetrics(rankMatrix:np.ndarray,
         rankMatrix (np.ndarray): The matrix of rank
         onStudent (bool): If True compute the statistics on the student, otherwise on the lectures. Defaults to True
         additional_fnc (Optional[dict[str,partial[np.ndarray] | Callable]], optional): External functions acting on the rank matrix. Defaults to None.
-        *post_aggregation_fnc (tuple[dict[str,partial[np.ndarray]|Callable]]): External functions acting on the dataframe, after the first metrics were computed. Useful for metametrics.
+        *post_df_fnc (tuple[dict[str,partial[np.ndarray]|Callable]]): External functions acting on the dataframe, after the first metrics were computed. Useful for metametrics.
 
     Returns:
         pd.DataFrame: A dataframe formed by a column for each function and a row for each student.
@@ -69,8 +72,8 @@ def computeBaseMetrics(rankMatrix:np.ndarray,
     # Prepare external functions
     if additional_fnc is None:
         additional_fnc = {}
-    if post_aggregation_fnc is None:
-        post_aggregation_fnc = ()
+    if post_df_fnc is None:
+        post_df_fnc = ()
     # Prepare matrix
     if not onStudent:
         rankMatrix = rankMatrix.T
@@ -99,7 +102,7 @@ def computeBaseMetrics(rankMatrix:np.ndarray,
     post_fncs = [{}]
     
     # Add the different level of external post aggregation functions.
-    for postAggregation in post_aggregation_fnc:
+    for postAggregation in post_df_fnc:
         post_fncs.append(postAggregation)
     
     # Apply functions 
@@ -110,24 +113,27 @@ def computeBaseMetrics(rankMatrix:np.ndarray,
     # Return the dataframe
     return df
 
-def getAdditionalPreferencesBasedFunction(preferences:pd.DataFrame) -> dict[str, partial | Callable]:
-    """Additional function for `compureBaseMetrics` including ***minStudentRank*** (the minimum normalised rank for the student; depends on mandatory lectures quantity),
+def getAdditionalPreferencesBasedOnStudentsFunction(preferences:pd.DataFrame) -> dict[str, partial | Callable]:
+    """Additional function for `computeBaseVectors` including ***minStudentRank*** (the minimum normalised rank for the student; depends on mandatory lectures quantity),
     ***maxStudentRank*** (the maximum normalised rank for the student; depend on the number of additional optional lectures), and ***requested*** the number of course the student has requested.
+    
+    The track of the student is also explicited.
 
     Args:
         preferences (pd.DataFrame): The DataFrame of preferences
 
     Returns:
-        dict[str, partial | Callable]: A dict of functions to feed in `computeBaseMetrics`
+        dict[str, partial | Callable]: A dict of functions to feed in `computeBaseVectors`
     """
     return {
         "minStudentRank": lambda mat: preferences.loc[:,preferences.columns.str.startswith("Rg")].min(axis=1),
         "maxStudentRank": lambda mat: preferences.loc[:,preferences.columns.str.startswith("Rg")].max(axis=1),
-        "requested": lambda mat: preferences["maxOptional"].to_numpy()
+        "requested": lambda mat: preferences["maxOptional"].to_numpy(),
+        "track": lambda mat: getStudentsTrackFromPreferences(preferences)
     }
 
-def getAdditionalCoursesBasedFunction(preferences:pd.DataFrame, courses:pd.DataFrame, parameters:dict) -> dict[str, partial | Callable]:
-    """Make additional function to use in `computeBaseMetrics`. This include the ***mandatoryCorrectedRankSum*** (RankSum minus the rank of mandatory lectures), the ***optionalCorrectedRankSum*** (RankSum minus the rank of additional optional lectures, i.e. we keep only the minimal number of lecture to pass the semester),
+def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, courses:pd.DataFrame, parameters:dict) -> dict[str, partial | Callable]:
+    """Make additional function to use in `computeBaseVectors`. This include the ***mandatoryCorrectedRankSum*** (RankSum minus the rank of mandatory lectures), the ***optionalCorrectedRankSum*** (RankSum minus the rank of additional optional lectures, i.e. we keep only the minimal number of lecture to pass the semester),
      the ***correctedRankSum*** (RankSum minus both corrections). Finally, it also include the rank of the last subject required to pass the semester (which can be an optional or a mandatory subject): ***lastMandatoryOptionalRank***.
 
     Args:
@@ -136,7 +142,7 @@ def getAdditionalCoursesBasedFunction(preferences:pd.DataFrame, courses:pd.DataF
         parameters (dict): The parameters (the dictionary including the number of minimal subject for each specialities)
 
     Returns:
-        dict[str, partial | Callable]: A dictionary of additional function for `computeBaseMetrics`. 
+        dict[str, partial | Callable]: A dictionary of additional function for `computeBaseVectors`. 
     """
     # Get the the track for each student
     studentTrack = getStudentsTrackFromPreferences(preferences)
@@ -214,12 +220,12 @@ def getAdditionalCoursesBasedFunction(preferences:pd.DataFrame, courses:pd.DataF
         "lastMandatoryOptionalRank": lastMandatoryOptionalRank
     })
 
-def getAdditionalPostFunction() -> tuple[dict[str, partial | Callable], ...]:
-    """Additional post processing functions to use in `computeBaseMetrics`. It includes ***rankedVSrequested*** (the number of subject which was not granted despite request), ***maxRankDistance*** (The distance between the last granted rank and the last rank that could have been granted),
+def getAdditionalPostOnStudentsFunction() -> tuple[dict[str, partial | Callable], ...]:
+    """Additional post processing functions to use in `computeBaseVectors`. It includes ***rankedVSrequested*** (the number of subject which was not granted despite request), ***maxRankDistance*** (The distance between the last granted rank and the last rank that could have been granted),
     ***minRankDistance*** (same, but with the minimal rank). Additionally, it also provides an alternative metric ***correctedMaxRankDistance*** which compute the rank distance between the last course required to pass the semester and the worst that could have been given.
 
     Returns:
-        tuple[dict[str, partial | Callable], ...]: A tuple to feed into `computeBaseMetrics`.
+        tuple[dict[str, partial | Callable], ...]: A tuple to feed into `computeBaseVectors`.
     """
     # Note: this is a tuple because we can chain operations sequentially
     return ({
@@ -229,20 +235,44 @@ def getAdditionalPostFunction() -> tuple[dict[str, partial | Callable], ...]:
         "correctedMaxRankDistance": lambda dataframe: (dataframe["maxStudentRank"]-dataframe["lastMandatoryOptionalRank"])/dataframe["maxStudentRank"]
     },) # Do not remove the coma, it is here to make the thing a tuple
 
+def getAdditionalCourseBasedOnCoursesFunction(courses:pd.DataFrame) -> dict[str, partial | Callable]:
+    """Additional functions for courses to feed in `computeBaseVectors`. It includes the number of available ***spots*** for each lecture.
+
+    Args:
+        courses (pd.DataFrame): The dataframe of courses
+
+    Returns:
+        dict[str, partial | Callable]: A dictionary of function to feed in `computeBaseVectors`
+    """
+    return {
+        "spots": lambda mat: courses["spots"].to_numpy()
+    }
+    
+def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[dict[str, partial | Callable], ...]:
+    """Additional Post processing functions for courses to feed in `computeBaseVectors`. It includes the number of ***free spots*** for each lecture and the ***loadBalancingDifference*** defined as $diff(j\\in M) = n_m - \\frac{\\sum_{i=1}^m{n_i}}{m}$. See the load balancing problem (here it is a variant, so it might not possess the right information in fine.).
+
+    Returns:
+        tuple[dict[str, partial | Callable], ...]: A tuple of function to feed in `computeBaseVectors`.
+    """
+    return ({
+        "freeSpots":lambda dataframe: np.max(np.array([dataframe["spots"]-dataframe["n"],np.zeros(dataframe.shape[0])], dtype=int), axis=0),
+        "loadBalancingDifference":lambda dataframe: dataframe["n"] - dataframe["n"].sum()/dataframe.shape[0]
+        },) # Do not remove the coma, it is here to make the thing a tuple
+
 if __name__ == "__main__":
     # Get datasets
-    affectations, preferences, courses = getData(DEFAULT_AFFECTATIONS_PATH, DEFAULT_PREFERENCES_PATH, DEFAULT_COURSES_PATH)
-    parameters = getParameters(DEFAULT_PARAMETERS_PATH)
+    affectations, preferences, courses = getData(DEFAULT_IN_AFFECTATIONS_PATH, DEFAULT_IN_PREFERENCES_PATH, DEFAULT_IN_COURSES_PATH)
+    parameters = getParameters(DEFAULT_IN_PARAMETERS_PATH)
     
     # Computer the rank matrix
     rankMatrix = computeRankMatrix(affectations, preferences)
 
     # Provide external functions and compute the metrics for students
-    additional_fncs = getAdditionalPreferencesBasedFunction(preferences) | getAdditionalCoursesBasedFunction(preferences, courses, parameters)
-    additional_post_fncs = getAdditionalPostFunction()
-    computeBaseMetrics(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=True).to_csv("out/studentMetrics.csv")
+    additional_fncs = getAdditionalPreferencesBasedOnStudentsFunction(preferences) | getAdditionalCoursesBasedOnStudentsFunction(preferences, courses, parameters)
+    additional_post_fncs = getAdditionalPostOnStudentsFunction()
+    computeBaseVectors(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=True).to_csv(DEFAULT_OUT_STUDENTS_VEC_PATH)
     
     # On the lectures
-    additional_fncs = {"spots": lambda mat: courses["spots"].to_numpy()}
-    additional_post_fncs = ({"freeSpots":lambda dataframe: np.max(np.array([dataframe["spots"]-dataframe["n"],np.zeros(dataframe.shape[0])], dtype=int), axis=0)},) # Do not remove the coma, it is here to make the thing a tuple
-    computeBaseMetrics(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=False).to_csv("out/coursesMetrics.csv")
+    additional_fncs = getAdditionalCourseBasedOnCoursesFunction(courses)
+    additional_post_fncs = getAdditionalPostCourseBasedOnCoursesFunction()
+    computeBaseVectors(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=False).to_csv(DEFAULT_OUT_COURSES_VEC_PATH)
