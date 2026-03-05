@@ -60,14 +60,25 @@ def getBaseAggregationMetrics(vectors:pd.DataFrame,
 
 def getAdditionalAggregationFunctions() -> dict[str, Callable | partial]:
     """Additional aggregations functions for the `getBaseAggregationMetrics` function. It includes the ***skewness*** (measure of assymetry based on moments), the 
-    ***kurtosis*** (how flat is the distribution).
+    ***kurtosis*** (how flat is the distribution), and the gini coefficient (inequality measure).
 
     Returns:
         dict[str, Callable | partial]: A dictionary of function to feed in `getBaseAggregationMetrics`. 
     """
+    def giniCoefficient(df:pd.DataFrame):
+        # Compute the gini coefficient for each columns: ∑∑|x_i-x_j|/(2n²E[x])
+        def gini(col:pd.Series):
+            s=0
+            for i in col:
+                for j in col:
+                    s+=abs(i-j)
+            return s/(2*col.mean()*col.shape[0]**2)     
+        return df.apply(gini)
+        
     return {
         "Skewness": partial(stats.skew, bias=True),
-        "Kurtosis": partial(stats.kurtosis, bias=True)
+        "Kurtosis": partial(stats.kurtosis, bias=True),
+        "GiniCoefficient": giniCoefficient
     }
 
 def getAdditionalAggregationPostFunctions() -> tuple[dict[str, Callable | partial]]:
@@ -77,6 +88,7 @@ def getAdditionalAggregationPostFunctions() -> tuple[dict[str, Callable | partia
     Returns:
         tuple[dict[str, Callable | partial]]: A tuple containing the functions to feed.
     """
+    
     return ({
         "IQR":lambda dataframe: dataframe.loc["75%",:]-dataframe.loc["25%",:]
     }, {
