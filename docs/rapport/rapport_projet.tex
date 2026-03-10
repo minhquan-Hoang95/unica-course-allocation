@@ -11,6 +11,17 @@
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{mathabx}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}
+
+\theoremstyle{definition}
+\newtheorem*{metric}{Métrique}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remarque}
+
 \newcommand{\llbracket}{[\![}
 \newcommand{\rrbracket}{]\!]}
 
@@ -98,10 +109,10 @@ Soit $n$ le nombre d'étudiants, $m$ le nombre d'UE et $p$ le nombre de parcours
 
 \subsubsection{Entrée}
 \begin{itemize}
-    \item \textbf{Cours :}
+    \item \textbf{Unités d'Enseignements :}
     \begin{itemize}
         \item $c_j \in \mathbb{N}$ : la capacité de l'UE $j \in \llbracket 1,m \rrbracket$.
-        \item $I^c_{j,j'} \in \{0,1\}$ : la matrice d'incompatibilité des UE $(j,j') \in \llbracket 1,m \rrbracket^2$, où la case $(j,j')$ vaut 1 si les cours sont incompatibles, 0 autrement.
+        \item $I^c_{j,j'} \in \{0,1\}$ : la matrice d'incompatibilité des UE $(j,j') \in \llbracket 1,m \rrbracket^2$, où la case $(j,j')$ vaut 1 si les UE sont incompatibles, 0 autrement.
     \end{itemize}
 
     \item \textbf{Parcours :}
@@ -114,13 +125,13 @@ Soit $n$ le nombre d'étudiants, $m$ le nombre d'UE et $p$ le nombre de parcours
     \begin{itemize}
         \item $m\!\max_i$ : le nombre maximum d'UE souhaité par l'étudiant $i \in \llbracket 1,n \rrbracket$.
         \item $p_i \in \llbracket 1,p \rrbracket$ : le parcours suivi par l'étudiant $i \in \llbracket 1,n \rrbracket$.
-        \item $r_i : \llbracket 1,m \rrbracket \to \llbracket 1,m \rrbracket$ : une fonction de rang indiquant les préférences d'un étudiant $i$, telle que plusieurs UE peuvent avoir le même rang, et que les rangs soient consécutifs.
+        \item $r_i : \llbracket 1,m \rrbracket \to \mathbb{R}^{+}$ : une fonction de rang (par les méthode des rangs moyens) indiquant les préférences d'un étudiant $i$, telle que plusieurs UE peuvent avoir le même rang, que les rangs soient consécutifs, que la somme des rangs soit égale pour tous les étudiants et que le premier rang soit occupé par les UEs obligatoires (si applicable).
     \end{itemize}
 \end{itemize}
 
 \subsubsection{Sortie}
 \begin{itemize}
-    \item $A_{i,j}$ : une affectation d'UE pour l'étudiant $i \in \llbracket 1,n \rrbracket$ ; 1 si le cours $j \in \llbracket 1,m \rrbracket$ est affecté, 0 sinon.
+    \item $A_{i,j}$ : une affectation d'UE pour l'étudiant $i \in \llbracket 1,n \rrbracket$ ; 1 si l'UE $j \in \llbracket 1,m \rrbracket$ est affecté, 0 sinon.
 \end{itemize}
 
 \subsubsection{Contraintes}
@@ -145,7 +156,7 @@ Soit $n$ le nombre d'étudiants, $m$ le nombre d'UE et $p$ le nombre de parcours
     \forall i \in \llbracket 1,n \rrbracket : 8 \le \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le 10
     \]
 
-    \item \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de cours qu'il a demandé \fg{} :
+    \item \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de UE qu'il a demandé \fg{} :
     \[
     \forall i \in \llbracket 1,n \rrbracket : \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le m\!\max_i
     \]
@@ -156,7 +167,124 @@ $\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sino
 
 \section{Méthodologie et implémentation}
 \subsection{Méthode proposée}
-\textbf{À faire.}
+\subsubsection{Métriques et fonctions objectifs}
+
+Dans le cadre de ce projet, être en mesure d'évaluer et de comparer plusieurs instances d'affectations d'étudiant est important. 
+En effet, sans cela, nous serions bien incapable de mesurer une potentielle amélioration du système, actuellement exploité, mais aussi de vérifier l'existence d'éventuels biais
+dans les affectations et donc d'établir si une affectation est équitable.
+
+Afin de réaliser cet objectif d'évaluation, nous devons développer des métriques adéquates au problème.
+Ces métriques se décomposent en deux catégories principales : les métriques vectorielles, contenant une valeur pour chaque entité mesuré, et les métriques agrégées renvoyant une unique valeur représentant l'ensemble des entités.
+Dans la suite de cette section, nous présentons l'ensemble des métriques développées, leurs avantages et leurs défauts.
+Avant cela, nous devons néanmoins définir plusieurs notions :
+
+\begin{definition}[Produit de Schur]
+    Soit $X$ et $Y$ deux matrices de même dimension dans $\mathbb{R}_{n,m}$, nous définissons le produit de Schur $\odot$
+    comme l'opération qui associe à $X$ et $Y$ la matrice $Z$ tel que $\forall (i,j)\in\llbracket 1,n\rrbracket\times\llbracket 1,m\rrbracket:z_{i,j}=x_{i,j}\cdot y_{i,j}$. Ou plus graphiquement :
+    $$
+    Z = X\odot Y = \begin{bmatrix}
+        x_{0,0} & \cdots & x_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        x_{n,0} & \cdots & x_{n,m}
+    \end{bmatrix} \odot \begin{bmatrix}
+        y_{0,0} & \cdots & y_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        y_{n,0} & \cdots & y_{n,m}
+    \end{bmatrix} = \begin{bmatrix}
+        x_{0,0}\cdot y_{0,0} & \cdots & x_{0,m}\cdot y_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        x_{n,0}\cdot y_{n,0} & \cdots & x_{n,m}\cdot y_{n,m}
+    \end{bmatrix}
+    $$
+\end{definition}
+
+\begin{definition}[Matrice des rangs d'affectation]
+    Soit $A_{i,j}\in\{0,1\}_{n,m}$ la matrice représentant l'affectation accordée à l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$. 
+    Soit $R_{i,j}\in\mathbb{R}^{+}_{n,m}$ la matrice représentant les rangs accordés par l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$, nous
+    définissons la matrice des rangs d'affectation $U_{i,j} = A_{i,j} \odot R_{i,j}$ comme la matrice des rangs des UE effectivement affectés à l'étudiant $i$.
+\end{definition}
+
+Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pouvons commencer à introduire nos premières métriques vectorielles :
+
+\begin{metric}[Dernier rang affecté]
+    Définit pour les étudiants et les UEs, le dernier rang affecté correspond pour chaque étudiants (resp. UE) au rang maximum des UEs (resp. étudiants) effectivement affecté. 
+    Elle se calcule ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{lastRank}(i) = \max_{j\in\llbracket 1,m\rrbracket} U_{i,j} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{lastRank}(j) = \max_{i\in\llbracket 1,n\rrbracket} U_{i,j} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique est sûrement la plus intuitive et la plus simple à calculer en plus de nous donner une borne supérieure sur les rangs (ce qui peut la rendre pratique à bien des égards). Malheureusement, elle manque d'une propriété essentielle pour la comparaison des affectations.
+    En effet, celle-ci ne fait pas transparaître la distribution des rangs inférieurs. En d'autre termes, un étudiant peut se voir affecté un dernier rang élevé, mais n'avoir que des UEs de rangs faibles pour ces autres affectations ; à l'inverse, un étudiant peut aussi avoir un dernier rang affecté moyen, mais avoir ces autres affectations très concentrées autours de cette borne, rendant ainsi l'affectation non satisfaisante pour l'étudiant. 
+    Nous devons donc trouver une autre métrique permettant de prendre en compte cette distribution, au moins implicitement. 
+\end{metric}
+
+\begin{metric}[Somme des rangs]
+    Définit pour les étudiants et les UEs, la somme des rangs est la métrique sommant les rangs de l'ensemble des UE affectés (resp. des étudiants) à chaque étudiant (resp. UE). 
+    Elle se formalise ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rankSum}(i) = \sum_{j=1}^m U_{i,j} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rankSum}(j) = \sum_{i=1}^n U_{i,j} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique à plusieurs avantages. Premièrement, elle dispose d'une interprétabilité simple : plus la valeur est élevé, plus l'étudiant est lésé et plus la valeur est faible, meilleur est la satisfaction de l'étudiant ; concernant les UEs, cette interprétation met en lumière les plus plébiscités et les plus évités. 
+    Deuxièmement, la métrique est rapide, simple à calculer et permet de prendre en compte la distribution sous-jacente des rangs affectés de manière implicite. Enfin, elle est intuitive, simple à accepter, à comprendre et à expliquer ; cela rendant le système plus abordable pour les exploitants.
+
+    Nous devons néanmoins rappeler que chaque étudiant ayant la possibilité de choisir un nombre différent d'UE, les valeurs obtenues deviennent difficilement comparable. D'où l'introduction de notre troisième métrique.
+\end{metric}
+\begin{metric}[Moyenne des rangs]
+    Également définit pour les étudiants et les UEs, la moyenne des rangs vise à normaliser la somme des rangs par le nombre de rang effectivement affecté. Elle est formalisé ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rankAvg}(i) = \frac{\sum_{j=1}^m U_{i,j}}{\sum_{j=1}^m A_{i,j}} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rankAvg}(j) = \frac{\sum_{i=1}^n U_{i,j}}{\sum_{i=1}^n A_{i,j}} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique, bien que déjà plus complexe à calculé, permets en effet de prendre en compte le nombre différent d'UE choisies par les étudiants tout en conservant une partie de l'état implicite de la distribution des rangs. Ainsi, la normalisation par le nombre d'UE (resp. étudiant) nous permet de comparer de nouveau les résultats obtenus entre chaque entité.
+    En effet, la moyenne des rangs, en plus de sa normalisation, revet une interprétation particulièrement intuitive : "En moyenne, l'étudiant (resp. UE) s'est vu affecté une UE (resp. un étudiant) avec une préférence x". 
+    Malheureusement, cette métrique est soumise comme d'autres à des biais importants que nous préciserons dans la suite.
+    
+    Maintenant que cela est dit, nous pouvons tout de même essayer de décrire plus en détail la distribution des rangs une fois combiné à d'autres métriques (notamment de dispersion). 
+\end{metric}
+\begin{metric}[Variance et Écart-type des rangs]
+    Définit pour les étudiant et les UEs, la variance et l'écart type des rangs vise à observer la dispersion de la distribution des rangs. Combiné à la moyenne des rangs, l'écart-type permet déjà d'avoir une bonne idée de la "forme" générale de la distribution des rangs entre les différentes entités. 
+    Elle se traduit mathématiquement ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rank}\sigma^2(i) = \frac{\sum_{j=1}^m U_{i,j}^2}{\sum_{j=1}^m A_{i,j}} - \text{rankSum}(i)^2, & \text{rank}\sigma(i) = \sqrt{\text{rank}\sigma^2(i)} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rank}\sigma^2(j) = \frac{\sum_{i=1}^n U_{i,j}^2}{\sum_{i=1}^n A_{i,j}} - \text{rankSum}(j)^2, & \text{rank}\sigma(j) = \sqrt{\text{rank}\sigma^2(j)} & \text{(UE)}
+    \end{matrix}
+    $$
+    Ici, il faut bien comprendre que la variance et l'écart-type sont des mesures standard de dispersion, mais sont par nature déjà plus délicate à interpréter. Pour la variance, l'unité est en réalité le rang au carré, rendant ainsi toute interprétation de cette mesure brute tout au mieux bancale dans notre contexte (elle peut néanmoins servir dans d'autres cas, comme des tests d'hypothèses tel l'ANOVA).
+    Pour interpréter la dispersion, nous utilisons donc l'écart-type. Toujours positif, plus l'écart-type approche 0, plus la dispersion des valeurs autour de la moyenne des rangs est faible. Au contraire, un écart-type élevé signifie qu'une entité s'est vu attribué une affectation très disparate sur la valeur des rangs.
+    
+    Aussi, il convient donc de ne pas utiliser cette métrique seule à des fin d'optimisation, car celle-ci, en plus de ne pas permettre de garanties sur les moyennes, n'admet pas de linéarité exploitable dans un solveur linéaire. Cette métrique servira donc plus à évaluer la qualité des affectations a posteriori. Maintenant que cela est dit, il faut tout de même addresser un point important sur les biais de cette mesure (et d'autres).
+\end{metric}
+\begin{remark}[Biais]
+    Bien que relativement standard, l'intégralité des mesures présentés ci-dessus (lastRank, rankSum, rankVar et rankStd) sont, en réalité, biaisés dans notre cas d'application. 
+    
+    Ici, contrairement à la plupart du temps en statistiques, les biais ne vient pas de la théorie de l'échantillonnage (facteur $\frac{1}{n-1}$ au lieu de $\frac{1}{n}$), car nous travaillons directement avec la population. Ils viennent en fait de la nature des données elle-mêmes ; nous en avons enregistré deux grande famille. 
+    
+    La première famille de biais observé vient de la liberté offerte au étudiant dans leur nombre de choix d'UE ; par exemple, pour un étudiant $E_1$ choisissant 9 UEs et un autre $E_2$ en choisissant 7, $E_1$ se verra naturellement attribué des rangs supplémentaires (pour la huitième et la neuvième UE), or ces rangs sont plus élevé que le septième rang qui lui a été attribué, cela augmente donc artificiellement son dernier rang, sa somme des rangs, dans une moindre mesure sa moyenne et ses dérivés : variances (moyenne des carrés) et écart-type ; ainsi, $E_1$ aura généralement pour ces métriques des valeurs plus faible. 
+    Cette observation s'étend malheureusement aux fonctions d'optimisations, ainsi, dans le cadre d'une minimisation des métriques auparavant mentionnées, $E_2$ sera très probablement toujours priorisé par rapport à $E_1$ et ce peu importe si $E_1$ a une distribution potentiellement moins bonne pour ses sept UEs affectés.
+
+    Le seconde famille de biais, ayant tendance à amplifier le premier, trouve ces racines dans des facteurs extérieurs non forcément contrôlable. Ainsi, plus le nombre d'étudiant est élevé, moins les étudiants sont acceptés dans leurs premier choix, augmentant ainsi la valeurs des métriques mentionnées de manière non-uniforme en raison de la capacité limite de chaque UE. De la même manière, cette observation peut être observé avec un nombre d'étudiant plus limité en fonction de la distribution de leur préférence et de la méthode d'affectation.
+    
+    Dans notre cas, nous ne pouvons malheureusement pas résoudre à travers des métriques (simple), du moins seulement, les biais structurelles engendrés par la seconde famille. Néanmoins, il faut remarquer que dans les instances pratiques, cette famille de biais s'avère, en réalité, négligeable tant que le nombre d'étudiant, le nombre de places par UE et l'équilibre des UE sont contrôlés. 
+    
+    Concernant la première famille de biais, celle-ci n'est pas négligeable (sur certaines instances, nous pouvons avoir du simple au double sur la somme, la moyenne, la variance et l'écart-type en moyenne entre les étudiants de type $E_1$ et $E_2$). Heureusement, dans le cas de cette famille, nous pouvons développer des métriques permettant de limiter cet impact.
+\end{remark}
+
+
+\textbf{Métrique de correction}
+
+
 
 \subsection{Implémentation}
 \textbf{À faire.}
