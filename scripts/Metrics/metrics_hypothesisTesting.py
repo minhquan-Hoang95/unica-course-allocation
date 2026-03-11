@@ -85,3 +85,6 @@ if __name__ == "__main__":
     
     # See if courses have different preferences distributions (does not have any sens since n is too low, but can be done for example.)
     areGroupDifferent(coursesVectors, ["lastRank"], 1)
+    
+    # See if students have different affectation over their choices of course number
+    areGroupDifferent(studentsVectors, ["sum","mean","median"], "n")
