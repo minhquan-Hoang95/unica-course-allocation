@@ -281,6 +281,19 @@ Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pou
     Concernant la première famille de biais, celle-ci n'est pas négligeable (sur certaines instances, nous pouvons avoir du simple au double sur la somme, la moyenne, la variance et l'écart-type en moyenne entre les étudiants de type $E_1$ et $E_2$). Heureusement, dans le cas de cette famille, nous pouvons développer des métriques permettant de limiter cet impact.
 \end{remark}
 
+\begin{definition}
+    Soit $\text{aSet(i)}=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in \llbracket 1,n\rrbracket$, nous pouvons distinguer trois types d'UEs : 
+    les UEs obligatoires pour l'étudiant en raison du parcours que l'on notera $\text{mSet(i)}$, 
+    celles optionnelles permettant d'atteindre le quota minimum de cours pour passer le semestre $\text{oSet}(i)$ 
+    et les UEs facultatives définis par $\text{fSet(i)} = \text{aSet}(i)\setminus[\text{mSet}(i)\cup\text{oSet}(i)]$.
+\end{definition}
+Étant donné que le nombre minimum d'UE requis pour passer le semestre pour chaque étudiant peut être obtenu par $m_{\min}(i)=\#\text{oSet}(i)+m\!\min_{p_i} \forall i \in \llbracket 1,n \rrbracket$, 
+nous pouvons montrer que le nombre d'UE minimum pour passer le semestre $m_{\min}(i)$ est constante pour tous les étudiants d'un même parcours. En pratique, nous pourrons émettre l'hypothèse que ce nombre d'UE
+est égal peu importe le parcours. À partir de là, nous pouvons établir des modifications aux métriques ci-dessus mentionnées afin de limiter les biais de premier type.  
+\begin{metric}[Corrected]
+
+\end{metric}
+
 
 \textbf{Métrique de correction}
 
