@@ -133,9 +133,9 @@ def getAdditionalPreferencesBasedOnStudentsFunction(preferences:pd.DataFrame) ->
     }
 
 def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, courses:pd.DataFrame, parameters:dict) -> dict[str, partial | Callable]:
-    """Make additional function to use in `computeBaseVectors`. This include the ***mandatoryCorrectedRankSum*** (RankSum minus the rank of mandatory lectures), the ***optionalCorrectedRankSum*** (RankSum minus the rank of additional optional lectures, i.e. we keep only the minimal number of lecture to pass the semester),
-     the ***correctedRankSum*** (RankSum minus both corrections). Finally, it also include the rank of the last subject required to pass the semester (which can be an optional or a mandatory subject): ***lastMandatoryOptionalRank***. From the sum, other measures are derived such as the variance and the standard deviation. 
-     Additionally, a correction on the median and the quantile are also given.
+    """Make additional function to use in `computeBaseVectors`. This include the ***optionalCorrectedRankSum*** (RankSum minus the rank of additional optional lectures, i.e. we keep only the minimal number of lecture to pass the semester), the rank of the last subject required to pass the semester (which can be an optional or a mandatory subject): ***lastMandatoryOptionalRank***. 
+    From the sum, other measures are derived such as the variance and the standard deviation. 
+    Additionally, a correction on the median and the quantile are also given.
 
     Args:
         preferences (pd.DataFrame): The dataframe of preferences
@@ -158,26 +158,6 @@ def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, course
         # Get the number of mandatory optional lectures (the minimum number of lecture to pass the semester)
         return  minNj + mandatoryCount
     
-    # Correct the sumRank wrt the mandatory lecture sum rank (we remove the rank of mandatory lectures in the count)
-    def mandatoryRankCorrection(mat:np.ndarray):
-        # Compute the sumRank
-        rankSum = np.array([np.sum(row[row!=0]) for row in mat])
-        
-        # For each student compute the correction
-        mandatoryCorrection = []
-        for studentID, lecture in enumerate(mandatoryLectures, start=1):
-            # If there is no mandatory lecture, do not apply correction and skip
-            if lecture == []: 
-                mandatoryCorrection.append(0)
-                continue
-            
-            # If there is mandatory lectures, create the correction as the sum of mandatory lectures rank
-            rankCorrection = preferences.loc[preferences["studentID"]==studentID, lecture].to_numpy().sum()
-            mandatoryCorrection.append(rankCorrection)
-        
-        # Apply the correction to the sum of the rank and apply it.
-        return (rankSum - np.array(mandatoryCorrection)).tolist()
-    
     # Correct the sumRank wrt the number of optional lecture the student takes (do not need to take into account optional lectures in rankSum, it falsify the rankSum)
     def optionalRankCorrection(mat:np.ndarray):
         # Compute the rankSum
@@ -194,13 +174,6 @@ def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, course
         
         # Apply the correction
         return (rankSum - np.array(correction)).tolist()
-    
-    # Merges the two above corrections  
-    def allCorrection(mat:np.ndarray):
-        rankSum = np.array([np.sum(row[row!=0]) for row in mat])
-        mandatoryCorrection = rankSum - np.array(mandatoryRankCorrection(mat))
-        optionalCorrection = rankSum - np.array(optionalRankCorrection(mat))
-        return rankSum - (mandatoryCorrection + optionalCorrection)
     
     # Get the last rank of the mandatory optional lecture (we do not really cares of the rank after the minimal number of lectures)
     def lastMandatoryOptionalRank(mat:np.ndarray):
@@ -228,13 +201,6 @@ def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, course
         
         return rankQuantile
     
-    # Merges the two above corrections  
-    def allCorrection(mat:np.ndarray):
-        rankSum = np.array([np.sum(row[row!=0]) for row in mat])
-        mandatoryCorrection = rankSum - np.array(mandatoryRankCorrection(mat))
-        optionalCorrection = rankSum - np.array(optionalRankCorrection(mat))
-        return rankSum - (mandatoryCorrection + optionalCorrection)
-    
     # Get the mean correction
     def optionalCorrectedMean(mat:np.ndarray):
         mandatoryOptional = countMandatoryOptional(mat)
@@ -252,9 +218,7 @@ def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, course
     
     # Return all the functions
     return ({
-        "mandatoryCorrectedRankSum": mandatoryRankCorrection,
         "optionalCorrectedRankSum": optionalRankCorrection,
-        "correctedRankSum": allCorrection,
         "lastMandatoryOptionalRank": lastMandatoryOptionalRank,
         "optionalCorrectedQ1": partial(optionalCorrectedQuantile, quantile=0.25),
         "optionalCorrectedMedian": partial(optionalCorrectedQuantile, quantile=0.5),
