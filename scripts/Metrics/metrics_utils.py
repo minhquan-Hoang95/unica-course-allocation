@@ -275,9 +275,9 @@ def getAdditionalPostOnStudentsFunction() -> tuple[dict[str, partial | Callable]
     # Note: this is a tuple because we can chain operations sequentially
     return ({
         "rankedVSrequested": lambda dataframe: list(map(lambda x:min(x,0), dataframe["n"]-dataframe["requested"])),
-        "maxRankDistance": lambda dataframe: (dataframe["maxStudentRank"]-dataframe["lastRank"])/dataframe["maxStudentRank"],
-        "minRankDistance": lambda dataframe: (dataframe["firstRank"]-dataframe["minStudentRank"])/dataframe["firstRank"],
-        "correctedMaxRankDistance": lambda dataframe: (dataframe["maxStudentRank"]-dataframe["lastMandatoryOptionalRank"])/dataframe["maxStudentRank"],
+        "maxRankDistance": lambda dataframe: dataframe["maxStudentRank"]-dataframe["lastRank"],
+        "minRankDistance": lambda dataframe: dataframe["firstRank"]-dataframe["minStudentRank"],
+        "correctedMaxRankDistance": lambda dataframe: dataframe["maxStudentRank"]-dataframe["lastMandatoryOptionalRank"],
         "IQR": lambda dataframe: dataframe["q3"]-dataframe["q1"],
         "optionalCorrectedIQR": lambda dataframe: dataframe["optionalCorrectedQ3"]-dataframe["optionalCorrectedQ1"]
     },)
