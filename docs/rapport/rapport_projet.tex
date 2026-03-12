@@ -16,6 +16,9 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Définition}
 
+\theoremstyle{remark}
+\newtheorem{lemme}{Lemme}
+
 \theoremstyle{definition}
 \newtheorem*{metric}{Métrique}
 
@@ -205,7 +208,8 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
 
 Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pouvons commencer à introduire nos premières métriques vectorielles.
 
-\subsection{Métriques vectorielles de base}
+\subsection{Métrique vectorielles}
+\subsubsection{Métriques vectorielles de base}
 
 \begin{metric}[Dernier rang affecté]
     Définit pour les étudiants et les UEs, le dernier rang affecté correspond pour chaque étudiants (resp. UE) au rang maximum des UEs (resp. étudiants) effectivement affecté. 
@@ -282,7 +286,7 @@ Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pou
     Concernant la première famille de biais, celle-ci n'est pas négligeable (sur certaines instances, nous pouvons avoir du simple au double sur la somme, la moyenne, la variance et l'écart-type en moyenne entre les étudiants de type $E_1$ et $E_2$). Heureusement, dans le cas de cette famille, nous pouvons développer des métriques permettant de limiter cet impact.
 \end{remark}
 
-\subsection{Métriques vectorielles corrigées du biais de Type I}
+\subsubsection{Métriques vectorielles corrigées du biais de Type I}
 
 \begin{definition}
     Soit $\text{aSet(i)}=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in \llbracket 1,n\rrbracket$, nous pouvons distinguer trois types d'UEs : 
@@ -340,7 +344,7 @@ Ainsi, bien que légèrement plus dur à calculer (nous devons déterminer le no
 Néanmoins, dans le cas d'instances pratiques (déjà observés dans d'autres universités) pour lesquels un nombre important d'UE est proposé avec un nombre de place limité (ou très limité), la moyenne, la variance et l'écart-type deviennent de moins en moins représentatif en raison de leur sensibilité aux valeurs dites extrêmes, qui peuvent apparaître dans ce cas suite à des refus répétitifs.
 Dans ce cas, il vaut donc mieux se reporter à des métriques résistantes aux valeurs extrêmes. 
 
-\subsection{Métriques vectorielles avec biais de Type II significatif}
+\subsubsection{Métriques vectorielles avec biais de Type II significatif}
 Comme dit précédemment, l'apparition de valeurs extrêmes nécessite l'utilisation de métriques résistantes à ces dernières.
 L'impact de ces valeurs, émise par un biais de Type II, doit donc être minimisé. À ces fins, nous devons développé des métriques exploitables permettant de visualiser au moins une centralité et une dispersion.
 Pour cela, nous allons nous baser sur les quantiles des distributions des rangs pour chaque étudiant et chaque UE.
@@ -389,7 +393,54 @@ Heureusement, de la même manière que pour les autres mesures, nous pouvons les
     Elles devront donc se cantonner aux évaluations et comparaisons d'affectations. Aussi, bien qu'initialement introduites pour mitiger le biais de type II, il reste intéressant de les utiliser dans le cas générale grâce à leurs interprétations simple, intuitive et renfermant une part de mesure d'équité.
 \end{remark}
 
+\subsection{Autres métriques vectorielles}
+Dans certains cas, il peut être intéressant de compléter les métriques précédemment introduites avec d'autres métriques utiles dans le cadre d'évaluation d'affectation (les métriques introduites dans cette section sont pour la plupart inutilisable à des fins d'affectation).
 
+Premièrement, dans le cadre d'une UE, il peut être intéressant de calculer le nombre de places affectées et non affectées. En effet, cela permet d'avoir un aperçu de la charge d'une affectation sur chacun des UEs. 
+De la même idée, nous pouvons aussi nous inspirer du problème d'équilibrage des charges afin d'introduire une métrique permettant de calculer la différence à une affectation équilibré des étudiants aux UEs.
+
+\begin{lemme}[Borne minimum pour l'équilibrage des affectations]
+    Soit $n$ le nombre d'étudiant et $m$ le nombre d'UE. Toutes les affectations $A_{i,j}$ vérifies :
+    $$
+        \frac{m_{\min}n}{m} \le \frac{\sum_{i=1}^{n}\#\text{aSet}(i)}{m}
+    $$
+    où $m_{\min}$ correspond au nombre d'UE minimum que doit prendre un étudiant (en supposant que le nombre est identique pour tous les étudiants).
+    En d'autres mots, la moyenne du nombre d'étudiant affecté par UE est supérieur ou égale au nombre minimum d'UE à prendre pour chaque étudiant diviser par le nombre de cours. 
+\end{lemme}
+\begin{metric}[Équilibre des affectations aux UEs]
+    À partir du lemme précédent, nous pouvons définir l'équilibre des affectations aux UEs comme la différence entre le nombre d'affectations réels et la borne minimum sur la moyenne, ou plus formellement :
+    $$
+        \forall j \in \llbracket 1,m\rrbracket : \text{loadDifference}(j) = \sum_{i=1}^{n}A_{i,j} - \frac{m_{\min}n}{m}
+    $$
+    Cette métrique peut être utile dans le cas où nous cherchons à savoir quelles UEs sont les plus/moins chargées par rapport à une affectation uniforme. 
+    Cependant, cette métrique possède deux limites majeures ; premièrement, elle suppose que le nombre d'UEs minimum par étudiant est égal peu importe le parcours (dans notre cas, il s'agit bien du cas, mais çà pourrait être autrement), deuxièmement, nous supposons que les UEs n'ont pas de capacités limites et que celles-ci soient égales (ce qui n'est pas le cas).
+    Ainsi, bien qu'intéressante, cette métrique nécessite d'être utilisé avec le nombre de place de chaque UEs pour avoir une interprétation correcte. 
+    Notez aussi que la valeur de cette métrique peut être négative (une UE est moins chargé) ou positive (une UE est plus chargé) ; calculer la valeur absolue de celle-ci revient à calculer la distance à la moyenne minimum. 
+\end{metric}
+
+Du côté des étudiant, d'autres métriques peuvent se formuler sur une notion de distance. Ainsi, nous pouvons essayer de mesurer la distance entre une affectation donné et la pire affectation donné.
+\begin{metric}
+    Pour mesurer la distance la distance d'une affectation à la pire possible, nous avons deux paramètres : quelle est la distance à la meilleur et quelle est la distance à la pire. 
+    Nous pouvons calculer cela en deux métriques :
+    $$
+        \begin{matrix}
+            \forall i \in \llbracket 1,n \rrbracket : \text{maxRankDistance}(i) = \max_{j\in\llbracket 1,m\rrbracket} \{R_{i,j}\} - \text{lastRank}(i) & \text{(Au pire)}\\
+            &\\
+            \forall i \in \llbracket 1,n \rrbracket : \text{maxRankDistance}(i) = \min_{j\in\llbracket 1,m\rrbracket} \{U_{i,j}\} - \min_{j\in\llbracket 1,m\rrbracket} \{R_{i,j}\} & \text{(Au meilleur)}\\
+        \end{matrix}
+    $$
+    Avec ces métriques, nous nous intéressons non seulement au dernier rang affecté en le comparant au dernier rang qui aurait pu être affecté, une distance élevé étant appréciable (on s'éloigne du pire cas); mais aussi au premier rang effectivement affecté en le comparant au premier rang qui aurait pu être affecté, une distance faible étant préférable (on s'approche du meilleur cas).
+    Cette métrique peut être intéressante pour vérifier que chaque étudiant a, à défaut d'avoir le meilleur cas, une affectation éloignée du pire cas ou inversement.
+    À noter que dans le cas de la distance au pire cas, le biais de type I peut avoir un impact, nous pouvons donc la corrigé de manière similaire aux autres métriques pour limiter ce problème.
+\end{metric}
+
+Maintenant que nous avons vu les métriques vectorielles, il peut être intéressant de les agréger afin d'obtenir une unique métrique sur laquelle travailler.
+
+\subsection{Métriques agrégés}
+\subsubsection{Métriques agrégés de base}
+\subsubsection{Pareto}
+
+\subsection{Tests d'hypothèses}
 
 \section{Méthodologie et implémentation}
 \subsection{Méthode proposée}
