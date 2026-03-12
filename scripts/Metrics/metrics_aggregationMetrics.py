@@ -14,8 +14,8 @@ PARETO_FUNCTION = Union[Literal[
     "requested","mandatoryCorrectedRankSum","optionalCorrectedRankSum","correctedRankSum",
     "lastMandatoryOptionalRank","rankedVSrequested","maxRankDistance","minRankDistance",
     "correctedMaxRankDistance","optionalCorrectedQ1","optionalCorrectedQ3","optionalCorrectedMedian",
-    "optionalCorrectedMean", "optionalCorrectedVar", "optionalCorrectedStd", "Yule_assymetry",
-    "IQR", "optionalCorrectedIQR", "optionalCorrectedYule_assymetry"
+    "optionalCorrectedMean", "optionalCorrectedVar", "optionalCorrectedStd", "IQR", 
+    "optionalCorrectedIQR",
 ]]
 
 DEFAULT_OUT_COURSES_METRICS_PATH = "out/coursesMetrics.csv"

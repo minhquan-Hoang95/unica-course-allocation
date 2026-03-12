@@ -280,12 +280,7 @@ def getAdditionalPostOnStudentsFunction() -> tuple[dict[str, partial | Callable]
         "correctedMaxRankDistance": lambda dataframe: (dataframe["maxStudentRank"]-dataframe["lastMandatoryOptionalRank"])/dataframe["maxStudentRank"],
         "IQR": lambda dataframe: dataframe["q3"]-dataframe["q1"],
         "optionalCorrectedIQR": lambda dataframe: dataframe["optionalCorrectedQ3"]-dataframe["optionalCorrectedQ1"]
-    },
-    {
-        "Yule_assymetry": lambda dataframe: (dataframe["q1"] + dataframe["q3"] - 2*dataframe["median"])/dataframe["IQR"],
-        "optionalCorrectedYule_assymetry": lambda dataframe: (dataframe["optionalCorrectedQ1"] + dataframe["optionalCorrectedQ3"] - 2*dataframe["optionalCorrectedMedian"])/dataframe["optionalCorrectedIQR"]
-    }       
-    )
+    },)
 
 def getAdditionalCourseBasedOnCoursesFunction(courses:pd.DataFrame) -> dict[str, partial | Callable]:
     """Additional functions for courses to feed in `computeBaseVectors`. It includes the number of available ***spots*** for each lecture.
@@ -308,7 +303,8 @@ def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[dict[str, partial |
     """
     return ({
         "freeSpots":lambda dataframe: np.max(np.array([dataframe["spots"]-dataframe["n"],np.zeros(dataframe.shape[0])], dtype=int), axis=0),
-        "loadBalancingDifference":lambda dataframe: dataframe["n"] - dataframe["n"].sum()/dataframe.shape[0]
+        "loadBalancingDifference":lambda dataframe: dataframe["n"] - dataframe["n"].sum()/dataframe.shape[0],
+        "IQR": lambda dataframe: dataframe["q3"]-dataframe["q1"]
         },) # Do not remove the coma, it is here to make the thing a tuple
 
 if __name__ == "__main__":
