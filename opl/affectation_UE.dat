@@ -1,0 +1,91 @@
+/*
+ * affectation_UE.dat
+ * Données d'exemple pour le modèle affectation_UE.mod
+ *
+ * Scénario : Master Informatique - Université Côte d'Azur
+ *   - n = 4 étudiants
+ *   - m = 7 UE
+ *   - p = 2 parcours (1 = Informatique, 2 = IA)
+ *
+ * Remarques :
+ *   - Les UE à places "illimitées" (Mineures DS4H externalisées) sont modélisées
+ *     avec une capacité égale à n (tous les étudiants peuvent y accéder).
+ *   - Les rangs sont consécutifs et plusieurs UE peuvent partager le même rang.
+ *     Un rang plus bas signifie une plus grande préférence.
+ */
+
+// ---------------------------------------------------------------------------
+// Dimensions
+// ---------------------------------------------------------------------------
+
+n = 4;   // Nombre d'étudiants
+m = 7;   // Nombre d'UE
+p = 2;   // Nombre de parcours (1=Informatique, 2=IA)
+
+// ---------------------------------------------------------------------------
+// Cours
+// ---------------------------------------------------------------------------
+
+// c[j] : capacité (nombre de places disponibles) pour l'UE j
+// UE 7 : mineure DS4H externalisée → capacité "illimitée" = n = 4
+c = [10, 8, 6, 10, 4, 6, 4];
+
+// Ic[j][j2] : 1 si les UE j et j2 sont en conflit d'emploi du temps
+// Matrice symétrique ; la diagonale vaut 0 (une UE n'est pas incompatible avec elle-même)
+//
+//      UE1 UE2 UE3 UE4 UE5 UE6 UE7
+Ic = [
+  [ 0,  0,  0,  0,  0,  0,  0 ],   // UE1
+  [ 0,  0,  1,  0,  0,  0,  0 ],   // UE2 incompatible avec UE3
+  [ 0,  1,  0,  0,  0,  0,  0 ],   // UE3 incompatible avec UE2
+  [ 0,  0,  0,  0,  1,  0,  0 ],   // UE4 incompatible avec UE5
+  [ 0,  0,  0,  1,  0,  0,  0 ],   // UE5 incompatible avec UE4
+  [ 0,  0,  0,  0,  0,  0,  0 ],   // UE6
+  [ 0,  0,  0,  0,  0,  0,  0 ]    // UE7
+];
+
+// ---------------------------------------------------------------------------
+// Parcours
+// ---------------------------------------------------------------------------
+
+// mmin[k] : nombre minimum d'UE optionnelles à suivre dans le parcours k
+//   Parcours 1 (Informatique) : entre 7 et 9 options → min = 7
+//   Parcours 2 (IA)           : entre 3 et 5 options → min = 3
+mmin = [7, 3];
+
+// mand[j][k] : 1 si l'UE j est obligatoire dans le parcours k
+//
+//             Parc1  Parc2
+//             Info   IA
+mand = [
+  [ 1,    1 ],   // UE1 obligatoire dans les deux parcours
+  [ 1,    1 ],   // UE2 obligatoire dans les deux parcours
+  [ 0,    1 ],   // UE3 obligatoire uniquement en IA
+  [ 0,    1 ],   // UE4 obligatoire uniquement en IA
+  [ 0,    0 ],   // UE5 optionnelle dans les deux parcours
+  [ 0,    0 ],   // UE6 optionnelle dans les deux parcours
+  [ 0,    0 ]    // UE7 optionnelle (mineure DS4H externalisée)
+];
+
+// ---------------------------------------------------------------------------
+// Étudiants
+// ---------------------------------------------------------------------------
+
+// mmax[i] : nombre maximum d'UE souhaité par l'étudiant i
+//   (doit être compris entre 8 et 10 selon la contrainte C4/C5)
+mmax = [9, 10, 8, 10];
+
+// parc[i] : parcours de l'étudiant i (1=Informatique, 2=IA)
+parc = [1, 2, 1, 2];
+
+// r[i][j] : rang de l'UE j pour l'étudiant i
+// Convention : rang faible = forte préférence ; plusieurs UE peuvent avoir le même rang.
+// Les UE obligatoires sont en général mises au rang 1 (préférées par défaut).
+//
+//           UE1 UE2 UE3 UE4 UE5 UE6 UE7
+r = [
+  [ 1,  1,  3,  4,  2,  2,  3 ],   // Etudiant 1 (Informatique)
+  [ 1,  1,  1,  1,  2,  3,  2 ],   // Etudiant 2 (IA)
+  [ 1,  2,  4,  4,  2,  1,  3 ],   // Etudiant 3 (Informatique)
+  [ 1,  1,  1,  2,  3,  2,  1 ]    // Etudiant 4 (IA)
+];
