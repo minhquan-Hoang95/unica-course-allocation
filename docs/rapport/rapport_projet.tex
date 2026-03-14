@@ -13,6 +13,12 @@
 \usepackage{amssymb}
 \usepackage{mathabx}
 
+\usepackage{color}
+\usepackage{tabularray}
+\definecolor{Gin}{rgb}{0.894,0.933,0.894}
+\definecolor{HalfandHalf}{rgb}{1,1,0.866}
+\definecolor{Prim}{rgb}{0.929,0.866,0.929}
+
 \theoremstyle{definition}
 \newtheorem{definition}{Définition}
 
@@ -436,11 +442,180 @@ Du côté des étudiant, d'autres métriques peuvent se formuler sur une notion 
 
 Maintenant que nous avons vu les métriques vectorielles, il peut être intéressant de les agréger afin d'obtenir une unique métrique sur laquelle travailler.
 
-\subsection{Métriques agrégés}
-\subsubsection{Métriques agrégés de base}
-\subsubsection{Pareto}
+\subsection{Métriques agrégées}
+Dans cette section, nous cherchons à concevoir des métriques agrégés, c'est à dire une métrique étant capable de résumer l'entièreté de l'affectation en un seul scalaire.
+Cela peut se faire de deux façons. Soit nous pouvons résumer les métriques vectorielles, cela nous donne une métrique agrégée pour chaque métriques vectorielles (nous les désignons ci-après par \og métriques agrégées de base \fg). 
+Soit, nous nous basons sur l'ensemble des affectations directement.
 
-\subsection{Tests d'hypothèses}
+\subsubsection{Métriques agrégées de base}
+Dans cette partie, nous ne verrons pas de métriques issues de fonctions d'agrégation que l'on pourrais qualifier << d'exotique >> ; en effet, nous chercherons ici à avoir des métrique d'évaluations ou de comparaison (pas forcément taillées pour l'optimisation). 
+Pour cette raison, nous souhaitons proposer des métriques simplement interprétables et applicable aussi bien aux étudiants qu'aux UEs.
+À partir de là, la meilleure façon de les représenter est le tableau à double entrées suivant :
+\begin{longtblr}[
+    caption = {Métriques d'agrégations pour chaque métrique vectorielle},
+]{
+    row{even} = {r},
+    row{2} = {font=\bfseries},
+    row{3} = {r,font=\bfseries},
+    row{5} = {r},
+    row{6} = {font=\bfseries},
+    row{7} = {r,font=\bfseries},
+    row{8} = {font=\bfseries},
+    row{9} = {r,font=\bfseries},
+    row{10} = {font=\bfseries},
+    row{11} = {r,font=\bfseries},
+    row{12} = {font=\bfseries},
+    row{13} = {r,font=\bfseries},
+    row{14} = {font=\bfseries},
+    row{15} = {r,font=\bfseries},
+    row{16} = {font=\bfseries},
+    row{17} = {r},
+    row{18} = {font=\bfseries},
+    row{19} = {r,font=\bfseries},
+    row{21} = {r},
+    row{22} = {font=\bfseries},
+    row{23} = {r,font=\bfseries},
+    row{24} = {font=\bfseries},
+    row{25} = {r,font=\bfseries},
+    row{26} = {font=\bfseries},
+    row{27} = {r,font=\bfseries},
+    row{28} = {font=\bfseries},
+    row{29} = {r,font=\bfseries},
+    column{2} = {c},
+    column{3} = {c,font=\bfseries},
+    column{4} = {font=\bfseries},
+    column{5} = {font=\bfseries},
+    column{6} = {font=\bfseries},
+    column{7} = {font=\bfseries},
+    column{9} = {font=\bfseries},
+    column{10} = {font=\bfseries},
+    column{11} = {c,font=\bfseries},
+    cell{1}{1} = {r,font=\bfseries},
+    cell{1}{2} = {font=\bfseries},
+    cell{2}{2} = {c=10,r=10}{Gin},
+    cell{12}{2} = {c=10,r=3}{HalfandHalf},
+    cell{15}{2} = {c=10,r=15}{Prim},
+    vline{1-2,12} = {1}{0.08em},
+    vline{1-3} = {2,12,15}{0.08em},
+    vline{1-2} = {3-11,13-14,16-29}{0.08em},
+    hline{1-2,30} = {-}{0.08em},
+    hline{12,15} = {-}{dashed},
+}
+    Métriques/Agrégations    & $\mathbf{\mathbb{E}}$          & $\mathbf{\sigma}$ & $\mathbf{\gamma_1}$ & $\mathbf{\gamma_2}$ & Min & Max & $\mathbf{Q_{0.05}\to Q_{0.95}}$ & IQR & $\mathbf{C_y}$ & Gini \\
+    rankSum                  & UEs et Étudiants &            &          &          &     &     &                        &     &                    &                     \\
+    rankAvg                  &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{rank}\mathbf{\sigma^2}$    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{rank}\mathbf{\sigma}$      &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q1                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q2                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q3                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    IQR                      &                  &            &          &          &     &     &                        &     &                    &                     \\
+    firstRank                &                  &            &          &          &     &     &                        &     &                    &                     \\
+    lastRank                 &                  &            &          &          &     &     &                        &     &                    &                     \\
+    spots                    & UEs              &            &          &          &     &     &                        &     &                    &                     \\
+    freeSpots                &                  &            &          &          &     &     &                        &     &                    &                     \\
+    loadDifference           &                  &            &          &          &     &     &                        &     &                    &                     \\
+    minRequestedRank         & Étudiants        &            &          &          &     &     &                        &     &                    &                     \\
+    maxRequestedRank         &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\mathbf{m\!\max_i}$              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corRankSum               &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corLastRank              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{corRank}\mathbf{\sigma^2}$ &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{corRank}\mathbf{\sigma}$   &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ1                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ2                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ3                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corIQR                   &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Nb d'UE en moins     &                  &            &          &          &     &     &                        &     &                    &                     \\
+    minRankDist              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    maxRankDist              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corMaxRankDist           &                  &            &          &          &     &     &                        &     &                    &                     
+\end{longtblr}
+Dans ce tableau, les fonctions d'agrégations ont été désignés par leur symboles pour pouvoir l'afficher complètement sur la page. Ainsi $\mathbb{E}$ est la moyenne, $\sigma$ l'écart-type, $\gamma_1$ le coefficient d'asymétrie de Fisher (Skewness), $\gamma_2$ le Kurtosis et $C_y$ le coefficient d'asymétrie de Yule.
+Il a aussi été introduit quelques métriques vectorielles non définit précédemment : << \textit{spots} >> correspondant au nombre de places d'une UE (donnée du problème), << \textit{min/maxRequestedRank} >> correspondant au rang minimum attribué et le rang maximum attribué par l'étudiant aux UEs (dépends des égalités) et le << Nombre d'UE >> en moins qui indique combien manque-t-il d'UEs facultatives afin d'atteindre le nombre d'UE demandé par l'étudiant.
+
+Concernant les métriques d'agrégations, nous n'allons pas détailler les plus simples (Moyenne, Écart-Type, Min, Max, Quantiles et IQR) que nous avons déjà défini vectoriellement, mais seulement les nouvelles métriques (Coefficient d'Asymétrie de Fisher, Kurtosis, Coefficient d'Asymétrie de Yule, Coefficient de Gini).
+Commençons par le coefficient d'asymétrie de Fisher et le Kurtosis :
+\begin{metric}[Skewness]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\sigma_v$ l'écart type calculé sur $m_v$. Nous définissons le coefficient d'asymétrie de Fisher ou Skewness ainsi :
+    $$
+        \forall v : \gamma_1 (m_v) = \frac{\frac{\sum_{i=1}^{\#m_v}\left(m_{v_i}-\ \widebar{m_v}\right)^3}{\#m_v}}{\sigma_v^3}
+    $$
+    où $\widebar{m_v}$ est la moyenne de la métrique vectorielle désignée. Quant-à son interprétation, le coefficient de Fisher est une mesure d'asymétrie et permet donc de dire si une distribution << s'étale >> sur la gauche ou sur la droite.
+    Ainsi, si $\gamma_1\approx0$, la distribution est symétrique et le mode, la moyenne et la médiane sont similaires. Si $\gamma_1<0$, on dit que la distribution est étalée sur la gauche (les valeurs se concentrent à droite) ; il s'agit donc du cas que nous voulons éviter sur les métriques telle que la somme des rangs, la moyenne, etc. (cela indiquerait une mauvaise affectation). 
+    Enfin, si $\gamma_1>0$, alors la distribution est << étalé sur la droite >> (les valeurs se concentrent à gauche) et peu d'étudiants se voient attribué d'affectation moins bonne que la majorité (attention, $\gamma_1>0$ n'indique pas forcément une bonne affectation, nous pouvons être dans le cas tous mauvais et une affectation très mauvaise). 
+    Cette métrique (comme le Kurtosis que nous allons voir) à néanmoins le défaut d'être très sensible aux valeurs extrêmes, il faut donc faire attention à l'interpréter sur les métriques corrigés du biais de Type I (voire de Type II).
+\end{metric}
+\begin{metric}[Kurtosis]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\sigma_v$ l'écart type calculé sur $m_v$. Nous définissons le coefficient d'aplatissement de Fisher ou Kurtosis ainsi :
+    $$
+        \forall v : \gamma_2 (m_v) = \frac{\frac{\sum_{i=1}^{\#m_v}\left(m_{v_i}-\ \widebar{m_v}\right)^4}{\#m_v}}{\sigma_v^4}
+    $$
+    où $\widebar{m_v}$ est la moyenne de la métrique vectorielle désignée. Pour l'interprétation du Kurtosis, il s'agit d'un indicateur << d'aplatissement >> ; avec celui-ci, nous cherchons à observer la fréquence d'apparition de valeurs très extrêmes dans une distribution. Malheureusement, cette métrique peut être non intuitive à interpréter et devrait donc être utilisé à des fin d'analyses plus poussés ou avec d'autres métrique. 
+    Par exemple, nous savons que si $\gamma_1\approx0\land\gamma_2\approx3$, alors nous pouvons émettre l'hypothèse que nous sommes en présence d'une loi normale. Pour une idée de l'interprétation de cette métrique, si $\gamma_2>3$, alors nous avons plus de valeurs extrêmes que sur une loi normale centrée réduite, si $\gamma_2<3$, nous en avons moins et autrement nous en avons en quantité similaire.
+\end{metric}
+Comme vu précédemment, le coefficient d'asymétrie de Fisher (et le Kurtosis) sont très sensibles aux valeurs extrême (à cause des puissances), il pourrait donc être intéressant d'avoir au moins un coefficient d'asymétrie non sensible aux valeurs extrêmes.
+\begin{metric}[Coefficient d'asymétrie de Yule]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $Q_x(m_v)$ le quantile d'ordre $x$ calculé sur $m_v$. Nous définissons le coefficient d'asymétrie de Yule ainsi :
+    $$
+        \forall v : C_y(m_v) = \frac{Q_{0.75}(m_v)+Q_{0.25}(m_v)-2Q_{0.5}(m_v)}{\text{IQR}(m_v)}
+    $$
+    où $IQR(m_v)$ est l'écart interquartile calculé sur le vecteur.
+    Ce coefficient d'asymétrie $C_y\in[-1,1]$ est, comme dit précédemment, robuste aux valeurs extrême, mais aussi assez simple à interpréter. 
+    Ainsi, si $C_y\approx 0$, alors la distribution est symétrique, si $C_y<0$ nous pouvons dire que la distribution est << étalé à gauche >> (ce qui est une mauvaise chose pour la plupart de nos métriques, car cela voudrait dire des valeurs potentiellement élevées pour le rang). 
+    Enfin si $C_y > 0$, alors la distribution est étalé à droite (ce qui est généralement une bonne chose dans la majorité de nos métriques). L'interprétation est donc similaire à celle du coefficient de Fisher, mais cette fois ci sur la médiane. 
+\end{metric}
+Il ne nous reste donc plus qu'une métrique agrégé de base à discuter : le coefficient de Gini.
+
+\begin{metric}[Coefficient de Gini]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\widebar{m_v}$ la moyenne calculée sur $m_v$, nous définissons le coefficient de Gini ainsi :
+    $$
+        \text{Gini}(m_v) = \frac{\sum_{i=1}^{\#m_v}\sum_{j=1}^{\#m_v}\left|x_i-x_j\right|}{2\left[\#m_v\right]^2\widebar{m_v}}
+    $$
+    Cet indice, très utilisé pour les comparaison d'inégalité des richesses, peut être utilisé dans un cas général de mesure d'inégalité incluant notre application. 
+    L'interprétation est cette fois très simple : si le coefficient approche de 0, alors toutes les valeurs de la métrique vectorielle donnée sont identiques ; autrement, dans le cas, où l'indice s'approche de 1, alors nous pouvons interpréter que un individu possède l'intégralité des richesse et les autres rien.
+    Attention tous de même, dans notre cadre, nous cherchons à avoir un coefficient de Gini proche de 0 (sur les métriques tel que la somme des rangs par exemple), non pas parce qu'un coefficient de 1 indiquerait qu'un individu est grandement bénéficiaire du système au détriment des autres, mais plutôt que si un tel individu existait, alors il serait certainement le plus lésé. 
+    En d'autres mots, si le coefficient de Gini est proche de 1 sur une métrique telle que la somme des rangs, alors la personne concentrant les << richesses >> serait en réalité une personne dont l'affectation est sciemment mauvaise afin de faire bénéficier le reste du groupe de son sacrifice.
+\end{metric}
+
+Maintenant que nous avons vu ces métriques agrégées de << base >>, voyons si nous pouvons établir une métrique d'agrégation se basant sur un autre système. 
+
+\subsubsection{Pareto en tant que métrique d'agrégation}
+Dans notre situation, où nous cherchons à offrir une affectation à chaque étudiant, plusieurs solutions plus ou moins bonne existent parallèlement. 
+Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affectation d'un étudiant avec celle d'un autre.
+
+\begin{definition}[Échange technique]
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ où $n$ est le nombre d'étudiant. 
+    Nous définissons un << échange technique >> comme un échange des affectations de $i_a$ et de $i_b$, tel que la contraintes des UEs obligatoires est respectée, plus formellement : $\text{mSet}(i_a)\subseteq\text{aSet}(i_b) \land \text{mSet}(i_b)\subseteq\text{aSet}(i_a)$ 
+    et que le nombre d'UE demandé par chacun des étudiant ne soit pas dépassé $m\!\max_{i_a}\ge\#\text{aSet}(i_b)\land m\!\max_{i_b}\ge\#\text{aSet}(i_a)$.
+    On notera le prédicat $i_a\stackrel{T}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange technique entre le couple $(i_a, i_b)$ et 1 autrement.  
+\end{definition}
+
+Bien que la définition d'échange technique permet de s'assurer qu'un échange d'affectation soit techniquement faisable, il ne nous permet pas de dire si un étudiant est bénéficiaire ou lésé par celui-ci. 
+À partir de cette observation, nous pouvons nous rappeler la définition l'utilité de Pareto.
+\begin{definition}[Échange de Pareto]
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ et une métrique vectorielle $m_v$.
+    Nous définissons un échange de Pareto comme un échange technique tel que si l'échange est opérant, alors $m_{v_{i_{a\to b}}} \ge m_{v_{i_a}}\text{ (resp.}\le\text{)}$ et $m_{v_{i_{b\to a}}} \ge m_{v_{i_b}}\text{ (resp.}\le\text{)}$ pour une métrique à maximiser (resp. à minimiser),
+    où $m_{v_{i_{x\to y}}}$ correspond à la métrique calculé pour l'étudiant $x$ après lui avoir attribué l'affectation de l'étudiant $y$.
+    On notera le prédicat $i_a\stackrel{(P,m_v)}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange de Pareto entre le couple $(i_a, i_b)$ pour la métrique vectorielle $m_v$ et 1 sinon.
+    On qualifiera de front de Pareto l'ensemble des solutions tels qu'aucun échanges de Pareto existe pour une métrique donnée.
+\end{definition}
+
+Lorsqu'un échange de Pareto existe, alors nous savons que la solution n'est pas optimale (sauf en égalité stricte) pour la métrique désignée. Ainsi, pour atteindre une solution optimale respectivement à une métrique, il nous suffit de chercher les échanges de Pareto possibles et d'exécuter les échanges jusqu'à ce qu'il n'y en ai plus. 
+\begin{metric}[Métriques d'échanges]
+    À partir de l'observation précédente, il peut être intéressant de compter le nombre d'échange de Pareto pour une métrique vectorielle $m_v$ désignée :
+    $$
+        \#\text{ParetoSwap}(A_{i,j}) = \sum_{k=1}^{n-1}\sum_{l=k+1}^{n}i_k\stackrel{(P,m_v)}{\longleftrightarrow}i_l
+    $$
+    À noter que cette métrique est extrêmement dépendante des métriques vectorielles utilisées. En effet, la forme du front de Pareto dépend de la définition de celles-ci et de ce que l'on cherche à optimiser.
+    Au niveau de l'interprétation, plus le nombre d'échange est bas, mieux la solution est optimisé ; à l'inverse, plus le nombre d'échange est élevé, moins la solution est bonne.
+    Aussi, il peut être intéressant de diviser la valeur obtenu par le nombre d'échanges techniques dans l'affectation générale ; en effet, cela permet d'avoir un meilleur aperçu de l'optimisation de la solution dans de grandes instances où un grand nombre d'échange technique peut exister (sans pour autant être de Pareto).
+\end{metric}
+
+
+\subsection{Autre indicateur, les tests d'hypothèses}
+
+
 
 \section{Méthodologie et implémentation}
 \subsection{Méthode proposée}
