@@ -7,10 +7,10 @@
 
 
 ///////////////////////
-///    Entrées      ///
+///    EntrÃ©es      ///
 ///////////////////////
 /*Dimensions*/
-int n = ...;   // Nombre d'étudiants
+int n = ...;   // Nombre d'Ã©tudiants
 int m = ...;   // Nombre d'UE
 int p = ...;   // Nombre de parcours
 
@@ -19,34 +19,34 @@ range UEs       = 1..m;
 range Parcours  = 1..p;
 
 /*Cours*/
-int c[UEs] = ...;				// Capacité de chaque UE j (en nombre de places disponibles hors obligatoires)
-int Ic[UEs][UEs] = ...;			// Matrice d'incompatibilité : Ic[j][j2] = 1 si les UE j et j2 sont incompatibles
+int c[UEs] = ...;				// CapacitÃ© de chaque UE j (en nombre de places disponibles hors obligatoires)
+int Ic[UEs][UEs] = ...;			// Matrice d'incompatibilitÃ© : Ic[j][j2] = 1 si les UE j et j2 sont incompatibles
 
 /*Parcours*/
-int mmin[Parcours] = ...;		// Nombre minimum d'UE optionnelles à suivre dans le parcours k
+int mmin[Parcours] = ...;		// Nombre minimum d'UE optionnelles Ã  suivre dans le parcours k
 int mand[UEs][Parcours] = ...;	// Matrice d'association des UE aux parcours (mand[2][3] = 1 <=> L'UE 2 est obligatoire dans le parcours 3).
 
-/* étudiants */
-int mmax[Etudiants] = ...;		// Nombre maximum d'UE souhaité par l'étudiant i
-int parc[Etudiants] = ...;		// Parcours suivi par l'étudiant i
+/* Ã©tudiants */
+int mmax[Etudiants] = ...;		// Nombre maximum d'UE souhaitÃ© par l'Ã©tudiant i
+int parc[Etudiants] = ...;		// Parcours suivi par l'Ã©tudiant i
 
-int r[Etudiants][UEs] = ...;	// Rang de l'UE j pour l'étudiant i (plus le rang est bas = plus l'UE est préférée)
-								// Plusieurs UE peuvent partager le même rang ; les rangs sont consécutifs.
+int r[Etudiants][UEs] = ...;	// Rang de l'UE j pour l'Ã©tudiant i (plus le rang est bas = plus l'UE est prÃ©fÃ©rÃ©e)
+								// Plusieurs UE peuvent partager le mÃªme rang ; les rangs sont consÃ©cutifs.
 
 
 ///////////////////////
 ///     Sortie      ///
 ///////////////////////
-dvar boolean A[Etudiants][UEs];	// A[i][j] = 1 si l'étudiant i est affecté à  l'UE j, 0 sinon
+dvar boolean A[Etudiants][UEs];	// A[i][j] = 1 si l'Ã©tudiant i est affectÃ© Ã Â  l'UE j, 0 sinon
 
 
 
 ///////////////////////
 ///    Fonction     ///
 ///////////////////////
-// On minimise la somme des rangs des UE attribuées à chaque étudiant.
-// Un rang faible signifie que l'UE est très désirée : on favorise
-// l'attribution des UE les mieux classées par chaque étudiant.
+// On minimise la somme des rangs des UE attribuÃ©es Ã  chaque Ã©tudiant.
+// Un rang faible signifie que l'UE est trÃ¨s dÃ©sirÃ©e : on favorise
+// l'attribution des UE les mieux classÃ©es par chaque Ã©tudiant.
 minimize
   sum(i in Etudiants, j in UEs) r[i][j] * A[i][j];
 
@@ -56,7 +56,7 @@ minimize
 ///////////////////////
 subject to {
 
-  // (C1) La somme des affectations pour une UE ne dépasse pas sa capacité.
+  // (C1) La somme des affectations pour une UE ne dÃ©passe pas sa capacitÃ©.
   forall(j in UEs)
     ctCapacite:
       sum(i in Etudiants) A[i][j] <= c[j];
@@ -64,15 +64,15 @@ subject to {
   // (C2) Une affectation ne peut accorder que des UE compatibles entre elles.
   forall(i in Etudiants, j in UEs, j2 in UEs : j < j2)
     ctCompatibilite:
-      Ic[j][j2] + A[i][j] + A[i][j2] <= 2;							// Si Ic[j][j2] = 1, un étudiant ne peut pas avoir les deux UE j et j2.
+      Ic[j][j2] + A[i][j] + A[i][j2] <= 2;							// Si Ic[j][j2] = 1, un Ã©tudiant ne peut pas avoir les deux UE j et j2.
 
-  // (C3) Un étudiant inscrit dans un parcours k doit recevoir toutes les UE obligatoires de ce parcours.
+  // (C3) Un Ã©tudiant inscrit dans un parcours k doit recevoir toutes les UE obligatoires de ce parcours.
   forall(i in Etudiants, j in UEs)
     ctObligatoires:
       A[i][j] >= sum(k in Parcours) ((parc[i] == k) * mand[j][k]);	// Si parc[i] == k et mand[j][k] == 1, alors A[i][j] doit valoir 1.
       
 
-  // (C4) Un étudiant doit recevoir entre 8 et 10 UE au total.
+  // (C4) Un Ã©tudiant doit recevoir entre 8 et 10 UE au total.
   forall(i in Etudiants) {
     ctMinUE:
       sum(j in UEs) A[i][j] >= 8;
@@ -80,13 +80,13 @@ subject to {
       sum(j in UEs) A[i][j] <= 10;
   }
 
-  // (C5) Un étudiant reçoit au plus le nombre d'UE qu'il a demandé.
+  // (C5) Un Ã©tudiant reÃ§oit au plus le nombre d'UE qu'il a demandÃ©.
   forall(i in Etudiants)
     ctDemandeMax:
       sum(j in UEs) A[i][j] <= mmax[i];
 
-  // (C6) Un étudiant doit suivre au moins mmin[k] UE optionnelles dans son parcours k.
-  // Une UE est optionnelle pour l'étudiant i si elle n'est PAS obligatoire dans son parcours.
+  // (C6) Un Ã©tudiant doit suivre au moins mmin[k] UE optionnelles dans son parcours k.
+  // Une UE est optionnelle pour l'Ã©tudiant i si elle n'est PAS obligatoire dans son parcours.
   forall(i in Etudiants)
     ctMinOptionnelles:
       sum(j in UEs : mand[j][parc[i]] == 0) A[i][j]
@@ -95,7 +95,7 @@ subject to {
 }
 
 // ---------------------------------------------------------------------------
-// 5. Post-traitement : affichage des résultats
+// 5. Post-traitement : affichage des rÃ©sultats
 // ---------------------------------------------------------------------------
 
 execute AFFICHAGE {

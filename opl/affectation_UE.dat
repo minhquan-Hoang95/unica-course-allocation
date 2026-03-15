@@ -27,7 +27,7 @@ p = 2;   // Nombre de parcours (1=Informatique, 2=IA)
 // ---------------------------------------------------------------------------
 
 // c[j] : capacité (nombre de places disponibles) pour l'UE j
-// UE 7 : mineure DS4H externalisée → capacité "illimitée" = n = 4
+// UE 7 : mineure DS4H externalisée -> capacité "illimitée" = n = 4
 c = [10, 8, 6, 10, 4, 6, 4];
 
 // Ic[j][j2] : 1 si les UE j et j2 sont en conflit d'emploi du temps
@@ -49,8 +49,8 @@ Ic = [
 // ---------------------------------------------------------------------------
 
 // mmin[k] : nombre minimum d'UE optionnelles à suivre dans le parcours k
-//   Parcours 1 (Informatique) : entre 7 et 9 options → min = 7
-//   Parcours 2 (IA)           : entre 3 et 5 options → min = 3
+//   Parcours 1 (Informatique) : entre 7 et 9 options -> min = 7
+//   Parcours 2 (IA)           : entre 3 et 5 options -> min = 3
 mmin = [7, 3];
 
 // mand[j][k] : 1 si l'UE j est obligatoire dans le parcours k
