@@ -613,9 +613,45 @@ Lorsqu'un échange de Pareto existe, alors nous savons que la solution n'est pas
 \end{metric}
 
 
-\subsection{Autre indicateur, les tests d'hypothèses}
+\subsection{Autre indicateurs, les tests d'hypothèses}
+Dans le cadre de nos évaluations, il peut également être important, en plus de regarder les métriques, de vérifier si les affectations proposées respectent un point important : << Y-a-t'il une façon permettant de prendre avantage de la méthode d'affectation à ses propres fins ? >>.
+À des fins d'équités, nous devons éviter que cela soit le cas.
 
+Les trois facteurs les plus importants à vérifier sont : \textbf{(1)} << Est-ce que l'ordre de remplissage du formulaire par les étudiants est déterminant pour avoir une meilleure affectation ? >>,
+\textbf{(2)} << Est-ce que le parcours des étudiants impacte la qualité des affectations ? >> et bien sûr, en lien avec le biais de Type I, \textbf{(3)} << Est-ce que le nombre d'UEs choisies par les étudiants impacte la qualité de leurs affectations par rapport à d'autres ? >>.
 
+Dans l'idéal, l'affectation proposé vérifie que les trois proposition ci-dessus soit fausses. Pour cela, nous pourrons utiliser les tests d'hypothèses et plus particulièrement le test H de Kruskal-Wallis \cite{Kruskal1952}, suivi éventuellement du test U de Mann-Whitney \cite{Whitney1947}. 
+\begin{definition}[Test H de Kruskal-Wallis]
+    Le test H de Kruskal-Wallis est un test statistique de comparaison non paramétrique de plusieurs groupes portant les hypothèses suivantes :
+    $$
+    \begin{matrix}
+        H_0 : & \ll\text{ La distribution des groupes se faisant comparés sont les mêmes. } \gg\\
+        H_1 : & \ll\text{ Au moins une distribution des groupes se faisant comparés est différente. }\gg
+    \end{matrix}
+    $$
+    Ce test nous est utile, car il nous permettrait dans un premier temps de vérifier si la distribution pour une certaine métrique vectorielle donnée (mesures) dépends d'un facteur extérieur (groupes comme le nombre d'UEs choisies, le parcours de l'étudiant, etc.). 
+    Un autre avantage non négligeable d'implémenter ce test est qu'il ne requiert pas de propriétés contraignantes dans notre cas : la normalité n'est pas assumé (ok), les mesures sont continues (ok), les mesures sont indépendantes entres-elles (nous pouvons l'assumer), les groupes sont indépendants (oui).
+    Dans la mesure où il serait trop lourd de rédiger l'intégralité du fonctionnement du test, nous ne l'expliquerons pas ici. Concernant l'implémentation en Python, celle-ci est possible via la librairie Scipy et la commande \texttt{scipy.stats.kruskal} (\texttt{kruskal.test} en R).
+
+    \textbf{Interprétation :} Bien qu'un peu plus complexe que çà, nous simplifierons l'interprétation du test d'Hypothèse ainsi : << Si la p-value est inférieur à 5\%, alors nous rejetons $H_0$ et concluons $H_1$. >>. Attention, si la p-value est au dessus du seuil critique 0.05, nous ne pouvons pas conclure en l'absence de différences entre les distributions, juste ne pas rejeter l'hypothèse pour l'instant.
+\end{definition}
+
+Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu'une distribution est différente, mais pas laquelle. Il est donc important, s'il on souhaite enquêter plus en détail d'exécuter un test U de Mann-Whitney pour chacune des paires de groupe possible.
+\begin{definition}[Test U de Mann-Whitney]
+    Le test U de Mann-Whitney est un test statistique de comparaison non paramétrique sur deux groupes portant les hypothèses suivantes :
+    $$
+    \begin{matrix}
+        H_0 : & << \text{ Les distributions X et Y sont égales en loi } >>\\
+        H_1 : & << \text{ X est stochastiquement supérieur à Y, ou } F_X<F_Y >>\\
+    \end{matrix}
+    $$
+    Plus simplement l'hypothèse alternative utilisée ici veut dire que la distribution de $X$ a généralement de plus grande valeurs que celle de $Y$. 
+    Concernant les requis pour ce test, celui-ci ne requiert pas de normalité pour les distributions (ok), requiert que les valeurs étudiées soient continues (ok) et que les mesures soient indépendantes (chose que nous assumons).
+    Pour les mêmes raisons que le test H de Kruskal-Wallis, nous n'allons pas détailler son fonctionnement, mais mentionner les implémentations en Python (\texttt{scipy.stats.mannwhitneyu}) et en R (\texttt{wilcox.test}). 
+    Les remarques sur l'interprétations sont également sensiblement identique que pour le test précédemment présenté. 
+\end{definition}
+
+En utilisant ces deux tests, nous sommes donc maintenant en mesure d'évaluer si une affectation est influencé par des facteurs non désirés.
 
 \section{Méthodologie et implémentation}
 \subsection{Méthode proposée}
@@ -638,5 +674,8 @@ Lorsqu'un échange de Pareto existe, alors nous savons que la solution n'est pas
 
 \section{Conclusion}
 \textbf{À faire.}
+
+\bibliographystyle{plain}
+\bibliography{refs.bib}
 
 \end{document}
