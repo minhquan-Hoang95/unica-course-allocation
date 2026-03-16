@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+
+# Generated files
+studentsRandom.csv
+
+# OS files
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
