@@ -1,0 +1,681 @@
+\documentclass{rapport}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\usepackage{pifont}
+\usepackage{url}
+\usepackage[hypertexnames=false,colorlinks, citecolor=red!60!green, linkcolor=blue!60!green, urlcolor=magenta]{hyperref}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathabx}
+
+\usepackage{color}
+\usepackage{tabularray}
+\definecolor{Gin}{rgb}{0.894,0.933,0.894}
+\definecolor{HalfandHalf}{rgb}{1,1,0.866}
+\definecolor{Prim}{rgb}{0.929,0.866,0.929}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}
+
+\theoremstyle{remark}
+\newtheorem{lemme}{Lemme}
+
+\theoremstyle{definition}
+\newtheorem*{metric}{Métrique}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remarque}
+
+\newcommand{\llbracket}{[\![}
+\newcommand{\rrbracket}{]\!]}
+
+\pagestyle{fancy}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+\fancyfoot{}
+\fancyhead{}
+\fancyhead[L]{\textsl{\leftmark}}
+\fancyhead[R]{\textbf{\thepage}}
+\setlength{\headheight}{23pt}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+}
+
+\title{unica-course-allocation}
+\author{Promo Modélisation par des contraintes (2025-2026)}
+\supervisor{Arnaud Malapert}
+\date{}
+\type{Projet}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Ce document constitue un début de rapport pour le projet \emph{unica-course-allocation} consacré à l'affectation des unités d'enseignement (UE) du Master Informatique. Il présente le contexte, les objectifs, les données disponibles et une formalisation mathématique des contraintes du problème. [à compléter avec les éléments que l'on va ajouter]
+\end{abstract}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\section{Introduction et problématique}
+\subsection{Introduction}
+Dans le Master Informatique de l'Université Côte d'Azur, les étudiantes et étudiants choisissent chaque semestre un ensemble d'UE à partir d'un catalogue commun aux parcours \emph{Informatique} et \emph{IA}. Le choix est contraint par :
+\begin{itemize}
+    \item des capacités limitées par UE,
+    \item des incompatibilités d'emploi du temps,
+    \item des UE obligatoires dépendant du parcours.
+\end{itemize}
+
+Le mécanisme actuel de type \og premier arrivé, premier servi \fg{} est simple mais peut générer des inégalités importantes. Le projet vise donc à proposer une méthode d'affectation plus \emph{équitable}, tout en restant explicable et opérationnelle.
+
+\subsection{Contexte et problématique}
+Le problème est \textbf{multiagent} (plusieurs étudiants avec des préférences différentes) et \textbf{multicritère} (respect des obligations, prise en compte des préférences, équité globale).
+
+Dans ce cadre, il n'existe pas nécessairement une solution unique optimale pour tous les critères simultanément. L'enjeu principal est alors de :
+\begin{enumerate}
+    \item définir une notion mesurable d'\textbf{équité},
+    \item proposer une procédure d'affectation compréhensible,
+    \item évaluer quantitativement la qualité des affectations obtenues.
+\end{enumerate}
+
+\subsection{Objectifs du projet}
+D'après la description du projet, la preuve de concept attendue doit :
+\begin{itemize}
+    \item définir le concept d'\emph{affectation équitable} et proposer des indicateurs quantitatifs,
+    \item améliorer le système d'affectation actuel par un processus simple et explicable,
+    \item rester flexible vis-à-vis des paramètres (nombre d'étudiants, d'UE, de parcours, de places, etc.),
+    \item présenter des résultats lisibles, cohérents et scientifiquement argumentés.
+\end{itemize}
+
+\section{Données}
+\subsection{Données disponibles}
+Les données exploitées dans le projet sont :
+\begin{itemize}
+    \item la liste des UE obligatoires et optionnelles selon les parcours,
+    \item les capacités d'accueil des UE (hors places réservées aux obligations de parcours),
+    \item les incompatibilités d'emploi du temps entre UE,
+    \item pour chaque étudiant : parcours, nombre maximum d'UE souhaitées, préférences sur les UE.
+\end{itemize}
+
+Notes :
+\begin{itemize}
+    \item certaines UE externes au processus principal peuvent être considérées à capacité \og illimitée \fg{},
+    \item toute UE non obligatoire dans un parcours est considérée comme optionnelle.
+\end{itemize}
+
+\subsection{Format des données}
+Soit $n$ le nombre d'étudiants, $m$ le nombre d'UE et $p$ le nombre de parcours.
+
+\subsubsection{Entrée}
+\begin{itemize}
+    \item \textbf{Unités d'Enseignements :}
+    \begin{itemize}
+        \item $c_j \in \mathbb{N}$ : la capacité de l'UE $j \in \llbracket 1,m \rrbracket$.
+        \item $I^c_{j,j'} \in \{0,1\}$ : la matrice d'incompatibilité des UE $(j,j') \in \llbracket 1,m \rrbracket^2$, où la case $(j,j')$ vaut 1 si les UE sont incompatibles, 0 autrement.
+    \end{itemize}
+
+    \item \textbf{Parcours :}
+    \begin{itemize}
+        \item $m\!\min_k \in \mathbb{N}^*$ : le nombre minimum d'UE optionnelles à suivre dans le parcours $k \in \llbracket 1,p \rrbracket$.
+        \item $m_{j,k} \in \{0,1\}$ : indique si l'UE $j \in \llbracket 1,m \rrbracket$ est obligatoire dans le parcours $k \in \llbracket 1,p \rrbracket$.
+    \end{itemize}
+
+    \item \textbf{Étudiants :}
+    \begin{itemize}
+        \item $m\!\max_i$ : le nombre maximum d'UE souhaité par l'étudiant $i \in \llbracket 1,n \rrbracket$.
+        \item $p_i \in \llbracket 1,p \rrbracket$ : le parcours suivi par l'étudiant $i \in \llbracket 1,n \rrbracket$.
+        \item $r_i : \llbracket 1,m \rrbracket \to \mathbb{R}^{+}$ : une fonction de rang (par les méthode des rangs moyens) indiquant les préférences d'un étudiant $i$, telle que plusieurs UE peuvent avoir le même rang, que les rangs soient consécutifs, que la somme des rangs soit égale pour tous les étudiants et que le premier rang soit occupé par les UEs obligatoires (si applicable).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Sortie}
+\begin{itemize}
+    \item $A_{i,j}$ : une affectation d'UE pour l'étudiant $i \in \llbracket 1,n \rrbracket$ ; 1 si l'UE $j \in \llbracket 1,m \rrbracket$ est affecté, 0 sinon.
+\end{itemize}
+
+\subsubsection{Contraintes}
+\begin{itemize}
+    \item \textbf{(C1)} \og Pour chaque UE, la somme des affectations pour celle-ci ne dépasse pas sa capacité \fg{} :
+    \[
+    \forall j \in \llbracket 1,m \rrbracket : \sum_{i \in \llbracket 1,n \rrbracket} A_{i,j} \le c_j
+    \]
+
+    \item \textbf{(C2)} \og Une affectation ne peut accorder que des UE compatibles \fg{} :
+    \[
+    \forall (i,j,j') \in \llbracket 1,n \rrbracket \times \llbracket 1,m \rrbracket^2 : I^c_{j,j'} + A_{i,j} + A_{i,j'} \le 2
+    \]
+
+    \item \textbf{(C3)} \og Un étudiant inscrit dans un parcours $p$ doit se voir attribuer toutes les UE obligatoires du parcours $p$ \fg{} :
+    \[
+    \forall (i,j,k) \in \llbracket 1,n \rrbracket \times \llbracket 1,m \rrbracket \times \llbracket 1,p \rrbracket : A_{i,j} - \mathbf{1}_{p_i=k} - m_{j,k} \ge -1
+    \]
+
+    \item \textbf{(C4)} \og Un étudiant doit recevoir une affectation de 8 à 10 UE \fg{} :
+    \[
+    \forall i \in \llbracket 1,n \rrbracket : 8 \le \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le 10
+    \]
+
+    \item \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de UE qu'il a demandé \fg{} :
+    \[
+    \forall i \in \llbracket 1,n \rrbracket : \sum_{j \in \llbracket 1,m \rrbracket} A_{i,j} \le m\!\max_i
+    \]
+\end{itemize}
+
+\paragraph{Note.}
+$\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sinon.
+
+
+\section{Métriques d'évaluations et de comparaisons}
+
+Dans le cadre de ce projet, être en mesure d'évaluer et de comparer plusieurs instances d'affectations d'étudiant est important. 
+En effet, sans cela, nous serions bien incapable de mesurer une potentielle amélioration du système, actuellement exploité, mais aussi de vérifier l'existence d'éventuels biais
+dans les affectations et donc d'établir si une affectation est équitable.
+
+Afin de réaliser cet objectif d'évaluation, nous devons développer des métriques adéquates au problème.
+Ces métriques se décomposent en deux catégories principales : les métriques vectorielles, contenant une valeur pour chaque entité mesuré, et les métriques agrégées renvoyant une unique valeur représentant l'ensemble des entités.
+Dans la suite de cette section, nous présentons l'ensemble des métriques développées, leurs avantages et leurs défauts.
+Avant cela, nous devons néanmoins définir plusieurs notions :
+
+\begin{definition}[Produit de Schur]
+    Soit $X$ et $Y$ deux matrices de même dimension dans $\mathbb{R}_{n,m}$, nous définissons le produit de Schur $\odot$
+    comme l'opération qui associe à $X$ et $Y$ la matrice $Z$ tel que $\forall (i,j)\in\llbracket 1,n\rrbracket\times\llbracket 1,m\rrbracket:z_{i,j}=x_{i,j}\cdot y_{i,j}$. Ou plus graphiquement :
+    $$
+    Z = X\odot Y = \begin{bmatrix}
+        x_{0,0} & \cdots & x_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        x_{n,0} & \cdots & x_{n,m}
+    \end{bmatrix} \odot \begin{bmatrix}
+        y_{0,0} & \cdots & y_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        y_{n,0} & \cdots & y_{n,m}
+    \end{bmatrix} = \begin{bmatrix}
+        x_{0,0}\cdot y_{0,0} & \cdots & x_{0,m}\cdot y_{0,m} \\
+        \vdots & \ddots & \vdots \\
+        x_{n,0}\cdot y_{n,0} & \cdots & x_{n,m}\cdot y_{n,m}
+    \end{bmatrix}
+    $$
+\end{definition}
+
+\begin{definition}[Matrice des rangs d'affectation]
+    Soit $A_{i,j}\in\{0,1\}_{n,m}$ la matrice représentant l'affectation accordée à l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$. 
+    Soit $R_{i,j}\in\mathbb{R}^{+}_{n,m}$ la matrice représentant les rangs accordés par l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$, nous
+    définissons la matrice des rangs d'affectation $U_{i,j} = A_{i,j} \odot R_{i,j}$ comme la matrice des rangs des UE effectivement affectés à l'étudiant $i$.
+\end{definition}
+
+Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pouvons commencer à introduire nos premières métriques vectorielles.
+
+\subsection{Métrique vectorielles}
+\subsubsection{Métriques vectorielles de base}
+
+\begin{metric}[Dernier rang affecté]
+    Définit pour les étudiants et les UEs, le dernier rang affecté correspond pour chaque étudiants (resp. UE) au rang maximum des UEs (resp. étudiants) effectivement affecté. 
+    Elle se calcule ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{lastRank}(i) = \max_{j\in\llbracket 1,m\rrbracket} U_{i,j} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{lastRank}(j) = \max_{i\in\llbracket 1,n\rrbracket} U_{i,j} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique est sûrement la plus intuitive et la plus simple à calculer en plus de nous donner une borne supérieure sur les rangs (ce qui peut la rendre pratique à bien des égards). Malheureusement, elle manque d'une propriété essentielle pour la comparaison des affectations.
+    En effet, celle-ci ne fait pas transparaître la distribution des rangs inférieurs. En d'autre termes, un étudiant peut se voir affecté un dernier rang élevé, mais n'avoir que des UEs de rangs faibles pour ces autres affectations ; à l'inverse, un étudiant peut aussi avoir un dernier rang affecté moyen, mais avoir ces autres affectations très concentrées autours de cette borne, rendant ainsi l'affectation non satisfaisante pour l'étudiant. 
+    Nous devons donc trouver une autre métrique permettant de prendre en compte cette distribution, au moins implicitement. 
+\end{metric}
+
+\begin{metric}[Somme des rangs]
+    Définit pour les étudiants et les UEs, la somme des rangs est la métrique sommant les rangs de l'ensemble des UE affectés (resp. des étudiants) à chaque étudiant (resp. UE). 
+    Elle se formalise ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rankSum}(i) = \sum_{j=1}^m U_{i,j} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rankSum}(j) = \sum_{i=1}^n U_{i,j} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique à plusieurs avantages. Premièrement, elle dispose d'une interprétabilité simple : plus la valeur est élevé, plus l'étudiant est lésé et plus la valeur est faible, meilleur est la satisfaction de l'étudiant ; concernant les UEs, cette interprétation met en lumière les plus plébiscités et les plus évités. 
+    Deuxièmement, la métrique est rapide, simple à calculer et permet de prendre en compte la distribution sous-jacente des rangs affectés de manière implicite. Enfin, elle est intuitive, simple à accepter, à comprendre et à expliquer ; cela rendant le système plus abordable pour les exploitants.
+
+    Nous devons néanmoins rappeler que chaque étudiant ayant la possibilité de choisir un nombre différent d'UE, les valeurs obtenues deviennent difficilement comparable. D'où l'introduction de notre troisième métrique.
+\end{metric}
+\begin{metric}[Moyenne des rangs]
+    Également définit pour les étudiants et les UEs, la moyenne des rangs vise à normaliser la somme des rangs par le nombre de rang effectivement affecté. Elle est formalisé ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rankAvg}(i) = \frac{\sum_{j=1}^m U_{i,j}}{\sum_{j=1}^m A_{i,j}} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rankAvg}(j) = \frac{\sum_{i=1}^n U_{i,j}}{\sum_{i=1}^n A_{i,j}} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique, bien que déjà plus complexe à calculé, permets en effet de prendre en compte le nombre différent d'UE choisies par les étudiants tout en conservant une partie de l'état implicite de la distribution des rangs. Ainsi, la normalisation par le nombre d'UE (resp. étudiant) nous permet de comparer de nouveau les résultats obtenus entre chaque entité.
+    En effet, la moyenne des rangs, en plus de sa normalisation, revet une interprétation particulièrement intuitive : "En moyenne, l'étudiant (resp. UE) s'est vu affecté une UE (resp. un étudiant) avec une préférence x". 
+    Malheureusement, cette métrique est soumise comme d'autres à des biais importants que nous préciserons dans la suite.
+    
+    Maintenant que cela est dit, nous pouvons tout de même essayer de décrire plus en détail la distribution des rangs une fois combiné à d'autres métriques (notamment de dispersion). 
+\end{metric}
+\begin{metric}[Variance et Écart-type des rangs]
+    Définit pour les étudiant et les UEs, la variance et l'écart type des rangs vise à observer la dispersion de la distribution des rangs. Combiné à la moyenne des rangs, l'écart-type permet déjà d'avoir une bonne idée de la "forme" générale de la distribution des rangs entre les différentes entités. 
+    Elle se traduit mathématiquement ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{rank}\sigma^2(i) = \frac{\sum_{j=1}^m U_{i,j}^2}{\sum_{j=1}^m A_{i,j}} - \text{rankAvg}(i)^2, & \text{rank}\sigma(i) = \sqrt{\text{rank}\sigma^2(i)} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{rank}\sigma^2(j) = \frac{\sum_{i=1}^n U_{i,j}^2}{\sum_{i=1}^n A_{i,j}} - \text{rankAvg}(j)^2, & \text{rank}\sigma(j) = \sqrt{\text{rank}\sigma^2(j)} & \text{(UE)}
+    \end{matrix}
+    $$
+    Ici, il faut bien comprendre que la variance et l'écart-type sont des mesures standard de dispersion, mais sont par nature déjà plus délicate à interpréter. Pour la variance, l'unité est en réalité le rang au carré, rendant ainsi toute interprétation de cette mesure brute tout au mieux bancale dans notre contexte (elle peut néanmoins servir dans d'autres cas, comme des tests d'hypothèses tel l'ANOVA).
+    Pour interpréter la dispersion, nous utilisons donc l'écart-type. Toujours positif, plus l'écart-type approche 0, plus la dispersion des valeurs autour de la moyenne des rangs est faible. Au contraire, un écart-type élevé signifie qu'une entité s'est vu attribué une affectation très disparate sur la valeur des rangs.
+    
+    Aussi, il convient donc de ne pas utiliser cette métrique seule à des fin d'optimisation, car celle-ci, en plus de ne pas permettre de garanties sur les moyennes, n'admet pas de linéarité exploitable dans un solveur linéaire. Cette métrique servira donc plus à évaluer la qualité des affectations a posteriori. Maintenant que cela est dit, il faut tout de même addresser un point important sur les biais de cette mesure (et d'autres).
+\end{metric}
+\begin{remark}[Biais]
+    Bien que relativement standard, l'intégralité des mesures présentés ci-dessus (lastRank, rankSum, rankVar et rankStd) sont, en réalité, biaisés dans notre cas d'application. 
+    
+    Ici, contrairement à la plupart du temps en statistiques, les biais ne vient pas de la théorie de l'échantillonnage (facteur $\frac{1}{n-1}$ au lieu de $\frac{1}{n}$), car nous travaillons directement avec la population. Ils viennent en fait de la nature des données elle-mêmes ; nous en avons enregistré deux grande famille. 
+    
+    La première famille de biais observé (\textbf{Type I}) vient de la liberté offerte au étudiant dans leur nombre de choix d'UE ; par exemple, pour un étudiant $E_1$ choisissant 9 UEs et un autre $E_2$ en choisissant 7, $E_1$ se verra naturellement attribué des rangs supplémentaires (pour la huitième et la neuvième UE), or ces rangs sont plus élevé que le septième rang qui lui a été attribué, cela augmente donc artificiellement son dernier rang, sa somme des rangs, dans une moindre mesure sa moyenne et ses dérivés : variances (moyenne des carrés) et écart-type ; ainsi, $E_1$ aura généralement pour ces métriques des valeurs plus faible. 
+    Cette observation s'étend malheureusement aux fonctions d'optimisations, ainsi, dans le cadre d'une minimisation des métriques auparavant mentionnées, $E_2$ sera très probablement toujours priorisé par rapport à $E_1$ et ce peu importe si $E_1$ a une distribution potentiellement moins bonne pour ses sept UEs affectés.
+
+    Le seconde famille de biais (\textbf{Type II}), ayant tendance à amplifier le premier, trouve ces racines dans des facteurs extérieurs non forcément contrôlable (nombre de places dans les UE, nombre d'étudiants, etc.). Ainsi, plus le nombre d'étudiant est élevé, moins les étudiants sont acceptés dans leurs premier choix, augmentant ainsi la valeurs des métriques mentionnées de manière non-uniforme en raison de la capacité limite de chaque UE. De la même manière, cette observation peut être observé avec un nombre d'étudiant plus limité en fonction de la distribution de leur préférence et de la méthode d'affectation.
+    
+    Dans notre cas, nous ne pouvons malheureusement pas résoudre entièrement à travers des métriques (simples), du moins seulement, les biais structurelles engendrés par la seconde famille. Néanmoins, il faut remarquer que dans les instances pratiques, cette famille de biais s'avère, en réalité, négligeable tant que le nombre d'étudiant, le nombre de places par UE et l'équilibre des UE sont contrôlés. 
+    
+    Concernant la première famille de biais, celle-ci n'est pas négligeable (sur certaines instances, nous pouvons avoir du simple au double sur la somme, la moyenne, la variance et l'écart-type en moyenne entre les étudiants de type $E_1$ et $E_2$). Heureusement, dans le cas de cette famille, nous pouvons développer des métriques permettant de limiter cet impact.
+\end{remark}
+
+\subsubsection{Métriques vectorielles corrigées du biais de Type I}
+
+\begin{definition}
+    Soit $\text{aSet(i)}=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in \llbracket 1,n\rrbracket$, nous pouvons distinguer trois types d'UEs : 
+    les UEs obligatoires pour l'étudiant en raison du parcours que l'on notera $\text{mSet(i)}$, 
+    celles optionnelles permettant d'atteindre le quota minimum d'UE pour passer le semestre $\text{oSet}(i)$ 
+    et les UEs facultatives définis par $\text{fSet(i)} = \text{aSet}(i)\setminus[\text{mSet}(i)\cup\text{oSet}(i)]$.
+    Attention, les trois ensembles sont disjoints.
+\end{definition}
+Étant donné que le nombre minimum d'UE requis pour passer le semestre pour chaque étudiant peut être obtenu par $m_{\min}(i)=\#\text{oSet}(i)+m\!\min_{p_i} \forall i \in \llbracket 1,n \rrbracket$, 
+nous pouvons montrer que le nombre d'UE minimum pour passer le semestre $m_{\min}(i)$ est constante pour tous les étudiants d'un même parcours. En pratique, nous pourrons émettre l'hypothèse que ce nombre d'UE
+est égal peu importe le parcours. À partir de là, nous pouvons établir des modifications aux métriques ci-dessus mentionnées afin de limiter les biais de premier type.  
+
+\begin{metric}[Dernier rang obligatoire affecté]
+    Définit pour les étudiants uniquement, le dernier rang obligatoire affecté correspond pour chaque étudiant $i$ au rang maximum des $m_{\min}(i)$ UEs au rang le plus faible.
+    Elle se formalise ainsi :
+    $$
+        \forall i\in\llbracket 1, n\rrbracket : \text{lastMandatoryRank}(i) = \max_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}  
+    $$
+    En prenant le dernier rangs des UEs requises pour passer le semestre, cette métrique est la version directement dérivée du dernier rang affecté ($\text{lastRank}$). 
+    Elle partage donc les mêmes avantages et défauts, mais reste néanmoins débarrassé du biais de Type I dans le cas où le nombre d'UEs minimum est le même pour chaque parcours (partiellement, si le nombre d'UE pour passer le semestre dépend du parcours).
+    Aussi, il est important de comprendre que cette correction émet une hypothèse forte : \og\textbf{Les UEs facultatives sont moins importantes que les UEs obligatoires ou optionnelles.}\fg. 
+    En un sens, cela fait sens, car il est plus important pour un étudiant d'avoir un cœur d'UEs appréciable plutôt que recevoir une nouvelle UE facultative non forcément apprécié qu'il pourra laissé tombé en cours de route. 
+    Notez que cette remarque sera valable pour l'intégralité des mesures corrigées du biais de Type I.
+\end{metric}
+
+De la même manière, nous pouvons redéfinir la somme des rangs affectés, la moyenne des rangs affectés, ainsi que la variance et l'écart-type des rangs affectés.
+\begin{metric}[Somme des rangs corrigée]
+    $$
+        \forall i\in\llbracket 1, n\rrbracket : \text{correctedRankSum}(i) = \text{rankSum}(i)-\sum_{j\in\text{fSet}(i)} U_{i,j}
+    $$
+\end{metric}
+\begin{metric}[Moyenne des rangs corrigée]
+    $$
+        \forall i\in\llbracket 1, n\rrbracket : \text{correctedRankAvg}(i) = \frac{\sum_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}}{\sum_{j\in \text{mSet}(i)\cup\text{oSet}(i)} A_{i,j}}
+    $$
+\end{metric}
+\begin{metric}[Variance des rangs corrigée]
+    $$
+        \forall i\in\llbracket 1, n\rrbracket : \text{correctedRank}\sigma^2(i) = \frac{\sum_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}^2}{\sum_{j\in \text{mSet}(i)\cup\text{oSet}(i)} A_{i,j}} - \text{correctedRankAvg}(i)^2
+    $$
+\end{metric}
+\begin{metric}[Écart-type des rangs corrigé]
+    $$
+        \forall i\in\llbracket 1, n\rrbracket : \text{correctedRank}\sigma(i) = \sqrt{\text{correctedRank}\sigma^2(i)}
+    $$
+\end{metric}
+Comme dit pour le dernier rang affecté corrigé, ces métriques conserve l'intégralité de leurs avantages et défauts initiaux modulo le biais de Type I. 
+Une observation intéressante sur ces métriques est que la valeur engendrée est toujours égale ou plus faible que leur équivalent non corrigé (en raison de la nature des rangs). 
+Néanmoins, il convient de rappeler que ces mesures sont intégralement corrigées du biais de Type I ssi $\forall i,i' \in \llbracket 1,n \rrbracket^2 : m_{\min}(i)=m_{\min}(i')$. Autrement,
+le bais de Type I persiste dans une moindre mesure et s'enracine dans la différence de parcours.
+
+Ainsi, bien que légèrement plus dur à calculer (nous devons déterminer le nombre d'UE minimum pour chaque étudiant), nous devrions toujours privilégier les mesures corrigées à leurs consœurs. 
+À noter que si l'étudiant n'a pas le choix de son nombre de matière, alors celles-ci deviennent équivalentes aux mesures non-corrigées. 
+
+Néanmoins, dans le cas d'instances pratiques (déjà observés dans d'autres universités) pour lesquels un nombre important d'UE est proposé avec un nombre de place limité (ou très limité), la moyenne, la variance et l'écart-type deviennent de moins en moins représentatif en raison de leur sensibilité aux valeurs dites extrêmes, qui peuvent apparaître dans ce cas suite à des refus répétitifs.
+Dans ce cas, il vaut donc mieux se reporter à des métriques résistantes aux valeurs extrêmes. 
+
+\subsubsection{Métriques vectorielles avec biais de Type II significatif}
+Comme dit précédemment, l'apparition de valeurs extrêmes nécessite l'utilisation de métriques résistantes à ces dernières.
+L'impact de ces valeurs, émise par un biais de Type II, doit donc être minimisé. À ces fins, nous devons développé des métriques exploitables permettant de visualiser au moins une centralité et une dispersion.
+Pour cela, nous allons nous baser sur les quantiles des distributions des rangs pour chaque étudiant et chaque UE.
+
+\begin{definition}
+    Soit $X$ une variable aléatoire et $x\in]0,1[$. Le quantile d'ordre $x$ de la distribution de $X$, noté $Q_x$, est définit par : $Q_x = \min\{y\in\mathbb{R} : \mathbb{P}[X\le y]\ge x\}$.
+    Ainsi, le premier quartile $Q_1 \equiv Q_{0.25}$, correspond à la valeur $y$ tel que 25\% de la population est en dessous de $y$. 
+    De même, la médiane (ou deuxième quartile) $Q_2\equiv Q_{0.5}$ correspond à la valeur $y$ tel que la moité de la population se trouve en dessous de cette valeur.
+    Enfin, le troisième quartile $Q_3\equiv Q_{0.75}$ équivaut à la valeur $y$ tel que les trois quarts de la population se trouve en de dessous de $y$. 
+\end{definition}
+
+\begin{metric}[Quartiles des rangs affectés]
+    Définit aussi bien pour les UEs que pour les étudiants, le premier, deuxième et troisième quartiles des rangs affectés sont formalisés ainsi (par abus de langage) :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : Q_{0.25|0.5|0.75}(i) = \min\{y : \mathbb{P}[\text{aSet}(i)\le y]\ge 0.25|0.5|0.75\} & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : Q_{0.25|0.5|0.75}(j) = \min\{y : \mathbb{P}[\text{aSet}(j)\le y]\ge 0.25|0.5|0.75\} & \text{(UE)}
+    \end{matrix}  
+    $$
+    Bien que non linéaires et plus compliquées à calculer que la moyenne (en pratique, il y a souvent une fonction pour les calculer simplement), ces métriques sont résistantes aux valeurs extrêmes (et donc mitigent le biais de type II).
+    Celles-ci peuvent non seulement agir comme des mesures de centralité grâce à leur simple interprétation (la médiane particulièrement), mais aussi comme des mesures d'analyse. Par exemple si $Q_1$ est élevé (par rapport au rang minimum), nous savons d'or et déjà que la distribution est étalé sur la gauche (ce qui est une mauvaise chose). De même si $Q_3$ est faible nous observons que la distribution est étalé sur la droite (ce qui est une bonne chose).
+\end{metric}
+Maintenant que nous avons ces mesures de centralité, nous devons obtenir un \og équivalent\fg de la variance et de l'écart-type pour les mesures de dispersons afin de compléter l'analyse.
+
+\begin{metric}[Écart Inter-Quartile]
+    Définit pour les étudiants et les UEs, l'Écart Inter-Quartile (IQR) représente la taille du domaine représentant les 50\% de la population entre le premier quartile et le troisième quartile. 
+    Elle se formalise ainsi :
+    $$
+    \begin{matrix}
+        \forall i\in\llbracket 1, n\rrbracket : \text{IQR}(i) = Q_3(i)-Q_1(i) & \text{(Étudiant)}\\
+        &\\
+        \forall j\in\llbracket 1, m\rrbracket : \text{IQR}(j) = Q_3(j)-Q_1(j) & \text{(UE)}
+    \end{matrix}  
+    $$
+    Cette métrique, bien que simple à calculer, apporte une information sur la dispersion de nos distributions. 
+    En effet, si l'IQR est faible, alors nous pouvons dire que 50\% de la population est concentré autours de la médiane (ce qui est une bonne chose si la médiane est faible). 
+    A contrario, si l'IQR est élevé, alors nous pouvons dire que les rangs affectés sont très dispersés.
+\end{metric}
+
+Maintenant que nous avons nos alternatives pour la mesure de centralité et de dispersion, nous devons quand même mentionné qu'elles sont toujours sensibles au biais de type I dans l'état.
+Heureusement, de la même manière que pour les autres mesures, nous pouvons les corrigés en ne raisonnant que sur les UEs non facultatives.
+
+\begin{remark}[Utilisation]
+    Nous avons introduit ces métriques comme une alternative dans le cas d'apparition de valeurs extrêmes ; néanmoins, la non-linéarité inhérente de celle-ci nous empêche de réellement les utiliser en objectif pour nos affectations. 
+    Elles devront donc se cantonner aux évaluations et comparaisons d'affectations. Aussi, bien qu'initialement introduites pour mitiger le biais de type II, il reste intéressant de les utiliser dans le cas générale grâce à leurs interprétations simple, intuitive et renfermant une part de mesure d'équité.
+\end{remark}
+
+\subsection{Autres métriques vectorielles}
+Dans certains cas, il peut être intéressant de compléter les métriques précédemment introduites avec d'autres métriques utiles dans le cadre d'évaluation d'affectation (les métriques introduites dans cette section sont pour la plupart inutilisable à des fins d'affectation).
+
+Premièrement, dans le cadre d'une UE, il peut être intéressant de calculer le nombre de places affectées et non affectées. En effet, cela permet d'avoir un aperçu de la charge d'une affectation sur chacun des UEs. 
+De la même idée, nous pouvons aussi nous inspirer du problème d'équilibrage des charges afin d'introduire une métrique permettant de calculer la différence à une affectation équilibré des étudiants aux UEs.
+
+\begin{lemme}[Borne minimum pour l'équilibrage des affectations]
+    Soit $n$ le nombre d'étudiant et $m$ le nombre d'UE. Toutes les affectations $A_{i,j}$ vérifies :
+    $$
+        \frac{m_{\min}n}{m} \le \frac{\sum_{i=1}^{n}\#\text{aSet}(i)}{m}
+    $$
+    où $m_{\min}$ correspond au nombre d'UE minimum que doit prendre un étudiant (en supposant que le nombre est identique pour tous les étudiants).
+    En d'autres mots, la moyenne du nombre d'étudiant affecté par UE est supérieur ou égale au nombre minimum d'UE à prendre pour chaque étudiant diviser par le nombre de cours. 
+\end{lemme}
+\begin{metric}[Équilibre des affectations aux UEs]
+    À partir du lemme précédent, nous pouvons définir l'équilibre des affectations aux UEs comme la différence entre le nombre d'affectations réels et la borne minimum sur la moyenne, ou plus formellement :
+    $$
+        \forall j \in \llbracket 1,m\rrbracket : \text{loadDifference}(j) = \sum_{i=1}^{n}A_{i,j} - \frac{m_{\min}n}{m}
+    $$
+    Cette métrique peut être utile dans le cas où nous cherchons à savoir quelles UEs sont les plus/moins chargées par rapport à une affectation uniforme. 
+    Cependant, cette métrique possède deux limites majeures ; premièrement, elle suppose que le nombre d'UEs minimum par étudiant est égal peu importe le parcours (dans notre cas, il s'agit bien du cas, mais çà pourrait être autrement), deuxièmement, nous supposons que les UEs n'ont pas de capacités limites et que celles-ci soient égales (ce qui n'est pas le cas).
+    Ainsi, bien qu'intéressante, cette métrique nécessite d'être utilisé avec le nombre de place de chaque UEs pour avoir une interprétation correcte. 
+    Notez aussi que la valeur de cette métrique peut être négative (une UE est moins chargé) ou positive (une UE est plus chargé) ; calculer la valeur absolue de celle-ci revient à calculer la distance à la moyenne minimum. 
+\end{metric}
+
+Du côté des étudiant, d'autres métriques peuvent se formuler sur une notion de distance. Ainsi, nous pouvons essayer de mesurer la distance entre une affectation donné et la pire affectation donné.
+\begin{metric}
+    Pour mesurer la distance la distance d'une affectation à la pire possible, nous avons deux paramètres : quelle est la distance à la meilleur et quelle est la distance à la pire. 
+    Nous pouvons calculer cela en deux métriques :
+    $$
+        \begin{matrix}
+            \forall i \in \llbracket 1,n \rrbracket : \text{maxRankDistance}(i) = \max_{j\in\llbracket 1,m\rrbracket} \{R_{i,j}\} - \text{lastRank}(i) & \text{(Au pire)}\\
+            &\\
+            \forall i \in \llbracket 1,n \rrbracket : \text{maxRankDistance}(i) = \min_{j\in\llbracket 1,m\rrbracket} \{U_{i,j}\} - \min_{j\in\llbracket 1,m\rrbracket} \{R_{i,j}\} & \text{(Au meilleur)}\\
+        \end{matrix}
+    $$
+    Avec ces métriques, nous nous intéressons non seulement au dernier rang affecté en le comparant au dernier rang qui aurait pu être affecté, une distance élevé étant appréciable (on s'éloigne du pire cas); mais aussi au premier rang effectivement affecté en le comparant au premier rang qui aurait pu être affecté, une distance faible étant préférable (on s'approche du meilleur cas).
+    Cette métrique peut être intéressante pour vérifier que chaque étudiant a, à défaut d'avoir le meilleur cas, une affectation éloignée du pire cas ou inversement.
+    À noter que dans le cas de la distance au pire cas, le biais de type I peut avoir un impact, nous pouvons donc la corrigé de manière similaire aux autres métriques pour limiter ce problème.
+\end{metric}
+
+Maintenant que nous avons vu les métriques vectorielles, il peut être intéressant de les agréger afin d'obtenir une unique métrique sur laquelle travailler.
+
+\subsection{Métriques agrégées}
+Dans cette section, nous cherchons à concevoir des métriques agrégés, c'est à dire une métrique étant capable de résumer l'entièreté de l'affectation en un seul scalaire.
+Cela peut se faire de deux façons. Soit nous pouvons résumer les métriques vectorielles, cela nous donne une métrique agrégée pour chaque métriques vectorielles (nous les désignons ci-après par \og métriques agrégées de base \fg). 
+Soit, nous nous basons sur l'ensemble des affectations directement.
+
+\subsubsection{Métriques agrégées de base}
+Dans cette partie, nous ne verrons pas de métriques issues de fonctions d'agrégation que l'on pourrais qualifier << d'exotique >> ; en effet, nous chercherons ici à avoir des métrique d'évaluations ou de comparaison (pas forcément taillées pour l'optimisation). 
+Pour cette raison, nous souhaitons proposer des métriques simplement interprétables et applicable aussi bien aux étudiants qu'aux UEs.
+À partir de là, la meilleure façon de les représenter est le tableau à double entrées suivant :
+\begin{longtblr}[
+    caption = {Métriques d'agrégations pour chaque métrique vectorielle},
+]{
+    row{even} = {r},
+    row{2} = {font=\bfseries},
+    row{3} = {r,font=\bfseries},
+    row{5} = {r},
+    row{6} = {font=\bfseries},
+    row{7} = {r,font=\bfseries},
+    row{8} = {font=\bfseries},
+    row{9} = {r,font=\bfseries},
+    row{10} = {font=\bfseries},
+    row{11} = {r,font=\bfseries},
+    row{12} = {font=\bfseries},
+    row{13} = {r,font=\bfseries},
+    row{14} = {font=\bfseries},
+    row{15} = {r,font=\bfseries},
+    row{16} = {font=\bfseries},
+    row{17} = {r},
+    row{18} = {font=\bfseries},
+    row{19} = {r,font=\bfseries},
+    row{21} = {r},
+    row{22} = {font=\bfseries},
+    row{23} = {r,font=\bfseries},
+    row{24} = {font=\bfseries},
+    row{25} = {r,font=\bfseries},
+    row{26} = {font=\bfseries},
+    row{27} = {r,font=\bfseries},
+    row{28} = {font=\bfseries},
+    row{29} = {r,font=\bfseries},
+    column{2} = {c},
+    column{3} = {c,font=\bfseries},
+    column{4} = {font=\bfseries},
+    column{5} = {font=\bfseries},
+    column{6} = {font=\bfseries},
+    column{7} = {font=\bfseries},
+    column{9} = {font=\bfseries},
+    column{10} = {font=\bfseries},
+    column{11} = {c,font=\bfseries},
+    cell{1}{1} = {r,font=\bfseries},
+    cell{1}{2} = {font=\bfseries},
+    cell{2}{2} = {c=10,r=10}{Gin},
+    cell{12}{2} = {c=10,r=3}{HalfandHalf},
+    cell{15}{2} = {c=10,r=15}{Prim},
+    vline{1-2,12} = {1}{0.08em},
+    vline{1-3} = {2,12,15}{0.08em},
+    vline{1-2} = {3-11,13-14,16-29}{0.08em},
+    hline{1-2,30} = {-}{0.08em},
+    hline{12,15} = {-}{dashed},
+}
+    Métriques/Agrégations    & $\mathbf{\mathbb{E}}$          & $\mathbf{\sigma}$ & $\mathbf{\gamma_1}$ & $\mathbf{\gamma_2}$ & Min & Max & $\mathbf{Q_{0.05}\to Q_{0.95}}$ & IQR & $\mathbf{C_y}$ & Gini \\
+    rankSum                  & UEs et Étudiants &            &          &          &     &     &                        &     &                    &                     \\
+    rankAvg                  &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{rank}\mathbf{\sigma^2}$    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{rank}\mathbf{\sigma}$      &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q1                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q2                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Q3                       &                  &            &          &          &     &     &                        &     &                    &                     \\
+    IQR                      &                  &            &          &          &     &     &                        &     &                    &                     \\
+    firstRank                &                  &            &          &          &     &     &                        &     &                    &                     \\
+    lastRank                 &                  &            &          &          &     &     &                        &     &                    &                     \\
+    spots                    & UEs              &            &          &          &     &     &                        &     &                    &                     \\
+    freeSpots                &                  &            &          &          &     &     &                        &     &                    &                     \\
+    loadDifference           &                  &            &          &          &     &     &                        &     &                    &                     \\
+    minRequestedRank         & Étudiants        &            &          &          &     &     &                        &     &                    &                     \\
+    maxRequestedRank         &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\mathbf{m\!\max_i}$              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corRankSum               &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corLastRank              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{corRank}\mathbf{\sigma^2}$ &                  &            &          &          &     &     &                        &     &                    &                     \\
+    $\textbf{corRank}\mathbf{\sigma}$   &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ1                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ2                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corQ3                    &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corIQR                   &                  &            &          &          &     &     &                        &     &                    &                     \\
+    Nb d'UE en moins     &                  &            &          &          &     &     &                        &     &                    &                     \\
+    minRankDist              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    maxRankDist              &                  &            &          &          &     &     &                        &     &                    &                     \\
+    corMaxRankDist           &                  &            &          &          &     &     &                        &     &                    &                     
+\end{longtblr}
+Dans ce tableau, les fonctions d'agrégations ont été désignés par leur symboles pour pouvoir l'afficher complètement sur la page. Ainsi $\mathbb{E}$ est la moyenne, $\sigma$ l'écart-type, $\gamma_1$ le coefficient d'asymétrie de Fisher (Skewness), $\gamma_2$ le Kurtosis et $C_y$ le coefficient d'asymétrie de Yule.
+Il a aussi été introduit quelques métriques vectorielles non définit précédemment : << \textit{spots} >> correspondant au nombre de places d'une UE (donnée du problème), << \textit{min/maxRequestedRank} >> correspondant au rang minimum attribué et le rang maximum attribué par l'étudiant aux UEs (dépends des égalités) et le << Nombre d'UE >> en moins qui indique combien manque-t-il d'UEs facultatives afin d'atteindre le nombre d'UE demandé par l'étudiant.
+
+Concernant les métriques d'agrégations, nous n'allons pas détailler les plus simples (Moyenne, Écart-Type, Min, Max, Quantiles et IQR) que nous avons déjà défini vectoriellement, mais seulement les nouvelles métriques (Coefficient d'Asymétrie de Fisher, Kurtosis, Coefficient d'Asymétrie de Yule, Coefficient de Gini).
+Commençons par le coefficient d'asymétrie de Fisher et le Kurtosis :
+\begin{metric}[Skewness]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\sigma_v$ l'écart type calculé sur $m_v$. Nous définissons le coefficient d'asymétrie de Fisher ou Skewness ainsi :
+    $$
+        \forall v : \gamma_1 (m_v) = \frac{\frac{\sum_{i=1}^{\#m_v}\left(m_{v_i}-\ \widebar{m_v}\right)^3}{\#m_v}}{\sigma_v^3}
+    $$
+    où $\widebar{m_v}$ est la moyenne de la métrique vectorielle désignée. Quant-à son interprétation, le coefficient de Fisher est une mesure d'asymétrie et permet donc de dire si une distribution << s'étale >> sur la gauche ou sur la droite.
+    Ainsi, si $\gamma_1\approx0$, la distribution est symétrique et le mode, la moyenne et la médiane sont similaires. Si $\gamma_1<0$, on dit que la distribution est étalée sur la gauche (les valeurs se concentrent à droite) ; il s'agit donc du cas que nous voulons éviter sur les métriques telle que la somme des rangs, la moyenne, etc. (cela indiquerait une mauvaise affectation). 
+    Enfin, si $\gamma_1>0$, alors la distribution est << étalé sur la droite >> (les valeurs se concentrent à gauche) et peu d'étudiants se voient attribué d'affectation moins bonne que la majorité (attention, $\gamma_1>0$ n'indique pas forcément une bonne affectation, nous pouvons être dans le cas tous mauvais et une affectation très mauvaise). 
+    Cette métrique (comme le Kurtosis que nous allons voir) à néanmoins le défaut d'être très sensible aux valeurs extrêmes, il faut donc faire attention à l'interpréter sur les métriques corrigés du biais de Type I (voire de Type II).
+\end{metric}
+\begin{metric}[Kurtosis]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\sigma_v$ l'écart type calculé sur $m_v$. Nous définissons le coefficient d'aplatissement de Fisher ou Kurtosis ainsi :
+    $$
+        \forall v : \gamma_2 (m_v) = \frac{\frac{\sum_{i=1}^{\#m_v}\left(m_{v_i}-\ \widebar{m_v}\right)^4}{\#m_v}}{\sigma_v^4}
+    $$
+    où $\widebar{m_v}$ est la moyenne de la métrique vectorielle désignée. Pour l'interprétation du Kurtosis, il s'agit d'un indicateur << d'aplatissement >> ; avec celui-ci, nous cherchons à observer la fréquence d'apparition de valeurs très extrêmes dans une distribution. Malheureusement, cette métrique peut être non intuitive à interpréter et devrait donc être utilisé à des fin d'analyses plus poussés ou avec d'autres métrique. 
+    Par exemple, nous savons que si $\gamma_1\approx0\land\gamma_2\approx3$, alors nous pouvons émettre l'hypothèse que nous sommes en présence d'une loi normale. Pour une idée de l'interprétation de cette métrique, si $\gamma_2>3$, alors nous avons plus de valeurs extrêmes que sur une loi normale centrée réduite, si $\gamma_2<3$, nous en avons moins et autrement nous en avons en quantité similaire.
+\end{metric}
+Comme vu précédemment, le coefficient d'asymétrie de Fisher (et le Kurtosis) sont très sensibles aux valeurs extrême (à cause des puissances), il pourrait donc être intéressant d'avoir au moins un coefficient d'asymétrie non sensible aux valeurs extrêmes.
+\begin{metric}[Coefficient d'asymétrie de Yule]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $Q_x(m_v)$ le quantile d'ordre $x$ calculé sur $m_v$. Nous définissons le coefficient d'asymétrie de Yule ainsi :
+    $$
+        \forall v : C_y(m_v) = \frac{Q_{0.75}(m_v)+Q_{0.25}(m_v)-2Q_{0.5}(m_v)}{\text{IQR}(m_v)}
+    $$
+    où $IQR(m_v)$ est l'écart interquartile calculé sur le vecteur.
+    Ce coefficient d'asymétrie $C_y\in[-1,1]$ est, comme dit précédemment, robuste aux valeurs extrême, mais aussi assez simple à interpréter. 
+    Ainsi, si $C_y\approx 0$, alors la distribution est symétrique, si $C_y<0$ nous pouvons dire que la distribution est << étalé à gauche >> (ce qui est une mauvaise chose pour la plupart de nos métriques, car cela voudrait dire des valeurs potentiellement élevées pour le rang). 
+    Enfin si $C_y > 0$, alors la distribution est étalé à droite (ce qui est généralement une bonne chose dans la majorité de nos métriques). L'interprétation est donc similaire à celle du coefficient de Fisher, mais cette fois ci sur la médiane. 
+\end{metric}
+Il ne nous reste donc plus qu'une métrique agrégé de base à discuter : le coefficient de Gini.
+
+\begin{metric}[Coefficient de Gini]
+    Soit $m_v$ une métrique vectorielle numérique quelconque de longueur $\#m_v$. Soit $\widebar{m_v}$ la moyenne calculée sur $m_v$, nous définissons le coefficient de Gini ainsi :
+    $$
+        \text{Gini}(m_v) = \frac{\sum_{i=1}^{\#m_v}\sum_{j=1}^{\#m_v}\left|x_i-x_j\right|}{2\left[\#m_v\right]^2\widebar{m_v}}
+    $$
+    Cet indice, très utilisé pour les comparaison d'inégalité des richesses, peut être utilisé dans un cas général de mesure d'inégalité incluant notre application. 
+    L'interprétation est cette fois très simple : si le coefficient approche de 0, alors toutes les valeurs de la métrique vectorielle donnée sont identiques ; autrement, dans le cas, où l'indice s'approche de 1, alors nous pouvons interpréter que un individu possède l'intégralité des richesse et les autres rien.
+    Attention tous de même, dans notre cadre, nous cherchons à avoir un coefficient de Gini proche de 0 (sur les métriques tel que la somme des rangs par exemple), non pas parce qu'un coefficient de 1 indiquerait qu'un individu est grandement bénéficiaire du système au détriment des autres, mais plutôt que si un tel individu existait, alors il serait certainement le plus lésé. 
+    En d'autres mots, si le coefficient de Gini est proche de 1 sur une métrique telle que la somme des rangs, alors la personne concentrant les << richesses >> serait en réalité une personne dont l'affectation est sciemment mauvaise afin de faire bénéficier le reste du groupe de son sacrifice.
+\end{metric}
+
+Maintenant que nous avons vu ces métriques agrégées de << base >>, voyons si nous pouvons établir une métrique d'agrégation se basant sur un autre système. 
+
+\subsubsection{Pareto en tant que métrique d'agrégation}
+Dans notre situation, où nous cherchons à offrir une affectation à chaque étudiant, plusieurs solutions plus ou moins bonne existent parallèlement. 
+Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affectation d'un étudiant avec celle d'un autre.
+
+\begin{definition}[Échange technique]
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ où $n$ est le nombre d'étudiant. 
+    Nous définissons un << échange technique >> comme un échange des affectations de $i_a$ et de $i_b$, tel que la contraintes des UEs obligatoires est respectée, plus formellement : $\text{mSet}(i_a)\subseteq\text{aSet}(i_b) \land \text{mSet}(i_b)\subseteq\text{aSet}(i_a)$ 
+    et que le nombre d'UE demandé par chacun des étudiant ne soit pas dépassé $m\!\max_{i_a}\ge\#\text{aSet}(i_b)\land m\!\max_{i_b}\ge\#\text{aSet}(i_a)$.
+    On notera le prédicat $i_a\stackrel{T}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange technique entre le couple $(i_a, i_b)$ et 1 autrement.  
+\end{definition}
+
+Bien que la définition d'échange technique permet de s'assurer qu'un échange d'affectation soit techniquement faisable, il ne nous permet pas de dire si un étudiant est bénéficiaire ou lésé par celui-ci. 
+À partir de cette observation, nous pouvons nous rappeler la définition l'utilité de Pareto.
+\begin{definition}[Échange de Pareto]
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ et une métrique vectorielle $m_v$.
+    Nous définissons un échange de Pareto comme un échange technique tel que si l'échange est opérant, alors $m_{v_{i_{a\to b}}} \ge m_{v_{i_a}}\text{ (resp.}\le\text{)}$ et $m_{v_{i_{b\to a}}} \ge m_{v_{i_b}}\text{ (resp.}\le\text{)}$ pour une métrique à maximiser (resp. à minimiser),
+    où $m_{v_{i_{x\to y}}}$ correspond à la métrique calculé pour l'étudiant $x$ après lui avoir attribué l'affectation de l'étudiant $y$.
+    On notera le prédicat $i_a\stackrel{(P,m_v)}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange de Pareto entre le couple $(i_a, i_b)$ pour la métrique vectorielle $m_v$ et 1 sinon.
+    On qualifiera de front de Pareto l'ensemble des solutions tels qu'aucun échanges de Pareto existe pour une métrique donnée.
+\end{definition}
+
+Lorsqu'un échange de Pareto existe, alors nous savons que la solution n'est pas optimale (sauf en égalité stricte) pour la métrique désignée. Ainsi, pour atteindre une solution optimale respectivement à une métrique, il nous suffit de chercher les échanges de Pareto possibles et d'exécuter les échanges jusqu'à ce qu'il n'y en ai plus. 
+\begin{metric}[Métriques d'échanges]
+    À partir de l'observation précédente, il peut être intéressant de compter le nombre d'échange de Pareto pour une métrique vectorielle $m_v$ désignée :
+    $$
+        \#\text{ParetoSwap}(A_{i,j}) = \sum_{k=1}^{n-1}\sum_{l=k+1}^{n}i_k\stackrel{(P,m_v)}{\longleftrightarrow}i_l
+    $$
+    À noter que cette métrique est extrêmement dépendante des métriques vectorielles utilisées. En effet, la forme du front de Pareto dépend de la définition de celles-ci et de ce que l'on cherche à optimiser.
+    Au niveau de l'interprétation, plus le nombre d'échange est bas, mieux la solution est optimisé ; à l'inverse, plus le nombre d'échange est élevé, moins la solution est bonne.
+    Aussi, il peut être intéressant de diviser la valeur obtenu par le nombre d'échanges techniques dans l'affectation générale ; en effet, cela permet d'avoir un meilleur aperçu de l'optimisation de la solution dans de grandes instances où un grand nombre d'échange technique peut exister (sans pour autant être de Pareto).
+\end{metric}
+
+
+\subsection{Autre indicateurs, les tests d'hypothèses}
+Dans le cadre de nos évaluations, il peut également être important, en plus de regarder les métriques, de vérifier si les affectations proposées respectent un point important : << Y-a-t'il une façon permettant de prendre avantage de la méthode d'affectation à ses propres fins ? >>.
+À des fins d'équités, nous devons éviter que cela soit le cas.
+
+Les trois facteurs les plus importants à vérifier sont : \textbf{(1)} << Est-ce que l'ordre de remplissage du formulaire par les étudiants est déterminant pour avoir une meilleure affectation ? >>,
+\textbf{(2)} << Est-ce que le parcours des étudiants impacte la qualité des affectations ? >> et bien sûr, en lien avec le biais de Type I, \textbf{(3)} << Est-ce que le nombre d'UEs choisies par les étudiants impacte la qualité de leurs affectations par rapport à d'autres ? >>.
+
+Dans l'idéal, l'affectation proposé vérifie que les trois proposition ci-dessus soit fausses. Pour cela, nous pourrons utiliser les tests d'hypothèses et plus particulièrement le test H de Kruskal-Wallis \cite{Kruskal1952}, suivi éventuellement du test U de Mann-Whitney \cite{Whitney1947}. 
+\begin{definition}[Test H de Kruskal-Wallis]
+    Le test H de Kruskal-Wallis est un test statistique de comparaison non paramétrique de plusieurs groupes portant les hypothèses suivantes :
+    $$
+    \begin{matrix}
+        H_0 : & \ll\text{ La distribution des groupes se faisant comparés sont les mêmes. } \gg\\
+        H_1 : & \ll\text{ Au moins une distribution des groupes se faisant comparés est différente. }\gg
+    \end{matrix}
+    $$
+    Ce test nous est utile, car il nous permettrait dans un premier temps de vérifier si la distribution pour une certaine métrique vectorielle donnée (mesures) dépends d'un facteur extérieur (groupes comme le nombre d'UEs choisies, le parcours de l'étudiant, etc.). 
+    Un autre avantage non négligeable d'implémenter ce test est qu'il ne requiert pas de propriétés contraignantes dans notre cas : la normalité n'est pas assumé (ok), les mesures sont continues (ok), les mesures sont indépendantes entres-elles (nous pouvons l'assumer), les groupes sont indépendants (oui).
+    Dans la mesure où il serait trop lourd de rédiger l'intégralité du fonctionnement du test, nous ne l'expliquerons pas ici. Concernant l'implémentation en Python, celle-ci est possible via la librairie Scipy et la commande \texttt{scipy.stats.kruskal} (\texttt{kruskal.test} en R).
+
+    \textbf{Interprétation :} Bien qu'un peu plus complexe que çà, nous simplifierons l'interprétation du test d'Hypothèse ainsi : << Si la p-value est inférieur à 5\%, alors nous rejetons $H_0$ et concluons $H_1$. >>. Attention, si la p-value est au dessus du seuil critique 0.05, nous ne pouvons pas conclure en l'absence de différences entre les distributions, juste ne pas rejeter l'hypothèse pour l'instant.
+\end{definition}
+
+Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu'une distribution est différente, mais pas laquelle. Il est donc important, s'il on souhaite enquêter plus en détail d'exécuter un test U de Mann-Whitney pour chacune des paires de groupe possible.
+\begin{definition}[Test U de Mann-Whitney]
+    Le test U de Mann-Whitney est un test statistique de comparaison non paramétrique sur deux groupes portant les hypothèses suivantes :
+    $$
+    \begin{matrix}
+        H_0 : & << \text{ Les distributions X et Y sont égales en loi } >>\\
+        H_1 : & << \text{ X est stochastiquement supérieur à Y, ou } F_X<F_Y >>\\
+    \end{matrix}
+    $$
+    Plus simplement l'hypothèse alternative utilisée ici veut dire que la distribution de $X$ a généralement de plus grande valeurs que celle de $Y$. 
+    Concernant les requis pour ce test, celui-ci ne requiert pas de normalité pour les distributions (ok), requiert que les valeurs étudiées soient continues (ok) et que les mesures soient indépendantes (chose que nous assumons).
+    Pour les mêmes raisons que le test H de Kruskal-Wallis, nous n'allons pas détailler son fonctionnement, mais mentionner les implémentations en Python (\texttt{scipy.stats.mannwhitneyu}) et en R (\texttt{wilcox.test}). 
+    Les remarques sur l'interprétations sont également sensiblement identique que pour le test précédemment présenté. 
+\end{definition}
+
+En utilisant ces deux tests, nous sommes donc maintenant en mesure d'évaluer si une affectation est influencé par des facteurs non désirés.
+
+\section{Méthodologie et implémentation}
+\subsection{Méthode proposée}
+
+
+
+
+\subsection{Implémentation}
+\textbf{À faire.}
+
+\section{Expériences}
+\textbf{À faire.}
+
+\section{Résultats et discussions}
+\subsection{Résultats}
+\textbf{À faire.}
+
+\subsection{Discussion}
+\textbf{À faire.}
+
+\section{Conclusion}
+\textbf{À faire.}
+
+\bibliographystyle{plain}
+\bibliography{refs.bib}
+
+\end{document}
