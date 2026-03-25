@@ -1,0 +1,129 @@
+# Nom de fichier : .pre-commit-config.yaml
+
+# ───────────────────────────────────────────────────────────
+# En applicant le principe de "Shift-Left" dans DevSecOps, c'est à dire que la sécurité doit être intégrée des les premières étapes du développement.
+#
+# Ce fichier permets de détecter les problème comme espace en fin de ligne, formattage de code , secret exposé, fichiers YAML/JSON mal formés, etc...
+# Les problèmes détectées en local sur notre machine avant de faire un commit
+# Souvant les bugs sont détectés de manière plus rapide et corrigé de manière automatique
+
+
+# Installation recommandée utilise pipx pour isoler les dépendances.
+# Ubuntu/Debian
+# sudo apt install pipx
+# pipx ensurepath
+# pipx install pre-commit
+
+# Sinon, avec pip
+
+# Instalation de pre-commit
+# pip install pre-commit
+
+
+# Verifier l'installation de pre-commit
+# pre-commit --version
+
+
+# Activer les hooks
+# pre-commit install
+
+# Pour tester les hooks sur les fichiers modifiés(staging area)
+# pre-commit run
+
+# Pour tester les hooks sur tous les fichiers (avant de faire un commit)
+# pre-commit run --all-files
+# ───────────────────────────────────────────────────────────
+
+repos:
+
+#         Hygiène de base
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace               # Détecte et supprime les espaces en fin de ligne
+      - id: end-of-file-fixer                 # Fichier se termine par une ligne vide
+      - id: check-yaml                        # Vérifie la syntaxe des fichiers YAML( ex: .github/workflows/ci.yml, configs)
+        args: ['--unsafe']                    # Permet de détecter les fichiers YAML mal formés, même ceux qui contiennent des constructions potentiellement dangereuses
+      - id: check-json                        # Vérifie la syntaxe des fichiers JSON (ex: package.json, .prettierrc, etc...)
+      - id: check-added-large-files           # Empêche l'ajout de fichiers volumineux au dépôt
+        args: ['--maxkb=500']                 # Définit la taille maximale des fichiers à 500 KB
+      - id: check-merge-conflict              # Détect et bloque si contient les marqueurs oubliés <<< HEAD ...
+      - id: detect-private-key                # Détecte les clés privées exposées dans le code ( -----BEGIN....)
+      - id: check-case-conflict               # Détecte /Evite les conflits de type( README.md vs readme.md) ( Windows/Mac)
+      - id: mixed-line-ending                 # Détecte les fins de ligne UNIX (LF vs CRLF)
+        args: ['--fix=lf']                     # Convertit les fins de ligne en LF (Unix) pour assurer la cohérence entre les systèmes d'exploitation
+
+#       SECRET
+# Détecte les secrets exposés dans le code, comme les clés API, les mots de passe, tokens  etc...
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+#      PYTHON - LINT + FORMAT
+# Ruff remplace flake8, black, isort, etc... pour le linting et le formatage du code Python
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff
+        args: ['--fix']  # Permet de corriger automatiquement les problèmes détectés
+      - id: ruff-format
+
+#     PYTHON - SECURITY (SAST)
+# semprep lightweight est est un outil de sécurité statique pour Python qui détecte les vulnérabilités de sécurité/ les patterns dangereux dans le code.
+# injection SQL, eval(), cryptographie avec algo faibless, authentification, secrets hardcodés, etc......
+# files : analyse uniquement scripts/ ( pas les notebooks, tests, etc...)
+
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.156.0
+    hooks:
+      - id: semgrep
+        files: ^(scripts/|data/).*\.py$
+        exclude: ^(tests/|\.venv/)
+        args: ['--config', 'p/security-audit']    #Audit de sécurité pour Python
+
+#    YAML STYLE AVANCE
+# Va plus loin que check-yaml : vérifie l'indentation,
+  # la longueur des lignes, les espaces dans les workflows CI.
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+#  MARKDOWN
+  # Vérifie que le README et la doc sont bien formatés.
+  # --fix : corrige automatiquement ce qu'il peut.
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.48.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  #  SHELL
+  # Détecte les erreurs dans les scripts .sh.
+  # C'est le Bandit du Shell.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+# PYTHON SECURITY (SAST) - Bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ['-c', '.bandit', '-r', '.']
+
+# DEPENDENCY SECURITY
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+        args: ['--full-report']
+
+# Enable these error categories: Ruff
+
+# E = PEP 8 syntax errors
+# F = PyFlakes (undefined variables, unused imports)
+# W = Warnings
+# I = Import sorting
+# N = Naming conventions (camelCase vs snake_case)

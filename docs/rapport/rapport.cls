@@ -11,7 +11,7 @@
 %%  E-mail:| marie.pelleau@univ-cotedazur.fr
 %% License:| Released under the LaTeX Project Public License v1.3c or later
 %%     See:| http://www.latex-project.org/lppl.txt
-%% 
+%%
 \NeedsTeXFormat{LaTeX2e}[1999/12/01]
 \ProvidesClass{rapport}
     [2021/11/22 v1.10 adding the titlepageneglish macro.]
@@ -110,25 +110,25 @@
     \setcounter{page}{1}
 }
 
-%% 
+%%
 %% Copyright (C) 2019-2020 by Marie Pelleau <marie.pelleau@univ-cotedazur.fr>
-%% 
+%%
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License (LPPL), either
 %% version 1.3c of this license or (at your option) any later
 %% version.  The latest version of this license is in the file:
-%% 
+%%
 %% http://www.latex-project.org/lppl.txt
-%% 
+%%
 %% This work is "maintained" (as per LPPL maintenance status) by
 %% Marie Pelleau.
-%% 
+%%
 %% This work is inspired by the exercice package of Arnaud Malapert.
-%% 
+%%
 %% This work consists of the file rapport.dtx and a Makefile.
 %% Running "make" generates the derived files README, rapport.pdf and rapport.cls.
 %% Running "make inst" installs the files in the user's TeX tree.
 %% Running "make install" installs the files in the local TeX tree.
-%% 
+%%
 %%
 %% End of file `rapport.cls'.
