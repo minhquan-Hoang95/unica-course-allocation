@@ -10,15 +10,14 @@
 import csv
 import json
 
-
-input_csv = "studentsRandom.csv" 
+input_csv = "studentsRandom.csv"
 courses_csv = "courses.csv"
 parametres_json = "parameters.json"
 output_dat = "students.dat"
 
 students = []
 mmax = []
-maxOptional = []   # on stocke les options ici
+maxOptional = []  # on stocke les options ici
 parc = []
 r = []
 c = []
@@ -27,11 +26,11 @@ c = []
 # STUDENTS
 # -------------------------
 
-with open(input_csv, newline='') as f:
+with open(input_csv, newline="") as f:
     reader = csv.DictReader(f)
 
     rg_cols = [col for col in reader.fieldnames if col.startswith("Rg")]
-    m = len(rg_cols) 
+    m = len(rg_cols)
 
     for row in reader:
         students.append(int(row["studentID"]))
@@ -46,7 +45,7 @@ with open(input_csv, newline='') as f:
         ranks = [float(row[col]) for col in rg_cols]
         r.append(ranks)
 
-n = len(students) 
+n = len(students)
 p = 2
 
 # -------------------------
@@ -58,14 +57,14 @@ mand = [[0 for _ in range(p)] for _ in range(m)]
 mandIA = 0
 mandCS = 0
 
-with open(courses_csv, newline='') as f:
+with open(courses_csv, newline="") as f:
     reader = csv.DictReader(f)
 
     for row in reader:
         course_id = int(row["courseID"]) - 1
 
         spots = int(row["spots"])
-        if spots == -1: #number of places illimated -> number of students places
+        if spots == -1:  # number of places illimated -> number of students places
             spots = n
 
         c.append(spots)
@@ -78,30 +77,26 @@ with open(courses_csv, newline='') as f:
             mand[course_id][1] = 1
             mandIA += 1
 
-#print("Mandatories IA:", mandIA, "Mandatories CS:", mandCS)
+# print("Mandatories IA:", mandIA, "Mandatories CS:", mandCS)
 for i in range(n):
-    if parc[i] == 1: #CS
-        mmax.append(maxOptional[i] + mandCS) # mandatories + optionals courses
-    else:   #IA
+    if parc[i] == 1:  # CS
+        mmax.append(maxOptional[i] + mandCS)  # mandatories + optionals courses
+    else:  # IA
         mmax.append(maxOptional[i] + mandIA)
 
-#pour le moment nous n'avons pas mis les contraintes d'EDT, on initialise donc la matrice à vide
-Ic = [[0 for _ in range(m)] for _ in range(m)] 
+# pour le moment nous n'avons pas mis les contraintes d'EDT, on initialise donc la matrice à vide
+Ic = [[0 for _ in range(m)] for _ in range(m)]
 
 with open(parametres_json) as f:
     params = json.load(f)
 
-    mmin = [
-        params["spe"]["CS_track"]["minNj"],
-        params["spe"]["AI_track"]["minNj"]
-    ]
+    mmin = [params["spe"]["CS_track"]["minNj"], params["spe"]["AI_track"]["minNj"]]
 
 # -------------------------
 # WRITE DAT in the .dat file
 # -------------------------
 
 with open(output_dat, "w") as f:
-
     f.write("// ---------------------------------------------------------------------------\n")
     f.write("// Dimensions\n")
     f.write("// ---------------------------------------------------------------------------\n")
@@ -118,7 +113,7 @@ with open(output_dat, "w") as f:
     f.write("c = [")
     f.write(", ".join(map(str, c)))
     f.write("];\n\n")
-   
+
     f.write("// Ic[j][j2] : 1 si les UE j et j2 sont en conflit d'emploi du temps\n")
     f.write("Ic = [\n")
     for row in Ic:
@@ -165,7 +160,6 @@ with open(output_dat, "w") as f:
         f.write(", ".join(map(str, row)))
         f.write("],\n")
     f.write("];\n")
-
 
 
 print("Fichier .dat généré :", output_dat)

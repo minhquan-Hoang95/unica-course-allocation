@@ -1,16 +1,16 @@
-## Student Preference Normalization
+# Student Preference Normalization
 
 Student preferences over courses are expressed as rankings of courses using a normalized system.
 
-### Mid-rank method
+## Mid-rank method
 
-Preferences are normalized using the **mid-rank/average rank for ties method**.  
+Preferences are normalized using the **mid-rank/average rank for ties method**.
 When multiple courses have the same preference level, their rank is the average of the positions they occupy.
 
 Example:
 
 | Course | Rank |
-|------|------|
+|--------|------|
 | A | 1 |
 | B | 2 |
 | C | 3.5 |
@@ -29,11 +29,12 @@ where **M** is the total number of courses.
 
 This property ensures that rankings remain **consistent and comparable across students**.
 
-### Mandatory courses
+## Mandatory courses
 
 Mandatory courses must always appear **before optional courses** in a student's ranking.
 
 During preference generation:
+
 - mandatory courses are assigned the **highest priority**
 - optional courses are ranked after them
 
@@ -45,8 +46,10 @@ This guarantees that mandatory courses always receive **better ranks than option
 
 To generate synthetic student preference data, run:
 
-```
+```bash
+
 python syntheticStudentGenerator.py
+
 ```
 
 This will generate the file:

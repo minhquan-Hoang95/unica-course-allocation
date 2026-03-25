@@ -70,7 +70,7 @@ subject to {
   forall(i in Etudiants, j in UEs)
     ctObligatoires:
       A[i][j] >= sum(k in Parcours) ((parc[i] == k) * mand[j][k]);	// Si parc[i] == k et mand[j][k] == 1, alors A[i][j] doit valoir 1.
-      
+
 
   // (C4) Un étudiant doit recevoir entre 8 et 10 UE au total.
   forall(i in Etudiants) {

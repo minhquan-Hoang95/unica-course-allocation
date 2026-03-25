@@ -111,15 +111,26 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        args: ['-c', '.bandit', '-r', '.']
+#        args: ['-c', '.bandit', '-r', '.']
+        additional_dependencies: ["pbr"]
 
 # DEPENDENCY SECURITY
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.3.2
-    hooks:
-      - id: python-safety-dependencies-check
-        args: ['--full-report']
+  # - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+  #   rev: v1.3.2
+  #   hooks:
+  #     - id: python-safety-dependencies-check
+  #       args: ['--full-report']
 
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.10.0
+    hooks:
+      - id: pip-audit
+        args: ["-r", "requirements-dev.txt"]
+
+ci:
+  # Leave pip-audit to only run locally and not in CI
+  # pre-commit.ci does not allow network calls
+  skip: [pip-audit]
 # Enable these error categories: Ruff
 
 # E = PEP 8 syntax errors
