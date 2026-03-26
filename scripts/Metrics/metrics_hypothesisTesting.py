@@ -42,7 +42,7 @@ def areGroupDifferent(
         # Create and register the groups
         for i in range(0, entitiyNumber, groupCol):
             groups.append(vectors.loc[i : i + groupCol, metrics].copy())
-            groupsName.append(f"{i}..{min(i+groupCol, entitiyNumber)}")
+            groupsName.append(f"{i}..{min(i + groupCol, entitiyNumber)}")
 
     # Initialise results and add some interpretation informations
     results = {}
@@ -74,7 +74,9 @@ def areGroupDifferent(
         for i, vec1 in enumerate(testVectors):
             for j, vec2 in enumerate(testVectors):
                 # Compute the p-value
-                twoVStwoResults[i, j] = stats.mannwhitneyu(vec1, vec2, alternative="greater").pvalue[0]
+                twoVStwoResults[i, j] = stats.mannwhitneyu(
+                    vec1, vec2, alternative="greater"
+                ).pvalue[0]
         # Store the result for each group comparisons.
         results[f"{metric}_MannWhitneyU"] = twoVStwoResults.tolist()
 
@@ -84,7 +86,9 @@ def areGroupDifferent(
 
 if __name__ == "__main__":
     # Get datasets
-    coursesVectors, studentsVectors = mu.getData(mu.DEFAULT_OUT_COURSES_VEC_PATH, mu.DEFAULT_OUT_STUDENTS_VEC_PATH)
+    coursesVectors, studentsVectors = mu.getData(
+        mu.DEFAULT_OUT_COURSES_VEC_PATH, mu.DEFAULT_OUT_STUDENTS_VEC_PATH
+    )
 
     # See if students have different affectation wellfare between tracks
     areGroupDifferent(studentsVectors, ["sum", "mean", "median"], "track")

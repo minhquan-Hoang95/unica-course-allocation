@@ -41,7 +41,7 @@ with open("parameters.json") as file:
 order = []
 while students["N"] > 0:
     # Get a random track that is still possible
-    possibleKeys = [k for k in students.keys() if students[k] > 0 and k != "N"]
+    possibleKeys = [k for k in students if students[k] > 0 and k != "N"]
     randomKey = RNG.choice(possibleKeys)
 
     # Keep it in the order and remove this possibility for the next choices
@@ -53,7 +53,7 @@ while students["N"] > 0:
 with open(OUTFILE, "w") as file:
     file.write(
         "studentID,"
-        + ",".join([k + "_track" for k in students.keys() if k != "N"])
+        + ",".join([k + "_track" for k in students if k != "N"])
         + ",maxOptional,"
         + ",".join([f"Rg{i}" for i in range(1, M + 1)])
         + "\n"
@@ -64,7 +64,9 @@ for studentID, curriculum in enumerate(order, start=1):
     # Initialise to random rank
     rg = RNG.randint(M - 1, size=M) + 2
     # Retrieve mandatory course for the selected track
-    mandatoryCourses = courses[courses[curriculum + "_track"]].loc[:, "courseID"].to_numpy(dtype=int)
+    mandatoryCourses = (
+        courses[courses[curriculum + "_track"]].loc[:, "courseID"].to_numpy(dtype=int)
+    )
     # Set mandatory courses
     rg[mandatoryCourses - 1] = 1
 
@@ -96,7 +98,9 @@ for studentID, curriculum in enumerate(order, start=1):
         # Put studentID
         file.write(f"{studentID},")
         # Put the one-hot encoded track selector
-        file.write(f"{','.join(map(str, [curriculum == k for k in students.keys() if k != 'N'])).lower()},")
+        file.write(
+            f"{','.join(map(str, [curriculum == k for k in students if k != 'N'])).lower()},"
+        )
         # Put optional number of course selected
         file.write(f"{optionalNumber},")
         # Put the midpoint-normalised rank

@@ -23,10 +23,16 @@ def getParameters(path: str) -> dict:
         return json.load(file)
 
 
-def computeRankMatrix(affectations: pd.DataFrame, preferences: pd.DataFrame) -> np.ndarray:
+def computeRankMatrix(
+    affectations: pd.DataFrame, preferences: pd.DataFrame
+) -> np.ndarray:
     # Crop to the necessary information
-    affectationsMatrix = affectations.loc[:, affectations.columns.str.startswith("c")].to_numpy()
-    preferencesMatrix = preferences.loc[:, preferences.columns.str.startswith("Rg")].to_numpy()
+    affectationsMatrix = affectations.loc[
+        :, affectations.columns.str.startswith("c")
+    ].to_numpy()
+    preferencesMatrix = preferences.loc[
+        :, preferences.columns.str.startswith("Rg")
+    ].to_numpy()
 
     # Return the matrix of selected ranked preferences
     return affectationsMatrix * preferencesMatrix
@@ -43,7 +49,9 @@ def getStudentsTrackFromPreferences(preferences: pd.DataFrame) -> list[str]:
 
 
 # Just an helper function
-def getStudentsMandatoryLecturesFromTrack(courses: pd.DataFrame, studentsTrack: list[str]) -> list[list[str]]:
+def getStudentsMandatoryLecturesFromTrack(
+    courses: pd.DataFrame, studentsTrack: list[str]
+) -> list[list[str]]:
     # Get the list of mandatory courses for each student depending on its track
     mandatoryCourses = []
     for track in studentsTrack:
@@ -87,14 +95,30 @@ def computeBaseVectors(
     # Base functions that are going to be calculated
     fncs = {
         "sum": partial(np.sum, axis=1),  # Sum of the rank for each student
-        "mean": lambda mat: [np.mean(row[row != 0]) for row in mat],  # Mean of the rank for each student
-        "var": lambda mat: [np.var(row[row != 0]) for row in mat],  # Variance of the rank for each student
-        "std": lambda mat: [np.std(row[row != 0]) for row in mat],  # Standard deviation of the rank
-        "median": lambda mat: [np.median(row[row != 0]) for row in mat],  # median (2nd quartile) of the rank
-        "q1": lambda mat: [np.quantile(row[row != 0], q=0.25) for row in mat],  # 1st quartile of the rank
-        "q3": lambda mat: [np.quantile(row[row != 0], q=0.75) for row in mat],  # 3rd quartile of the rank
-        "n": partial(np.count_nonzero, axis=1),  # Number of subject ranked for each student
-        "firstRank": lambda mat: [np.min(row[row != 0]) for row in mat],  # First rank granted
+        "mean": lambda mat: [
+            np.mean(row[row != 0]) for row in mat
+        ],  # Mean of the rank for each student
+        "var": lambda mat: [
+            np.var(row[row != 0]) for row in mat
+        ],  # Variance of the rank for each student
+        "std": lambda mat: [
+            np.std(row[row != 0]) for row in mat
+        ],  # Standard deviation of the rank
+        "median": lambda mat: [
+            np.median(row[row != 0]) for row in mat
+        ],  # median (2nd quartile) of the rank
+        "q1": lambda mat: [
+            np.quantile(row[row != 0], q=0.25) for row in mat
+        ],  # 1st quartile of the rank
+        "q3": lambda mat: [
+            np.quantile(row[row != 0], q=0.75) for row in mat
+        ],  # 3rd quartile of the rank
+        "n": partial(
+            np.count_nonzero, axis=1
+        ),  # Number of subject ranked for each student
+        "firstRank": lambda mat: [
+            np.min(row[row != 0]) for row in mat
+        ],  # First rank granted
         "lastRank": partial(np.max, axis=1),  # Last rank granted
     }
 
@@ -120,7 +144,9 @@ def computeBaseVectors(
     return df
 
 
-def getAdditionalPreferencesBasedOnStudentsFunction(preferences: pd.DataFrame) -> dict[str, partial | Callable]:
+def getAdditionalPreferencesBasedOnStudentsFunction(
+    preferences: pd.DataFrame,
+) -> dict[str, partial | Callable]:
     """Additional function for `computeBaseVectors` including ***minStudentRank*** (the minimum normalised rank for the student; depends on mandatory lectures quantity),
     ***maxStudentRank*** (the maximum normalised rank for the student; depend on the number of additional optional lectures), and ***requested*** the number of course the student has requested.
 
@@ -133,8 +159,12 @@ def getAdditionalPreferencesBasedOnStudentsFunction(preferences: pd.DataFrame) -
         dict[str, partial | Callable]: A dict of functions to feed in `computeBaseVectors`
     """
     return {
-        "minStudentRank": lambda mat: preferences.loc[:, preferences.columns.str.startswith("Rg")].min(axis=1),
-        "maxStudentRank": lambda mat: preferences.loc[:, preferences.columns.str.startswith("Rg")].max(axis=1),
+        "minStudentRank": lambda mat: preferences.loc[
+            :, preferences.columns.str.startswith("Rg")
+        ].min(axis=1),
+        "maxStudentRank": lambda mat: preferences.loc[
+            :, preferences.columns.str.startswith("Rg")
+        ].max(axis=1),
         "requested": lambda mat: preferences["maxOptional"].to_numpy(),
         "track": lambda mat: getStudentsTrackFromPreferences(preferences),
     }
@@ -180,7 +210,9 @@ def getAdditionalCoursesBasedOnStudentsFunction(
         correction = []
         for studentID, row in enumerate(mat):
             # We sum the rank after the minimum number of lectures to complete
-            correction.append(sum(sorted(row[row != 0])[mandatoryOptional[studentID] :]))
+            correction.append(
+                sum(sorted(row[row != 0])[mandatoryOptional[studentID] :])
+            )
 
         # Apply the correction
         return (rankSum - np.array(correction)).tolist()
@@ -194,7 +226,9 @@ def getAdditionalCoursesBasedOnStudentsFunction(
         lastMandatoryOptionalRank = []
         for studentID, row in enumerate(mat):
             # Get last attributed
-            lastMandatoryOptionalRank.append(sorted(row[row != 0])[mandatoryOptional[studentID] - 1])
+            lastMandatoryOptionalRank.append(
+                sorted(row[row != 0])[mandatoryOptional[studentID] - 1]
+            )
 
         return lastMandatoryOptionalRank
 
@@ -207,7 +241,11 @@ def getAdditionalCoursesBasedOnStudentsFunction(
         rankQuantile = []
         for studentID, row in enumerate(mat):
             # Compute the corrected quantile
-            rankQuantile.append(np.quantile(np.sort(row[row != 0])[: mandatoryOptional[studentID]], quantile))
+            rankQuantile.append(
+                np.quantile(
+                    np.sort(row[row != 0])[: mandatoryOptional[studentID]], quantile
+                )
+            )
 
         return rankQuantile
 
@@ -220,7 +258,10 @@ def getAdditionalCoursesBasedOnStudentsFunction(
     def optionalCorrectedVar(mat: np.ndarray):
         mandatoryOptional = countMandatoryOptional(mat)
         # E(X²)-E(X)²
-        return optionalRankCorrection(mat**2) / mandatoryOptional - optionalCorrectedMean(mat) ** 2
+        return (
+            optionalRankCorrection(mat**2) / mandatoryOptional
+            - optionalCorrectedMean(mat) ** 2
+        )
 
     # Just the root of the corrected var
     def optionalCorrectedStd(mat: np.ndarray):
@@ -253,18 +294,26 @@ def getAdditionalPostOnStudentsFunction() -> tuple[dict[str, partial | Callable]
             "rankedVSrequested": lambda dataframe: list(
                 map(lambda x: min(x, 0), dataframe["n"] - dataframe["requested"])
             ),
-            "maxRankDistance": lambda dataframe: dataframe["maxStudentRank"] - dataframe["lastRank"],
-            "minRankDistance": lambda dataframe: dataframe["firstRank"] - dataframe["minStudentRank"],
-            "correctedMaxRankDistance": lambda dataframe: dataframe["maxStudentRank"]
-            - dataframe["lastMandatoryOptionalRank"],
+            "maxRankDistance": lambda dataframe: (
+                dataframe["maxStudentRank"] - dataframe["lastRank"]
+            ),
+            "minRankDistance": lambda dataframe: (
+                dataframe["firstRank"] - dataframe["minStudentRank"]
+            ),
+            "correctedMaxRankDistance": lambda dataframe: (
+                dataframe["maxStudentRank"] - dataframe["lastMandatoryOptionalRank"]
+            ),
             "IQR": lambda dataframe: dataframe["q3"] - dataframe["q1"],
-            "optionalCorrectedIQR": lambda dataframe: dataframe["optionalCorrectedQ3"]
-            - dataframe["optionalCorrectedQ1"],
+            "optionalCorrectedIQR": lambda dataframe: (
+                dataframe["optionalCorrectedQ3"] - dataframe["optionalCorrectedQ1"]
+            ),
         },
     )
 
 
-def getAdditionalCourseBasedOnCoursesFunction(courses: pd.DataFrame) -> dict[str, partial | Callable]:
+def getAdditionalCourseBasedOnCoursesFunction(
+    courses: pd.DataFrame,
+) -> dict[str, partial | Callable]:
     """Additional functions for courses to feed in `computeBaseVectors`. It includes the number of available ***spots*** for each lecture.
 
     Args:
@@ -276,7 +325,9 @@ def getAdditionalCourseBasedOnCoursesFunction(courses: pd.DataFrame) -> dict[str
     return {"spots": lambda mat: courses["spots"].to_numpy()}
 
 
-def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[dict[str, partial | Callable], ...]:
+def getAdditionalPostCourseBasedOnCoursesFunction() -> (
+    tuple[dict[str, partial | Callable], ...]
+):
     """Additional Post processing functions for courses to feed in `computeBaseVectors`. It includes the number of ***free spots*** for each lecture and the ***loadBalancingDifference*** defined as $diff(j\\in M) = n_m - \\frac{\\sum_{i=1}^m{n_i}}{m}$. See the load balancing problem (here it is a variant, so it might not possess the right information in fine.).
 
     Returns:
@@ -285,9 +336,15 @@ def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[dict[str, partial |
     return (
         {
             "freeSpots": lambda dataframe: np.max(
-                np.array([dataframe["spots"] - dataframe["n"], np.zeros(dataframe.shape[0])], dtype=int), axis=0
+                np.array(
+                    [dataframe["spots"] - dataframe["n"], np.zeros(dataframe.shape[0])],
+                    dtype=int,
+                ),
+                axis=0,
             ),
-            "loadBalancingDifference": lambda dataframe: dataframe["n"] - dataframe["n"].sum() / dataframe.shape[0],
+            "loadBalancingDifference": lambda dataframe: (
+                dataframe["n"] - dataframe["n"].sum() / dataframe.shape[0]
+            ),
             "IQR": lambda dataframe: dataframe["q3"] - dataframe["q1"],
         },
     )  # Do not remove the coma, it is here to make the thing a tuple
@@ -296,7 +353,9 @@ def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[dict[str, partial |
 if __name__ == "__main__":
     # Get datasets
     affectations, preferences, courses = getData(
-        DEFAULT_IN_AFFECTATIONS_PATH, DEFAULT_IN_PREFERENCES_PATH, DEFAULT_IN_COURSES_PATH
+        DEFAULT_IN_AFFECTATIONS_PATH,
+        DEFAULT_IN_PREFERENCES_PATH,
+        DEFAULT_IN_COURSES_PATH,
     )
     parameters = getParameters(DEFAULT_IN_PARAMETERS_PATH)
 
@@ -308,13 +367,13 @@ if __name__ == "__main__":
         preferences
     ) | getAdditionalCoursesBasedOnStudentsFunction(preferences, courses, parameters)
     additional_post_fncs = getAdditionalPostOnStudentsFunction()
-    computeBaseVectors(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=True).to_csv(
-        DEFAULT_OUT_STUDENTS_VEC_PATH
-    )
+    computeBaseVectors(
+        rankMatrix, additional_fncs, *additional_post_fncs, onStudent=True
+    ).to_csv(DEFAULT_OUT_STUDENTS_VEC_PATH)
 
     # On the lectures
     additional_fncs = getAdditionalCourseBasedOnCoursesFunction(courses)
     additional_post_fncs = getAdditionalPostCourseBasedOnCoursesFunction()
-    computeBaseVectors(rankMatrix, additional_fncs, *additional_post_fncs, onStudent=False).to_csv(
-        DEFAULT_OUT_COURSES_VEC_PATH
-    )
+    computeBaseVectors(
+        rankMatrix, additional_fncs, *additional_post_fncs, onStudent=False
+    ).to_csv(DEFAULT_OUT_COURSES_VEC_PATH)

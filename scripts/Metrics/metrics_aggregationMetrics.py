@@ -72,14 +72,18 @@ def getBaseAggregationMetrics(
     # Get everything except course and student id
     df = vectors.iloc[:, 1:].copy(deep=True)
     # Get first metrics
-    described_df = df.describe(include="all", percentiles=[i / 100 for i in range(5, 100, 5)])
+    described_df = df.describe(
+        include="all", percentiles=[i / 100 for i in range(5, 100, 5)]
+    )
 
     # Apply additional functions
     for key, value in additional_fnc.items():
         try:
             described_df.loc[key, :] = value(df)
         except TypeError:
-            described_df.loc[key, described_df.dtypes != "object"] = value(df.loc[:, df.dtypes != "object"])
+            described_df.loc[key, described_df.dtypes != "object"] = value(
+                df.loc[:, df.dtypes != "object"]
+            )
 
     # Set up the post-processing function (aggregation operations over columns), in a list such that it is possible to chain multiple level of operations and intermediate ones
     post_fncs = [{}]
@@ -134,9 +138,13 @@ def getAdditionalAggregationPostFunctions() -> tuple[dict[str, Callable | partia
         {"IQR": lambda dataframe: dataframe.loc["75%", :] - dataframe.loc["25%", :]},
         {
             "Yule_assymetry": lambda dataframe: (
-                dataframe.loc["25%", :] + dataframe.loc["75%", :] - 2 * dataframe.loc["50%", :]
+                (
+                    dataframe.loc["25%", :]
+                    + dataframe.loc["75%", :]
+                    - 2 * dataframe.loc["50%", :]
+                )
+                / dataframe.loc["IQR", :]
             )
-            / dataframe.loc["IQR", :]
         },
     )
 
@@ -178,10 +186,14 @@ def getPossibleParetoExchanges(
     paretoExchange = []
 
     # Transform the affectations into a matrix
-    affectationsMatrix = affectations.loc[:, affectations.columns.str.startswith("c")].to_numpy()
+    affectationsMatrix = affectations.loc[
+        :, affectations.columns.str.startswith("c")
+    ].to_numpy()
 
     # Transforms the preferences into a matrix
-    preferencesMatrix = preferences.loc[:, preferences.columns.str.startswith("Rg")].to_numpy()
+    preferencesMatrix = preferences.loc[
+        :, preferences.columns.str.startswith("Rg")
+    ].to_numpy()
 
     # Get the maximal number of courses a student a want to participate
     coursesRequestVector = preferences.loc[:, "maxOptional"].to_numpy()
@@ -197,41 +209,57 @@ def getPossibleParetoExchanges(
             # If false, then no one is selected within a numpy array slice
             mandatoryLecturesIndices.append(False)
         else:
-            mandatoryLecturesIndices.append(list(map(lambda x: int(str.removeprefix(x, "Rg")) - 1, lectures)))
+            mandatoryLecturesIndices.append(
+                list(map(lambda x: int(str.removeprefix(x, "Rg")) - 1, lectures))
+            )
 
     # For each student, look if it is possible to exchange
     for student1 in preferences.loc[:, "studentID"]:
         # Compute the partial rank matrix of student 1
-        startStudent1RankMatrix = affectationsMatrix[student1 - 1, :] * preferencesMatrix[student1 - 1, :]
+        startStudent1RankMatrix = (
+            affectationsMatrix[student1 - 1, :] * preferencesMatrix[student1 - 1, :]
+        )
 
         # For each student having a student id over the one of student 2
-        for student2 in preferences.loc[preferences["studentID"] > student1, "studentID"]:
+        for student2 in preferences.loc[
+            preferences["studentID"] > student1, "studentID"
+        ]:
             # Check if student 1 can exchange with student 2 affectation regarding to student 1 mandatory lectures
             canStudent1ExchangeWithStudent2 = np.array_equal(
-                affectationsMatrix[student1 - 1, mandatoryLecturesIndices[student1 - 1]],
-                affectationsMatrix[student2 - 1, mandatoryLecturesIndices[student1 - 1]],
+                affectationsMatrix[
+                    student1 - 1, mandatoryLecturesIndices[student1 - 1]
+                ],
+                affectationsMatrix[
+                    student2 - 1, mandatoryLecturesIndices[student1 - 1]
+                ],
             )
             if not canStudent1ExchangeWithStudent2:
                 continue
 
             # Check if student 2 can exchange with student 1 affectation regarding to student 2 mandatory lectures
             canStudent2ExchangeWithStudent1 = np.array_equal(
-                affectationsMatrix[student1 - 1, mandatoryLecturesIndices[student2 - 1]],
-                affectationsMatrix[student2 - 1, mandatoryLecturesIndices[student2 - 1]],
+                affectationsMatrix[
+                    student1 - 1, mandatoryLecturesIndices[student2 - 1]
+                ],
+                affectationsMatrix[
+                    student2 - 1, mandatoryLecturesIndices[student2 - 1]
+                ],
             )
             if not canStudent2ExchangeWithStudent1:
                 continue
 
             # Does student 1 have more courses than student 2 whishes?
             haveStudent1LessWhishesThanStudent2 = (
-                affectationsMatrix[student1 - 1, :].sum() <= coursesRequestVector[student2 - 1]
+                affectationsMatrix[student1 - 1, :].sum()
+                <= coursesRequestVector[student2 - 1]
             )
             if not haveStudent1LessWhishesThanStudent2:
                 continue
 
             # Does student 2 have more courses than student 1 whishes
             haveStudent2LessWhishesThanStudent1 = (
-                affectationsMatrix[student2 - 1, :].sum() <= coursesRequestVector[student1 - 1]
+                affectationsMatrix[student2 - 1, :].sum()
+                <= coursesRequestVector[student1 - 1]
             )
             if not haveStudent2LessWhishesThanStudent1:
                 continue
@@ -242,20 +270,27 @@ def getPossibleParetoExchanges(
 
             # Form the partial rank matrix of student 1 and student 2 before swapping affectations
             startingRankMatrix = np.array(
-                [startStudent1RankMatrix, affectationsMatrix[student2 - 1, :] * preferencesMatrix[student2 - 1, :]]
+                [
+                    startStudent1RankMatrix,
+                    affectationsMatrix[student2 - 1, :]
+                    * preferencesMatrix[student2 - 1, :],
+                ]
             )
 
             # Same, but after swapping the affectations
             swapRankMatrix = np.array(
                 [
-                    affectationsMatrix[student2 - 1, :] * preferencesMatrix[student1 - 1, :],
-                    affectationsMatrix[student1 - 1, :] * preferencesMatrix[student2 - 1, :],
+                    affectationsMatrix[student2 - 1, :]
+                    * preferencesMatrix[student1 - 1, :],
+                    affectationsMatrix[student1 - 1, :]
+                    * preferencesMatrix[student2 - 1, :],
                 ]
             )
 
             # Filter to get the right metrics (we do not want metrics that keeps other students in memory)
             studentPreferencesFilter = np.logical_or(
-                preferences["studentID"] == student1, preferences["studentID"] == student2
+                preferences["studentID"] == student1,
+                preferences["studentID"] == student2,
             )
 
             # Get additional function for getBaseMetrics (This part could be improved with a dictionary to get if the exchange is Pareto under each metrics instead of one)
@@ -270,24 +305,39 @@ def getPossibleParetoExchanges(
             postFunc = mu.getAdditionalPostOnStudentsFunction()
 
             # Get all the metrics before applying the swap
-            startVectors = mu.computeBaseVectors(startingRankMatrix, additionalFunc, *postFunc, onStudent=True)
+            startVectors = mu.computeBaseVectors(
+                startingRankMatrix, additionalFunc, *postFunc, onStudent=True
+            )
 
             # Get all the metrics after applying the swap
-            swapVectors = mu.computeBaseVectors(swapRankMatrix, additionalFunc, *postFunc, onStudent=True)
+            swapVectors = mu.computeBaseVectors(
+                swapRankMatrix, additionalFunc, *postFunc, onStudent=True
+            )
 
             # If the swap resulted in better metrics according to the mode, and this for all parties or at least one, register the swap as Pareto Exchange
-            if mode == "min" and np.all(startVectors.loc[:, paretoFunction] >= swapVectors.loc[:, paretoFunction]):
+            if (
+                mode == "min"
+                and np.all(
+                    startVectors.loc[:, paretoFunction]
+                    >= swapVectors.loc[:, paretoFunction]
+                )
+                or mode == "max"
+                and np.all(
+                    startVectors.loc[:, paretoFunction]
+                    <= swapVectors.loc[:, paretoFunction]
+                )
+            ):
                 paretoExchange.append((student1, student2))
                 if verbose:
-                    print(f"{student1} and {student2} are Pareto exchangeable under {paretoFunction} [{mode}]")
-            elif mode == "max" and np.all(startVectors.loc[:, paretoFunction] <= swapVectors.loc[:, paretoFunction]):
-                paretoExchange.append((student1, student2))
-                if verbose:
-                    print(f"{student1} and {student2} are Pareto exchangeable under {paretoFunction} [{mode}]")
+                    print(
+                        f"{student1} and {student2} are Pareto exchangeable under {paretoFunction} [{mode}]"
+                    )
 
             # Inform the user on the function running time
             elif verbose and student1 % 5 == 0 and student2 == student1 + 1:
-                print(f"[{time.time()-begin:.5f}s] Student couple ({student1, student2}).")
+                print(
+                    f"[{time.time() - begin:.5f}s] Student couple ({student1, student2})."
+                )
 
     # Return the Pareto exchanges, but also possible exchanges in general if asked.
     if returnTechnicalExchange:
@@ -303,16 +353,24 @@ if __name__ == "__main__":
 
     # Get all the other files
     affectations, preferences, courses = mu.getData(
-        mu.DEFAULT_IN_AFFECTATIONS_PATH, mu.DEFAULT_IN_PREFERENCES_PATH, mu.DEFAULT_IN_COURSES_PATH
+        mu.DEFAULT_IN_AFFECTATIONS_PATH,
+        mu.DEFAULT_IN_PREFERENCES_PATH,
+        mu.DEFAULT_IN_COURSES_PATH,
     )
     parameters = mu.getParameters(mu.DEFAULT_IN_PARAMETERS_PATH)
 
     # Get the Pareto and possible exchanges
     paretoExchanges, technicalExchanges = getPossibleParetoExchanges(
-        affectations, preferences, courses, parameters, "lastMandatoryOptionalRank", "min", returnTechnicalExchange=True
+        affectations,
+        preferences,
+        courses,
+        parameters,
+        "lastMandatoryOptionalRank",
+        "min",
+        returnTechnicalExchange=True,
     )
     print(
-        f"There is {len(paretoExchanges)} Pareto exchanges possible over {len(technicalExchanges)} possible exchanges. The Pareto exchange density is {len(paretoExchanges)/len(technicalExchanges):.3f}"
+        f"There is {len(paretoExchanges)} Pareto exchanges possible over {len(technicalExchanges)} possible exchanges. The Pareto exchange density is {len(paretoExchanges) / len(technicalExchanges):.3f}"
     )
 
     # Get the additional functions
@@ -320,11 +378,11 @@ if __name__ == "__main__":
     additional_post_fncs = getAdditionalAggregationPostFunctions()
 
     # Computes Metrics for courses
-    getBaseAggregationMetrics(coursesVectors, additional_fncs, *additional_post_fncs).to_csv(
-        DEFAULT_OUT_COURSES_METRICS_PATH
-    )
+    getBaseAggregationMetrics(
+        coursesVectors, additional_fncs, *additional_post_fncs
+    ).to_csv(DEFAULT_OUT_COURSES_METRICS_PATH)
 
     # Compute metrics for students
-    getBaseAggregationMetrics(studentsVectors, additional_fncs, *additional_post_fncs).to_csv(
-        DEFAULT_OUT_STUDENTS_METRICS_PATH
-    )
+    getBaseAggregationMetrics(
+        studentsVectors, additional_fncs, *additional_post_fncs
+    ).to_csv(DEFAULT_OUT_STUDENTS_METRICS_PATH)

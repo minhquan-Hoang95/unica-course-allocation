@@ -6,12 +6,20 @@ authors = [{ name = "Minh Hoang" }]
 requires-python = ">=3.11"
 
 [tool.ruff]
-line-length = 120
+line-length = 88
 target-version = "py312"
+# Dossiers à ignorer
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
-ignore = ["E501", "N816"]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
 fixable = ["ALL"]
 
 [tool.ruff.format]

@@ -112,6 +112,7 @@ repos:
     hooks:
       - id: bandit
 #        args: ['-c', '.bandit', '-r', '.']
+        args: ["-ll", "--skip", "B101"]
         additional_dependencies: ["pbr"]
 
 # DEPENDENCY SECURITY
