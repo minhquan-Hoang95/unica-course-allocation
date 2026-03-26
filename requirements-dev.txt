@@ -1,7 +1,7 @@
 numpy==2.4.3
 pandas==3.0.1
+Pygments==2.19.2
 python-dateutil==2.9.0.post0
 scipy==1.17.1
 setuptools==82.0.1
 six==1.17.0
-pytest-cov>=4.1.0
