@@ -115,10 +115,10 @@ jobs:
         with:
           sarif_file: semgrep.sarif
         if: always()
- # Gate 3: SCA (Dependency Analysis) - JOB SÉPARÉ !
+# Gate 3: SCA (Dependency Analysis)
   sca:
     name: 📦 SCA (Trivy)
-    runs-on: ubuntu-latest  # ← PAS de container ici !
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
