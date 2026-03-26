@@ -94,25 +94,33 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   # Gate 2 : SAST (block sur critical / high)
   sast:
-    name: semgrep/ci
-    runs-on: ubuntu-latest
+    name: Analyse de sécurité
+    runs-on: ubuntu-24.04
     container:
-      image: semgrep/semgrep
-
-    if: (github.actor != 'dependabot[bot]')
+      image: returntocorp/semgrep
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - run: |
-          semgrep ci --sarif > semgrep.sarif
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+      # Récupérer le code
+      - name: Checkout du code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Upload SARIF file for Github Advanced Security
-        uses: github/codeql-action/upload-sarif@ebcb5b36ded6beda4ceefea6a8bc4cc885255bb3 # v3
-        with:
-          sarif_file: 'semgrep.sarif'
+      # Lancer le scan
+      - name: Scan Semgrep
+        run: |
+          semgrep --config=p/security-audit \
+                  --error \
+                  --json \
+                  -o semgrep-results.json \
+                  .
+
+      # Sauvegarder les résultats même si le scan échoue
+      - name: Upload des résultats
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
+        with:
+          name: semgrep-results
+          path: semgrep-results.json
+
 # Gate 3: SCA (Dependency Analysis)
   sca:
     name: 📦 SCA (Trivy)
