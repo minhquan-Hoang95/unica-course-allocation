@@ -5,6 +5,7 @@ on:
     branches: [main, dev] # trigger on push to main and dev
   pull_request:
     branches: [main, dev] # trigger on pull request to main and dev
+  workflow_dispatch: # allows manual trigger from GitHub UI
 
   schedule: # Schedule workflow to run at 6:00 UTC on Monday
     - cron: '0 6 * * 1'
