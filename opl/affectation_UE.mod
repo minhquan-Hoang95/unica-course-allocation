@@ -161,5 +161,27 @@ execute AFFICHAGE {
     writeln("UE " + j + " : " + inscrits + "/" + c[j] + " places occupees");
   }
 
-  // TODO Par contre, il faut une sortie au format CSV pour les scripts.
+    // Sortie au format CSV pour les scripts.
+    var f = new IloOplOutputFile("affectation.csv");
+    f.write("studentID", ",");
+    for(var j = 1; j <= m; j++) {
+        f.write("c" + j);
+        if (j != m) {
+            f.write(",");
+        }
+    } 
+    f.writeln();
+    for(var i = 1; i <= n; i++) {
+        f.write(i);          
+    	f.write(",");    
+        for(var j = 1; j <= m; j++) {
+          	var value = A[i][j]       
+            f.write(value);
+            if (j != m) {          
+	            f.write(",");
+            }
+        }
+        f.writeln();
+    }
+    f.close();
 }
