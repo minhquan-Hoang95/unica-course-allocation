@@ -34,6 +34,11 @@
 \theoremstyle{remark}
 \newtheorem{remark}{Remarque}
 
+\setlist[itemize,1]{label=\textbullet}
+\setlist[itemize,2]{label=\textendash}
+\setlist[itemize,3]{label=\textasteriskcentered}
+\setlist[itemize,4]{label=\textperiodcentered}
+
 \newcommand{\llbracket}{[\![}
 \newcommand{\rrbracket}{]\!]}
 
@@ -74,56 +79,51 @@ Le document vise une longueur d'environ \textasciitilde{}20 pages (hors annexes)
 \clearpage
 
 \section{Introduction et problématique}
-\subsection{Introduction}
-Dans le Master Informatique de l'Université Côte d'Azur, les étudiantes et étudiants choisissent chaque semestre un ensemble d'UE à partir d'un catalogue commun aux parcours \emph{Informatique} et \emph{IA}. Le choix est contraint par :
-\begin{itemize}
-    \item des capacités limitées par UE,
-    \item des incompatibilités d'emploi du temps,
-    \item des UE obligatoires dépendant du parcours.
-\end{itemize}
+\subsection{Description}
+À l'université Côte d'Azur, les étudiants en Master Informatique structurent leur parcours chaque semestre en choisissant librement les matières qu'ils souhaitent suivre.
+Le master est scindé en deux parcours : Informatique et IA. Peu importe leur spécialité, les étudiants suivent une sélection dans le même ensemble de cours/matières appelés <<unité d'enseignement>> [UE].
+Pour chaque parcours, certaines UE sont obligatoires et d'autres optionnelles. Au total, un étudiant suit entre 8 et 10 UE.  
 
-Le mécanisme actuel de type \og premier arrivé, premier servi \fg{} est simple mais peut générer des inégalités importantes. Le projet vise donc à proposer une méthode d'affectation plus \emph{équitable}, tout en restant explicable et opérationnelle.
+Chaque UE dispose néanmoins d'un nombre de places limité. Comme différentes UE sont obligatoires dans certains parcours, le nombre de places proposées pour les autres parcours diminue également.
+De plus, en raison d'incompatibilités entre certaines UE (conflit d'emploi du temps [EdT], par exemple), le choix des étudiants est réduit.
+
+Aujourd'hui, l'université se repose sur un système simple, explicable et facile à mettre en place pour l'attribution des places, à savoir <<premier arrivé, premier servi>>. 
+Malheureusement, ce système engendre de multiples inégalités. En effet, les étudiants qui s'inscrivent en premier obtiennent toutes les UE qu'ils souhaitent, tandis que les derniers n'en obtiennent aucune.
+À cela peuvent également s'ajouter des facteurs externes susceptibles de retarder le choix des étudiants (contraintes personnelles ou techniques, mauvaise manipulation, faible connexion Internet, etc.). 
+Le système actuel accentue malheureusement aussi l'impact de ces facteurs sur le parcours final de l'étudiant.
+
+Des étudiants et des professeurs, informés de cette problématique, lancent une initiative collective [IC] pour trouver une meilleure méthode d'affectation des UE.
+
+\subsection{Objectifs}
+À travers une preuve de concept, l'IC devra répondre aux questions/consignes suivantes :
+\begin{itemize}
+    \item Le problème étant multicritère et multiagent, il n'existe, par nature, pas d'affectation <<optimale>>. L'IC devra donc définir le concept <<d'affectation équitable>> et trouver un moyen de l'évaluer quantitativement.
+    \item Proposez un processus simple à \textbf{mettre en place} et de préférence compréhensible/explicable, permettant d'améliorer le système d'affectation des UE.
+    \item Proposez une preuve de concept flexible à d'autres paramètres (nombre de cours, d'étudiants, de parcours/spécialités, de places, nombre de cours obligatoires, etc.).
+    \item Présentez vos résultats de manière à ce que votre système soit \textbf{facilement compréhensible} et \textbf{scientifiquement cohérent}. 
+\end{itemize}
+\textbf{Note 1 :} \underline{\textit{Idéalement}}, le système proposé doit être simple (processus, algorithmes, etc.), facile à comprendre, à vulgariser et à exploiter, mais aussi compréhensible/explicable et <<intègre>> (il n'existe pas de moyens simples de détourner le système afin de s'avantager par rapport aux autres étudiants). 
 
 \begin{definition}[Équité (définition opérationnelle)]
-Dans ce rapport, on qualifie une affectation d'\emph{équitable} si, à contraintes satisfaites, elle (i) garantit un niveau de satisfaction acceptable pour l'ensemble des étudiants (éviter les situations \og très défavorisées \fg{}) et (ii) limite les écarts de satisfaction entre étudiants, tout en restant compatible avec une interprétation simple par les responsables de formation.
+    Dans ce rapport, nous proposons pour commencer une définition simple d'équité que nous développerons au fur-et-à-mesure de celui-ci. Ainsi, nous qualifierons, dans un premier temps, d'affectation \textit{équitable} toutes affectations (i) respectant les contraintes du problème énoncé, (ii) garantissant un niveau de satisfaction <<acceptable>> pour l'ensemble des étudiants (éviter les situations très défavorisées), (iii) limitant les écarts de satisfactions entre les étudiants, (iv) tout en restant compatible avec une interprétation simple par les responsables de formation.
 \end{definition}
-
-\subsection{Contexte et problématique}
-Le problème est \textbf{multiagent} (plusieurs étudiants avec des préférences différentes) et \textbf{multicritère} (respect des obligations, prise en compte des préférences, équité globale).
-
-Dans ce cadre, il n'existe pas nécessairement une solution unique optimale pour tous les critères simultanément. L'enjeu principal est alors de :
-\begin{enumerate}
-    \item définir une notion mesurable d'\textbf{équité},
-    \item proposer une procédure d'affectation compréhensible,
-    \item évaluer quantitativement la qualité des affectations obtenues.
-\end{enumerate}
-
-\subsection{Objectifs du projet}
-D'après la description du projet, la preuve de concept attendue doit :
-\begin{itemize}
-    \item définir le concept d'\emph{affectation équitable} et proposer des indicateurs quantitatifs,
-    \item améliorer le système d'affectation actuel par un processus simple et explicable,
-    \item rester flexible vis-à-vis des paramètres (nombre d'étudiants, d'UE, de parcours, de places, etc.),
-    \item présenter des résultats lisibles, cohérents et scientifiquement argumentés.
-\end{itemize}
 
 \subsection{Organisation du rapport}
 Ce rapport est volontairement concis (\textasciitilde{}20 pages hors annexes). Après l'introduction du contexte et des objectifs, nous présentons le format des données et les contraintes, puis les méthodes et résultats permettant de comparer des affectations et de soutenir une décision.
 
 \section{Données}
 \subsection{Données disponibles}
-Les données exploitées dans le projet sont :
+Pour mener à bien ce projet, l'IC dispose des informations suivantes :
 \begin{itemize}
-    \item la liste des UE obligatoires et optionnelles selon les parcours,
-    \item les capacités d'accueil des UE (hors places réservées aux obligations de parcours),
-    \item les incompatibilités d'emploi du temps entre UE,
-    \item pour chaque étudiant : parcours, nombre maximum d'UE souhaitées, préférences sur les UE.
+    \item La liste complète des UE obligatoires et optionnelles pour chaque parcours, ainsi que le nombre de places disponibles (hors places réservées pour les UEs obligatoires).
+    \item L'EdT du semestre afin d'observer les potentiels conflits entre les UE.
+    \item La liste des préférences de chaque étudiant pour chaque UE proposée, le nombre d'UE qu'il souhaite suivre et sa spécialité.
 \end{itemize}
 
 Notes :
 \begin{itemize}
-    \item certaines UE externes au processus principal peuvent être considérées à capacité \og illimitée \fg{},
-    \item toute UE non obligatoire dans un parcours est considérée comme optionnelle.
+    \item Certaines UE externes au processus principal d'affectation peuvent être considérées à capacité <<illimitée>>,
+    \item Toute UE non obligatoire dans un parcours est considérée comme optionnelle.
 \end{itemize}
 
 \subsection{Format des données}
@@ -160,27 +160,27 @@ La notation $\llbracket a,b \rrbracket$ désigne l'ensemble des entiers de $a$ �
 
 \subsubsection{Contraintes}
 \begin{itemize}
-    \item \textbf{(C1)} \og Pour chaque UE, la somme des affectations pour celle-ci ne dépasse pas sa capacité \fg{} :
+    \item[] \textbf{(C1)} \og Pour chaque UE, la somme des affectations pour celle-ci ne dépasse pas sa capacité \fg{} :
     \[
     \forall j \in M : \sum_{i \in N} A_{i,j} \le c_j
     \]
 
-    \item \textbf{(C2)} \og Une affectation ne peut accorder que des UE compatibles \fg{} :
+    \item[] \textbf{(C2)} \og Une affectation ne peut accorder que des UE compatibles \fg{} :
     \[
     \forall i \in N,\ \forall (j,j') \in M^2\ \text{tels que}\ I^c_{j,j'} = 1 : A_{i,j} + A_{i,j'} \le 1
     \]
 
-    \item \textbf{(C3)} \og Un étudiant inscrit dans un parcours $p$ doit se voir attribuer toutes les UE obligatoires du parcours $p$ \fg{} :
+    \item[] \textbf{(C3)} \og Un étudiant inscrit dans un parcours $p$ doit se voir attribuer toutes les UE obligatoires du parcours $p$ \fg{} :
     \[
     \forall i \in N,\ \forall j \in M : A_{i,j} \ge m_{j,p_i}
     \]
 
-    \item \textbf{(C4)} \og Un étudiant doit recevoir une affectation de 8 à 10 UE \fg{} :
+    \item[] \textbf{(C4)} \og Un étudiant doit recevoir une affectation de 8 à 10 UE \fg{} :
     \[
     \forall i \in N : 8 \le \sum_{j \in M} A_{i,j} \le 10
     \]
 
-    \item \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de UE qu'il a demandé \fg{} :
+    \item[] \textbf{(C5)} \og Un étudiant peut recevoir au maximum le nombre de UE qu'il a demandé \fg{} :
     \[
     \forall i \in N : \sum_{j \in M} A_{i,j} \le m\!\max_i
     \]
@@ -189,19 +189,20 @@ La notation $\llbracket a,b \rrbracket$ désigne l'ensemble des entiers de $a$ �
 \paragraph{Note.}
 $\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sinon. Les quantités $p_i$, $m_{j,k}$, $I^c_{j,j'}$, $c_j$ et $m\!\max_i$ sont des données d'entrée (paramètres), tandis que $A_{i,j}$ est la variable de décision.
 
-\paragraph{Exemple d'instance et d'affectation.}
-Considérons $n=2$ étudiants ($N=\llbracket 1,2\rrbracket$), $m=3$ UE ($M=\llbracket 1,3\rrbracket$) et $p=2$ parcours ($P=\llbracket 1,2\rrbracket$).
-On fixe les capacités $(c_1,c_2,c_3)=(1,2,1)$ et une incompatibilité unique $I^c_{1,3}=I^c_{3,1}=1$ (les autres valent 0). Le parcours de l'étudiant 1 est $p_1=1$ et celui de l'étudiant 2 est $p_2=2$.
-Si l'UE 2 est obligatoire dans le parcours 1 (donc $m_{2,1}=1$) et aucune UE n'est obligatoire dans le parcours 2, alors l'affectation
-\begin{center}
-\begin{tabular}{c|ccc}
- & $j=1$ & $j=2$ & $j=3$ \\
-\hline
-$i=1$ & 0 & 1 & 0 \\
-$i=2$ & 1 & 0 & 0
-\end{tabular}
-\end{center}
-satisfait (C1) (capacités), (C2) (pas de couple incompatible attribué à un même étudiant) et (C3) (UE obligatoire du parcours 1 attribuée à l'étudiant 1).
+\begin{example}[Exemple du format de sortie]
+    Considérons $n=2$ étudiants ($N=\llbracket 1,2\rrbracket$), $m=3$ UE ($M=\llbracket 1,3\rrbracket$) et $p=2$ parcours ($P=\llbracket 1,2\rrbracket$).
+    On fixe les capacités $(c_1,c_2,c_3)=(1,2,1)$ et une incompatibilité unique $I^c_{1,3}=I^c_{3,1}=1$ (les autres valent 0). Le parcours de l'étudiant 1 est $p_1=1$ et celui de l'étudiant 2 est $p_2=2$.
+    Si l'UE 2 est obligatoire dans le parcours 1 (donc $m_{2,1}=1$) et aucune UE n'est obligatoire dans le parcours 2, alors l'affectation
+    \begin{center}
+        \begin{tabular}{c|ccc}
+            & $j=1$ & $j=2$ & $j=3$ \\
+            \hline
+            $i=1$ & 0 & 1 & 0 \\
+            $i=2$ & 1 & 0 & 0
+        \end{tabular}
+    \end{center}
+    satisfait (C1) (capacités), (C2) (pas de couple incompatible attribué à un même étudiant) et (C3) (UE obligatoire du parcours 1 attribuée à l'étudiant 1).
+\end{example}
 
 
 \section{Métriques d'évaluations et de comparaisons}
@@ -222,7 +223,7 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
 
 \begin{definition}[Produit de Schur]
     Soit $X$ et $Y$ deux matrices de même dimension dans $\mathbb{R}_{n,m}$, nous définissons le produit de Schur $\odot$
-    comme l'opération qui associe à $X$ et $Y$ la matrice $Z$ tel que $\forall (i,j)\in\llbracket 1,n\rrbracket\times\llbracket 1,m\rrbracket:z_{i,j}=x_{i,j}\cdot y_{i,j}$. Ou plus graphiquement :
+    comme l'opération qui associe à $X$ et $Y$ la matrice $Z$ tel que $\forall (i,j)\in N\times M:z_{i,j}=x_{i,j}\cdot y_{i,j}$. Ou plus graphiquement :
     $$
     Z = X\odot Y = \begin{bmatrix}
         x_{0,0} & \cdots & x_{0,m} \\
@@ -241,8 +242,8 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
 \end{definition}
 
 \begin{definition}[Matrice des rangs d'affectation]
-    Soit $A_{i,j}\in\{0,1\}_{n,m}$ la matrice représentant l'affectation accordée à l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$. 
-    Soit $R_{i,j}\in\mathbb{R}^{+}_{n,m}$ la matrice représentant les rangs accordés par l'étudiant $i\in\llbracket 1,n\rrbracket$ pour l'UE $j\in\llbracket 1,m\rrbracket$, nous
+    Soit $A_{i,j}\in\{0,1\}_{n,m}$ la matrice représentant l'affectation accordée à l'étudiant $i\in N$ pour l'UE $j\in M$. 
+    Soit $R_{i,j}\in\mathbb{R}^{+}_{n,m}$ la matrice représentant les rangs accordés par l'étudiant $i\in N$ pour l'UE $j\in M$, nous
     définissons la matrice des rangs d'affectation $U_{i,j} = A_{i,j} \odot R_{i,j}$ comme la matrice des rangs des UE effectivement affectés à l'étudiant $i$.
 \end{definition}
 
@@ -319,13 +320,13 @@ Nous désignerons ce biais comme un biais de <<\textbf{Type I}>> (un biais de Ty
 Pour réduire ce biais au plus possible, nous allons tout d'abord devoir mieux préciser la nature des UEs.
 
 \begin{definition}
-    Soit $\text{aSet(i)}=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in \llbracket 1,n\rrbracket$, nous pouvons distinguer trois types d'UEs : 
+    Soit $\text{aSet(i)}\subseteq M=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in N$, nous pouvons distinguer trois types d'UEs : 
     les UEs obligatoires pour l'étudiant en raison du parcours que l'on notera $\text{mSet(i)}$, 
     celles optionnelles permettant d'atteindre le quota minimum d'UE pour passer le semestre $\text{oSet}(i)$ 
     et les UEs facultatives définis par $\text{fSet(i)} = \text{aSet}(i)\setminus[\text{mSet}(i)\cup\text{oSet}(i)]$.
     Attention, les trois ensembles sont disjoints.
 \end{definition}
-Étant donné que le nombre minimum d'UE requis pour passer le semestre pour chaque étudiant peut être obtenu par $m_{\min}(i)=\#\text{oSet}(i)+m\!\min_{p_i} \forall i \in \llbracket 1,n \rrbracket$, 
+Étant donné que le nombre minimum d'UE requis pour passer le semestre pour chaque étudiant peut être obtenu par $m_{\min}(i)=\#\text{oSet}(i)+m\!\min_{p_i} \forall i \in N$, 
 nous pouvons montrer que le nombre d'UE minimum pour passer le semestre $m_{\min}(i)$ est constant pour tous les étudiants d'un même parcours. En pratique, nous pourrons émettre l'hypothèse que ce nombre d'UE
 est égal peu importe les parcours.
 
@@ -356,7 +357,7 @@ Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectori
     Définit pour les étudiants uniquement, le dernier rang non facultatif affecté correspond pour chaque étudiant $i$ au rang maximum des $m_{\min}(i)$ UEs au rang le plus faible.
     Elle se formalise ainsi :
     $$
-        \forall i\in\llbracket 1, n\rrbracket : \text{lastMandatoryRank}(i) = \max_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}  
+        \forall i\in N : \text{lastMandatoryRank}(i) = \max_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}  
     $$
     En prenant le dernier rangs des UEs requises pour passer le semestre, cette métrique fait la promesse d'être intuitive, compréhensible et simple à calculer tout en nous donnant une borne supérieure sur les rangs affectés (ce qui peut être utile à des fins de minimisations). 
     Malheureusement, celle-ci ne capture pas la distribution des rangs affectés inférieurs. 
@@ -368,7 +369,7 @@ Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectori
     Définit pour les étudiants, la somme des rangs non facultatifs est la métrique sommant les rangs de l'ensemble des UEs non facultatives affectés pour chaque étudiant. 
     Elle se formalise ainsi :
     $$
-        \forall i\in\llbracket 1, n\rrbracket : \text{correctedRankSum}(i) = \text{rankSum}(i)-\sum_{j\in\text{fSet}(i)} U_{i,j}
+        \forall i\in N : \text{correctedRankSum}(i) = \text{rankSum}(i)-\sum_{j\in\text{fSet}(i)} U_{i,j}
     $$
     Cette métrique à plusieurs avantages.
     Premièrement, elle dispose d'une interprétabilité simple : plus la valeur est élevé, plus l'étudiant est lésé ; plus la valeur faible, meilleur la satisfaction de l'étudiant. 
@@ -403,7 +404,7 @@ Les métriques cités plus hauts sont directement utilisables dans un solveur li
 \begin{metric}[Médianes et Quartiles des rangs non-facultatifs affectés]
     Définit pour les étudiants, le premier, deuxième et troisième quartiles des rangs non-facultatifs affectés sont formalisés ainsi (par abus de langage) :
     $$
-    \forall i\in\llbracket 1, n\rrbracket : Q_{0.25|0.5|0.75}(i) = \min\{y : \mathbb{P}[\text{aSet}(i)\setminus\text{fSet}(i)\le y]\ge 0.25|0.5|0.75\}
+    \forall i\in N : Q_{0.25|0.5|0.75}(i) = \min\{y : \mathbb{P}[\text{aSet}(i)\setminus\text{fSet}(i)\le y]\ge 0.25|0.5|0.75\}
     $$
     Bien que non linéaires et plus compliquées à calculer que la moyenne (en pratique, il y a souvent une fonction pour les calculer simplement), cette famille de métrique offre de nombreux avantages.
     En effet, elle permet de disposer d'une mesure de centralité résistante à de potentielles valeurs extrêmes (voir biais de Type II, Annexe I), 
@@ -442,10 +443,10 @@ Le but que nous nous sommes fixés est d'atteindre une notion d'<<équité>> que
     D'après le Larousse, l'équité est définit comme une <<Qualité consistant à attribuer à chacun ce qui lui est dû par référence aux principes de la justice naturelle ; impartialité>>. 
     En d'autres mots, nous chercherons à produire des affectations tel que celles-ci ne soient influencés qu'uniquement par le choix des étudiants. Le but est donc de faire en sorte qu'aucun étudiant ne soit avantagé par rapport à un autre lors de l'affectations des UEs.
 
-    Sur le dernier rang non-facultatif affecté, par exemple, cela se traduirais par <<le dernier rang non facultatif affecté à un étudiant est le plus faible possible (optimisation) et est similaire à celui des autres étudiants (minimiser les différences) >>.
+    Sur le dernier rang non-facultatif affecté, par exemple, cela se traduirais par <<le dernier rang non facultatif affecté à un étudiant est le plus faible possible (optimisation) et est similaire à celui des autres étudiants (minimiser les différences)>>.
 \end{definition}
 
-Par cette définition et cet example, nous observons donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant tandis qu'une aggregation de ces métriques (voir Annexe I pour plus de détails) permettent d'évaluer cette notion d'équité.
+Par cette définition et cet example, nous observons donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant tandis qu'une aggregation de ces métriques (voir Annexe I pour plus de détails) permettent d'évaluer cette notion d'équité (Médianes faibles et IQR faibles ou Moyennes faibles et écarts-types faibles par exemple).
 
 Comme dit plus tôt, la notion d'équité peut se définir en partie par les métriques, mais elle capture également des facteurs plus indirect tel que : <<Est-ce qu'un groupe d'étudiant est plus favorisé qu'un autre>>. À partir d'ici, nous allons voir trois moyens complémentaires d'évaluer cette équité. 
 Commençons directement par une aggregation : le coefficient de Gini.
@@ -492,8 +493,8 @@ Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affect
 À partir de cela, nous pouvons avoir une définition alternative de l'équité d'une affectation comme étant une affectation où de tels échanges n'existent pas. 
 
 \begin{definition}[Échange technique]
-    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ où $n$ est le nombre d'étudiant. 
-    Nous définissons un << échange technique >> comme un échange des affectations de $i_a$ et de $i_b$, tel que la contraintes des UEs obligatoires est respectée, plus formellement : $\text{mSet}(i_a)\subseteq\text{aSet}(i_b) \land \text{mSet}(i_b)\subseteq\text{aSet}(i_a)$ 
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in N^2_{a\ne b}$ où $n$ est le nombre d'étudiant. 
+    Nous définissons un << échange technique >> comme un échange des affectations de $i_a$ et de $i_b$, tel que la contraintes des UEs obligatoires est respectée, plus formellement : $\left[\text{mSet}(i_a)\subseteq\text{aSet}(i_b)\right] \land \left[\text{mSet}(i_b)\subseteq\text{aSet}(i_a)\right]$ 
     et que le nombre d'UE demandé par chacun des étudiant ne soit pas dépassé $m\!\max_{i_a}\ge\#\text{aSet}(i_b)\land m\!\max_{i_b}\ge\#\text{aSet}(i_a)$.
     On notera le prédicat $i_a\stackrel{T}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange technique entre le couple $(i_a, i_b)$ et 1 autrement.  
 \end{definition}
@@ -501,7 +502,7 @@ Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affect
 Bien que la définition d'échange technique permet de s'assurer qu'un échange d'affectation soit techniquement faisable, il ne nous permet pas de dire si un étudiant est bénéficiaire ou lésé par celui-ci. 
 À partir de cette observation, nous pouvons nous rappeler la définition l'utilité de Pareto.
 \begin{definition}[Échange de Pareto]
-    Soit deux étudiants différents $\left(i_a,i_b\right)\in[\![1,n]\!]^2_{a\ne b}$ et une métrique vectorielle $m_v$.
+    Soit deux étudiants différents $\left(i_a,i_b\right)\in N^2_{a\ne b}$ et une métrique vectorielle $m_v$.
     Nous définissons un échange de Pareto comme un échange technique tel que si l'échange est opérant, alors $m_{v_{i_{a\to b}}} \ge m_{v_{i_a}}\text{ (resp.}\le\text{)}$ et $m_{v_{i_{b\to a}}} \ge m_{v_{i_b}}\text{ (resp.}\le\text{)}$ pour une métrique à maximiser (resp. à minimiser),
     où $m_{v_{i_{x\to y}}}$ correspond à la métrique calculé pour l'étudiant $x$ après lui avoir attribué l'affectation de l'étudiant $y$.
     On notera le prédicat $i_a\stackrel{(P,m_v)}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange de Pareto entre le couple $(i_a, i_b)$ pour la métrique vectorielle $m_v$ et 1 sinon.
@@ -571,30 +572,17 @@ Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu
 
 Ainsi, en utilisant ces deux tests, en plus des autres indicateurs et métriques, nous sommes maintenant capable de dire si une affectation est optimale, équitable et intègre (si nous pouvons la détourner). 
 
-\section{Méthodologie et implémentation}
-\subsection{Méthode proposée}
+\subsection{Fonctions objectifs}
 
+\section{Entrée -- Sondage et Générateur de données synthétiques}
 
+\section{Solveur -- Méthode d'affectation des UEs}
 
-
-\subsection{Implémentation}
-\textbf{À faire.}
-
-\section{Expériences}
-\textbf{À faire.}
-
-\section{Résultats et discussions}
-\subsection{Résultats}
-\textbf{À faire.}
-
-\subsection{Discussion}
-\textbf{À faire.}
+\section{Sortie -- Visualisation des résultats}
 
 \section{Conclusion}
 Ce projet vise à proposer un mécanisme d'affectation plus satisfaisant que le \og premier arrivé, premier servi \fg{}, tout en restant explicable et directement exploitable.
 
-
-\textbf{À faire.} Finaliser la méthodologie, compléter les expériences, et discuter les résultats obtenus sur des instances réelles.
 
 \bibliographystyle{plain}
 \bibliography{refs.bib}
