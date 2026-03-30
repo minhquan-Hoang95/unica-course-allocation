@@ -1,0 +1,20 @@
+courseID,title,AI_track,CS_track,spots
+1,3D Game Programming in Real Time on the Web,false,false,45
+2,Finite Dynamical System,false,false,45
+3,Natural Language Processing,true,false,45
+4,Advanced Computer Networks,false,false,45
+5,Combinatorial Optimization,true,false,45
+6,Computational Complexity,false,false,45
+7,Complex Systems,false,false,45
+8,Distributed Big Data For AI,true,false,45
+9,Graphs,true,false,45
+10,Introduction to Software Architecture,false,false,45
+11,Modélisation par Contraintes,false,false,45
+12,Communication and Concurrency,false,false,45
+13,Operations Research,false,false,45
+14,Safety critical systems,false,false,45
+15,Sécurité,false,false,20
+16,Systèmes d'exploitation avancés,false,false,45
+17,Verified Algorithms,false,false,45
+18,Mineure DS4H,false,false,-1
+

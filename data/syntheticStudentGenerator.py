@@ -33,7 +33,7 @@ students:dict[str,int] = {
 }
 
 # Get the different lectures and their number
-courses = pd.read_csv("courses.csv")
+courses = pd.read_csv("coursesS1.csv")
 M = courses.loc[:,"courseID"].max()
 
 # Get the tracks minimum optional and maximum
