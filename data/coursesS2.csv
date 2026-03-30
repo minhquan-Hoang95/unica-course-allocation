@@ -1,21 +1,21 @@
 courseID,title,AI_track,CS_track,spots
-1, Introduction to Software Architecture (EN), false, true, 35
-2, Computer Networks (EN), false, true, 35
-3, Securité, false, true, 35
-4, Synchronous Programming (EN), false, true, 35
-5, Systèmes d'exploitation avancés, false, true, 35
-6, Data Science for Complex Networks (EN), false, false, 35
-7, Scalable Data Science (EN), false, false, 35
-8, 3D Game Programming in Real Time on the Web (EN), false, false, 35
-9, Modelling Distributed Systems (EN), false, false, 35
-10, Computational Complexity (EN), false, false, 35
-11, Programming Paradigms (EN), false, false, 35
-12, Mineure DS4H (EN), false, false, 35
-13, Natural Language Processing (EN), true, false, 35
-14, Combinatorial Optimization (EN), true, false, 35
-15, Logic for AI (EN), true, false, 35
-16, Modélisation par des contraintes, true, false, 35
-17, Introduction to Multiagent Systems (EN), true, false, 35
+1, Introduction to Software Architecture (EN), false, true, 45
+2, Computer Networks (EN), false, true, 45
+3, Securité, false, true, 45
+4, Synchronous Programming (EN), false, true, 45
+5, Systèmes d'exploitation avancés, false, true, 45
+6, Data Science for Complex Networks (EN), false, false, 45
+7, Scalable Data Science (EN), false, false, 45
+8, 3D Game Programming in Real Time on the Web (EN), false, false, 45
+9, Modelling Distributed Systems (EN), false, false, 45
+10, Computational Complexity (EN), false, false, 45
+11, Programming Paradigms (EN), false, false, 45
+12, Mineure DS4H (EN), false, false, 45
+13, Natural Language Processing (EN), true, false, 45
+14, Combinatorial Optimization (EN), true, false, 45
+15, Logic for AI (EN), true, false, 45
+16, Modélisation par des contraintes, true, false, 45
+17, Introduction to Multiagent Systems (EN), true, false, 45
 
 
 
