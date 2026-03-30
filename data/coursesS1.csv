@@ -1,18 +1,18 @@
 courseID,title,AI_track,CS_track,spots
-1, AI Game Programming, true, false, 35
-2, AI: Models and Applications, true, false, 35
-3, Model Checking for AI, true, false, 35
-4, Neural Language Processing, true, false, 35
-5, Software engineering and Design patterns, true, true, 35
-6, English, true, true, 35
-7, Web, false, false, 35
-8, Advanced Algorithms, false, false, 35
-9, Gestion de projet, false, false, 35
-10, Distributed Computing and Learning, false, false, 35
-11, Programming Challenge, false, false, 35
-12, Problem Solving, false, false, 35
-13, Mineure DS4H , false, false, 35
-14, Architectures de processeurs hautes performances, false, true, 35
-15, Software Components and Services for Internet of Things (IoT), false, true, 35
-16, Container Orchestration and DevOps, false, true, 35
-17, Concurrent Programming, false, true, 35
+1, AI Game Programming, true, false, 45
+2, AI: Models and Applications, true, false, 45
+3, Model Checking for AI, true, false, 45
+4, Neural Language Processing, true, false, 45
+5, Software engineering and Design patterns, true, true, 45
+6, English, true, true, 45
+7, Web, false, false, 45
+8, Advanced Algorithms, false, false, 45
+9, Gestion de projet, false, false, 45
+10, Distributed Computing and Learning, false, false, 45
+11, Programming Challenge, false, false, 45
+12, Problem Solving, false, false, 45
+13, Mineure DS4H , false, false, 45
+14, Architectures de processeurs hautes performances, false, true, 45
+15, Software Components and Services for Internet of Things (IoT), false, true, 45
+16, Container Orchestration and DevOps, false, true, 45
+17, Concurrent Programming, false, true, 45
