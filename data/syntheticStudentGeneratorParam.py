@@ -13,8 +13,18 @@
 #
 # Usage:
 #   python syntheticStudentGenerator.py [--n 75] [--ai 30] [--cs 45] [--seed 42]
-#   python syntheticStudentGenerator.py --n 100 --ai 40 --cs 60 --seed 0
-#   python3 syntheticStudentGenerator.py --n 110 --ai 40 --cs 70 --seed 42 --dat students.dat
+#   python syntheticStudentGenerator.py --n 100 --ai 40 --cs 60 --seed 0 --dat students.dat
+#
+# Demand profiles (--profile):
+#   uniform    : all optional courses equally likely to be preferred (default)
+#   hotspot    : a few courses are heavily preferred by most students
+#   bottleneck : one single course attracts everyone -> capacity crisis
+#   custom     : user-defined weights via --weights (one per course, comma-separated)
+#
+# Example extreme cases:
+#   --profile bottleneck               # everyone wants course 1
+#   --profile hotspot                  # courses 1-3 are very popular
+#   --profile custom --weights 10,1,1,5,1,2   # manual weights per course
 
 import argparse
 import json
@@ -23,6 +33,44 @@ import numpy as np
 import pandas as pd
 from convertisseur import compute_mmax, read_courses, read_params, write_dat
 from scipy.stats import rankdata
+
+# ---------------------------------------------------------------------------
+# Profiles
+# ---------------------------------------------------------------------------
+
+# A profile maps a number of courses M to a weight vector of length M.
+# Higher weight = course more likely to receive a good (low) rank.
+# Mandatory courses ignore weights (they are always set to rank 1).
+
+
+def build_profile(profile, M, weights_arg=None):
+    if profile == "custom":
+        if weights_arg is None:
+            raise ValueError("--weights required for custom profile")
+        weights = np.array([float(w) for w in weights_arg.split(",")])
+        if len(weights) != M:
+            raise ValueError(f"Expected {M} weights, got {len(weights)}")
+        if (weights < 0).any():
+            raise ValueError("Weights must be non-negative")
+
+    else:
+        weights = np.ones(M)
+
+        if profile == "hotspot":
+            weights[: max(1, M // 3)] *= 10
+
+        elif profile == "bottleneck":
+            weights[0] = 100
+
+        elif profile != "uniform":
+            raise ValueError(f"Unknown profile: {profile}")
+
+    return weights / weights.sum()
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
 
 
 def parse_args():
@@ -57,12 +105,31 @@ def parse_args():
         default=None,
         help="If set, also generate a .dat file at this path",
     )
+    parser.add_argument(
+        "--profile",
+        type=str,
+        default="uniform",
+        choices=["uniform", "hotspot", "bottleneck", "custom"],
+        help="Demand profile: uniform (default), hotspot, bottleneck, custom",
+    )
+    parser.add_argument(
+        "--weights",
+        type=str,
+        default=None,
+        help="Comma-separated weights per course, only with --profile custom. "
+        "Example: --weights 10,1,1,5,1,2",
+    )
     args = parser.parse_args()
 
     if args.ai + args.cs != args.n:
         parser.error(f"--ai ({args.ai}) + --cs ({args.cs}) must equal --n ({args.n})")
 
     return args
+
+
+# ---------------------------------------------------------------------------
+# Student order
+# ---------------------------------------------------------------------------
 
 
 def generate_order(students, RNG):
@@ -79,6 +146,11 @@ def generate_order(students, RNG):
     return order
 
 
+# ---------------------------------------------------------------------------
+# CSV header
+# ---------------------------------------------------------------------------
+
+
 def write_header(OUTFILE, students, M):
     with open(OUTFILE, "w") as file:
         file.write(
@@ -90,17 +162,39 @@ def write_header(OUTFILE, students, M):
         )
 
 
-def generate_student_ranks(curriculum, courses, M, tracksData, RNG):
-    # Initialise to random rank
-    rg = RNG.randint(M - 1, size=M) + 2
+# ---------------------------------------------------------------------------
+# Rank generation
+# ---------------------------------------------------------------------------
 
-    # Retrieve mandatory course for the selected track
+
+def generate_student_ranks(curriculum, courses, M, tracksData, RNG, probs):
+    # Retrieve mandatory courses for the selected track
     mandatoryCourses = (
         courses[courses[curriculum + "_track"]].loc[:, "courseID"].to_numpy(dtype=int)
     )
 
+    # Build optional course indices (0-based)
+    optionalIdx = np.array([i for i in range(M) if (i + 1) not in mandatoryCourses])
+
+    # Initialise to random rank in [2, M]
+    rg = RNG.randint(M - 1, size=M) + 2
+
     # Set mandatory courses
     rg[mandatoryCourses - 1] = 1
+
+    if len(optionalIdx) > 0:
+        # Renormaliser les probabilités sur les cours optionnels
+        optionalProbs = probs[optionalIdx]
+        optionalProbs = optionalProbs / optionalProbs.sum()
+
+        # Tirage aléatoire pondéré d’un ordre de préférence
+        ordered = RNG.choice(
+            optionalIdx, size=len(optionalIdx), replace=False, p=optionalProbs
+        )
+
+        # Assigner les rangs (2, 3, ..., M)
+        for rank, course_idx in enumerate(ordered, start=2):
+            rg[course_idx] = rank
 
     # Mid-rank normalization
     # Ensures mid-rank normalization property
@@ -127,6 +221,11 @@ def generate_student_ranks(curriculum, courses, M, tracksData, RNG):
     return ranks, optionalNumber
 
 
+# ---------------------------------------------------------------------------
+# CSV writing
+# ---------------------------------------------------------------------------
+
+
 def write_student(OUTFILE, studentID, curriculum, students, optionalNumber, ranks):
     with open(OUTFILE, "a") as file:
         # Put studentID
@@ -141,7 +240,7 @@ def write_student(OUTFILE, studentID, curriculum, students, optionalNumber, rank
         file.write(f"{','.join(map(str, ranks))}\n")
 
 
-def generate_preferences(OUTFILE, order, students, courses, M, tracksData, RNG):
+def generate_preferences(OUTFILE, order, students, courses, M, tracksData, RNG, probs):
     # Generate the preferences and save them
     parc = []
     maxOptional = []
@@ -149,7 +248,7 @@ def generate_preferences(OUTFILE, order, students, courses, M, tracksData, RNG):
 
     for studentID, curriculum in enumerate(order, start=1):
         ranks, optionalNumber = generate_student_ranks(
-            curriculum, courses, M, tracksData, RNG
+            curriculum, courses, M, tracksData, RNG, probs
         )
         write_student(OUTFILE, studentID, curriculum, students, optionalNumber, ranks)
 
@@ -159,6 +258,11 @@ def generate_preferences(OUTFILE, order, students, courses, M, tracksData, RNG):
         r.append(list(ranks))
 
     return parc, maxOptional, r
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 
 def main():
@@ -175,13 +279,17 @@ def main():
     with open(args.params) as file:
         tracksData = json.load(file)["spe"]
 
+    probs = build_profile(args.profile, M, args.weights)
+
     order = generate_order(students, RNG)
     write_header(OUTFILE, students, M)
     parc, maxOptional, r = generate_preferences(
-        OUTFILE, order, students, courses, M, tracksData, RNG
+        OUTFILE, order, students, courses, M, tracksData, RNG, probs
     )
 
-    print(f"Generated {args.n} students ({args.ai} AI, {args.cs} CS) -> {OUTFILE}")
+    print(
+        f"Generated {args.n} students ({args.ai} AI, {args.cs} CS) -> {OUTFILE}  [profile={args.profile}]"
+    )
 
     # Direct .dat conversion without re-reading the CSV
     if args.dat:

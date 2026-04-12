@@ -1,0 +1,22 @@
+courseID,title,AI_track,CS_track,spots
+1,AI game programming,true,false,45
+2,AI: Models and Applications,true,false,45
+3,Software Components and Services for Internet of Things (IoT),false,false,45
+4,Advanced Algorithms,false,false,45
+5,Aerial Robotic Systems: from modeling to motion planning,false,false,45
+6,Architectures de processeurs hautes performances,false,false,45
+7,Computer networks,false,false,45
+8,Concurrent Programming,false,false,45
+9,Distributed-memory Parallel Programming and its Applications,false,false,45
+10,Gestion de projet,false,false,45
+11,Introduction to Computability,false,false,45
+12,Introduction to Constraint Programming,false,false,45
+13,Logic for AI,true,false,45
+14,Model Checking,false,false,45
+15,Problem Solving,true,false,45
+16,Programmation efficace,false,false,45
+17,Programming challenge,false,false,45
+18,Software Engineering, false, false, 45
+19,Synchronous Programming, false, false, 45
+20,Web, false, false, 45
+21,Mineure DS4H,false,false,-1
