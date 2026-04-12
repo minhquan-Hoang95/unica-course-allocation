@@ -169,15 +169,15 @@ execute AFFICHAGE {
         if (j != m) {
             f.write(",");
         }
-    } 
+    }
     f.writeln();
     for(var i = 1; i <= n; i++) {
-        f.write(i);          
-    	f.write(",");    
+        f.write(i);
+    	f.write(",");
         for(var j = 1; j <= m; j++) {
-          	var value = A[i][j]       
+          	var value = A[i][j]
             f.write(value);
-            if (j != m) {          
+            if (j != m) {
 	            f.write(",");
             }
         }

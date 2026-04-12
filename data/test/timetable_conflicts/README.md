@@ -1,3 +1,5 @@
+# Timetable conflicts
+
 mêmes cours, mais avec une matrice Ic non nulle dans le .dat
 
 certaines UE sont incompatibles entre elles en raison de conflits d’emploi du temps
