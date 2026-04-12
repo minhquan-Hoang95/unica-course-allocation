@@ -1,0 +1,74 @@
+/*********************************************
+ * OPL 22.1.0.0 Data
+ * Author: nthie
+ * Creation Date: 30 mars 2026 at 09:30:49
+ *********************************************/
+
+
+// ---------------------------------------------------------------------------
+// Dimensions
+// ---------------------------------------------------------------------------
+
+n = 6;   // Nombre d'étudiants
+m = 6;   // Nombre d'UE
+p = 1;   // Nombre de parcours (1=Informatique, 2=IA)
+
+// Bornes globales sur le nombre d'UE par étudiant
+gmin = 5;   // Minimum d'UE à suivre (toutes UE confondues)
+gmax = 6;   // Maximum d'UE à suivre (toutes UE confondues)
+
+// Objectif : 1 = somme des rangs (utilité globale), 2 = pire rang (équité)
+objType = 1;
+
+// ---------------------------------------------------------------------------
+// Cours
+// ---------------------------------------------------------------------------
+
+// c[j] : capacité (nombre de places disponibles) pour l'UE j
+// UE 7 : mineure DS4H externalisée → capacité "illimitée" = n = 4
+c = [5, 5, 5, 5, 5, 5];
+
+// conflicts : paires d'UE en conflit d'emploi du temps.
+// Format : {<ue1, ue2>} avec ue1 < ue2 par convention (relation symétrique).
+// Ici aucune incompatibilité n'existe dans le cas parfait.
+conflicts = {};
+
+// ---------------------------------------------------------------------------
+// Parcours
+// ---------------------------------------------------------------------------
+
+// mmin[k] : nombre minimum d'UE optionnelles à suivre dans le parcours k
+//   Parcours 1 (Informatique) : entre 7 et 9 options → min = 7
+//   Parcours 2 (IA)           : entre 3 et 5 options → min = 3
+mmin = [6];
+
+// mandatory : paires (UE, parcours) pour lesquelles l'UE est obligatoire.
+// Format : {<ue, parcours>}.
+// Ici aucune UE n'est obligatoire dans le cas parfait (toutes sont optionnelles).
+mandatory = {};
+
+// ---------------------------------------------------------------------------
+// Étudiants
+// ---------------------------------------------------------------------------
+
+// mmax[i] : nombre maximum d'UE souhaité par l'étudiant i
+//   (doit être compris entre 8 et 10 selon la contrainte C4/C5)
+mmax = [5, 5, 5, 5, 5, 5];
+
+// parc[i] : parcours de l'étudiant i (1=Informatique, 2=IA)
+parc = [1, 1, 1, 1, 1, 1];
+
+// r[i][j] : rang de l'UE j pour l'étudiant i
+// Convention : rang faible = forte préférence ; plusieurs UE peuvent avoir le même rang.
+// Les UE obligatoires sont en général mises au rang 1 (préférées par défaut).
+//
+//           UE1 UE2 UE3 UE4 UE5 UE6 UE7
+r = [
+  [ 1,  2,  3,  4,  5,  6 ],   // Etudiant 1
+  [ 6,  1,  2,  3,  4,  5 ],   // Etudiant 2
+  [ 5,  6,  1,  2,  3,  4 ],   // Etudiant 3 
+  [ 4,  5,  6,  1,  2,  3 ],   // Etudiant 4 
+  [ 3,  4,  5,  6,  1,  2 ],   // Etudiant 5 
+  [ 2,  3,  4,  5,  6,  1 ]    // Etudiant 6 
+];
+ 
