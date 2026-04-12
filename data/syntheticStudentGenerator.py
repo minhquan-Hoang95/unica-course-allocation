@@ -133,7 +133,7 @@ def write_student(OUTFILE, studentID, curriculum, students, optionalNumber, rank
         file.write(f"{studentID},")
         # Put the one-hot encoded track selector
         file.write(
-            f"{','.join(map(str, [curriculum==k for k in students if k!='N'])).lower()},"
+            f"{','.join(map(str, [curriculum == k for k in students if k != 'N'])).lower()},"
         )
         # Put optional number of course selected
         file.write(f"{optionalNumber},")
