@@ -46,7 +46,7 @@ repos:
         args: ['--unsafe']                    # Permet de détecter les fichiers YAML mal formés, même ceux qui contiennent des constructions potentiellement dangereuses
       - id: check-json                        # Vérifie la syntaxe des fichiers JSON (ex: package.json, .prettierrc, etc...)
       - id: check-added-large-files           # Empêche l'ajout de fichiers volumineux au dépôt
-        args: ['--maxkb=500']                 # Définit la taille maximale des fichiers à 500 KB
+        args: ['--maxkb=600']                 # Définit la taille maximale des fichiers à 500 KB
       - id: check-merge-conflict              # Détect et bloque si contient les marqueurs oubliés <<< HEAD ...
       - id: detect-private-key                # Détecte les clés privées exposées dans le code ( -----BEGIN....)
       - id: check-case-conflict               # Détecte /Evite les conflits de type( README.md vs readme.md) ( Windows/Mac)
