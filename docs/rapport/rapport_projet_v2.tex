@@ -31,6 +31,9 @@
 \theoremstyle{definition}
 \newtheorem*{metric}{Métrique}
 
+\theoremstyle{definition}
+\newtheorem*{goal}{Objectif}
+
 \theoremstyle{remark}
 \newtheorem{remark}{Remarque}
 
@@ -72,6 +75,8 @@ Ce document constitue un rapport (version de travail) pour le projet \emph{unica
 Il présente le contexte et les objectifs, décrit les données disponibles, puis propose une formalisation des principales contraintes du problème.
 L'ambition est de développer une méthode d'affectation explicable qui améliore l'équité tout en servant d'aide à la décision (comparaison et sélection de scénarios d'affectation).
 Le document vise une longueur d'environ \textasciitilde{}20 pages (hors annexes).
+
+Notez que les annexes ne sont pas nécessaires à la compréhension du sujet, mais constituent des éléments utiles pour une analyse du sujet en plus grande profondeur.
 \end{abstract}
 
 \clearpage
@@ -109,7 +114,14 @@ Des étudiants et des professeurs, informés de cette problématique, lancent un
 \end{definition}
 
 \subsection{Organisation du rapport}
-Ce rapport est volontairement concis (\textasciitilde{}20 pages hors annexes). Après l'introduction du contexte et des objectifs, nous présentons le format des données et les contraintes, puis les méthodes et résultats permettant de comparer des affectations et de soutenir une décision.
+Ce rapport, volontairement concis (\textasciitilde{}20 pages hors annexes), couvre l'architecture globale du projet:
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{img/Project Flow Diagram.png}
+    \caption{Architecture globale du projet}
+\end{figure}
+
+Après l'introduction du contexte et des objectifs, ci-haut faite, nous présentons dans la suite du rapport le format des données, les contraintes que nous exploiterons, les métriques et mesures de qualités définissant une affectation <<équitable>>, les processus et méthodes employées pour les obtenir, ainsi que les visualisations utiles pour comparer différentes affectations afin de soutenir une décision. 
+
 
 \section{Données}
 \subsection{Données disponibles}
@@ -369,7 +381,7 @@ Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectori
     Définit pour les étudiants, la somme des rangs non facultatifs est la métrique sommant les rangs de l'ensemble des UEs non facultatives affectés pour chaque étudiant. 
     Elle se formalise ainsi :
     $$
-        \forall i\in N : \text{correctedRankSum}(i) = \text{rankSum}(i)-\sum_{j\in\text{fSet}(i)} U_{i,j}
+        \forall i\in N : \text{correctedRankSum}(i) = \sum_{j\in M} U_{i,j}-\sum_{j\in\text{fSet}(i)} U_{i,j}
     $$
     Cette métrique à plusieurs avantages.
     Premièrement, elle dispose d'une interprétabilité simple : plus la valeur est élevé, plus l'étudiant est lésé ; plus la valeur faible, meilleur la satisfaction de l'étudiant. 
@@ -573,6 +585,50 @@ Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu
 Ainsi, en utilisant ces deux tests, en plus des autres indicateurs et métriques, nous sommes maintenant capable de dire si une affectation est optimale, équitable et intègre (si nous pouvons la détourner). 
 
 \subsection{Fonctions objectifs}
+Dans le cadre de ce projet, plusieurs fonctions objectifs ont été développées afin d'atteindre un affectation <<optimale>> et <<équitable>>. 
+Tous ces objectifs n'ont pas été conservés dans le rendu final, pour des raisons de praticité, de simplification ou d'application difficile dans le cadre de solveur linéaire (voir \textbf{\textit{Annexe II - Brouillon et Réflexions sur les Objectifs}} pour plus de détails); nous présentons ici donc, les plus importantes. 
+Commençons sans plus tarder avec notre premier objectif :
+
+\begin{goal}[Minimisation de la somme des rangs non facultatifs]
+    Définit pour les étudiants, la minimisation de la somme des rangs non facultatifs se caractérise ainsi:
+    $$
+        \min_{\forall i\in N}\left\{\text{correctedRankSum}(i)\right\}
+    $$
+    Cet objectif est extrêmement simple, ce qui en fait sa force. Ici, nous avons l'avantage que chaque étudiant voit sa propre somme des rangs diminuer.
+    Intuitivement, cet objectif permet à ce que les étudiants ayant les sommes maximum se voient minimiser en priorité leurs propres sommes.
+    Malheureusement, cet objectif peut engendrer des inégalités en cas d'égalité des sommes : qui faut-il privilégier en premier ?
+    
+    Notez qu'en effectuant la somme de la somme des rangs non facultatifs de chaque étudiants, nous obtenons une valeur unique nous indiquant si une affectation est globalement bonne ou non.
+\end{goal}
+
+De la même manière, nous pouvons décider de minimiser le pire rang non facultatif émis pour chaque étudiant.
+\begin{goal}[Minimisation du dernier rang non facultatif]
+    Définit pour les étudiants, la minimisation du dernier rangs non facultatif se détermine ainsi :
+    $$
+        \min_{\forall i\in N}\left\{\text{lastMandatoryRank}(i)\right\}
+    $$
+    Ici, nous nous attendons à des résultats similaires à l'objectif précédent, avec néanmoins une subtilité importante. 
+    En effet nous souhaitons, ici, explicitement viser le rang de la pire affectation non facultative. 
+    En cela, nous émettons l'hypothèse, à travers objectif, qu'un étudiant est moins satisfait d'avoir une UE obligatoire de très mauvais rang qu'un lot d'UEs de rangs moyens.
+    Cette hypothèse est débattable et est ce qui rend l'utilisation de cet objectif intéressant.
+
+    De manière similaire à l'objectif précédent, la somme des dernier rangs non facultatifs de chaque étudiants, correspond à une métrique que nous pouvons aussi minimiser en tant qu'objectif (agrégation ou une sorte d'optimisation multicritère en somme). 
+\end{goal}
+
+Avec ces objectifs, nous nous approchons d'une affectation que nous pouvons qualifier d'<<optimal>>, mais comment pouvons nous garantir son <<équité>>. En effet, même si les objectifs précédents prennent en compte, au moins implicitement, cette notion ; elles en n'ont qu'une représentation partielle. 
+C'est pourquoi il peut également être important d'intégrer une composante permettant de vérifier qu'un étudiant n'est pas fortement lésé par rapport à un autre.
+\begin{goal}[Minimisation de l'écart entre la somme des rangs non facultatifs des différents étudiants]
+    Soit $S_{\max}$ la somme des rangs non facultatifs la plus élevé parmi les étudiants. Soit $S_{\min}$ la somme des rangs non facultatifs la plus faible parmi les étudiants. 
+    Nous définissons cet objectif ainsi:
+    $$
+        \min\left\{S_{\max}-S_{\min}\right\}
+    $$
+    Cet objectif a plusieurs avantages : il permet non seulement de se rapprocher de la notion d'<<équité>>, mais aussi d'éviter les situation où un étudiant est très désavantagé par rapport à un autre.
+    Néanmoins, il dispose d'un désavantage majeur : utilisé seul, cet objectif peut entraîner une baisse potentiellement conséquente de la qualité de l'affectation en terme d'<<optimalité>>. 
+\end{goal}
+
+Maintenant que nous avons des objectifs permettant de s'approcher séparément de l'<<optimalité>> et de l'<<équité>>, il sera intéressant de les combiner pour pouvoir faire un compromis entre les deux.
+Aussi, nous avons introduit précédemment la notion d'<<intégrité>>, mais celle-ci est en réalité difficile à définir en termes d'objectifs (d'autant plus linéaires) ; elle restera donc dans le domaine de l'évaluation et de la détection de problèmes a posteriori.
 
 \section{Entrée -- Sondage et Générateur de données synthétiques}
 

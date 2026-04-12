@@ -1,0 +1,348 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+
+\begin{document}
+
+\section{Format de sortie des données}
+
+On considère les variables suivantes :
+
+\[
+A_{i,j} =
+\begin{cases}
+1 & \text{si l'étudiant } i \text{ obtient le cours } j \\
+0 & \text{sinon}
+\end{cases}
+\]
+
+où :
+
+\begin{itemize}
+\item $i \in \{1,\dots,n\}$ représente un étudiant
+\item $j \in \{1,\dots,m\}$ représente un cours
+\item $r_{i,j}$ est le rang du cours $j$ pour l'étudiant $i$
+\end{itemize}
+
+\section{Liste des objectifs}
+
+\subsection{Minimiser la somme des rangs}
+
+\[
+\min \sum_{i=1}^{n} \sum_{j=1}^{m} r_{i,j} A_{i,j}
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item maximise la satisfaction moyenne globale des étudiants
+\item certains étudiants peuvent recevoir uniquement des cours très bien classés
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item peut générer des inégalités importantes entre étudiants (non équitable)
+\item certains étudiants peuvent recevoir uniquement des cours mal classés
+\end{itemize}
+
+\subsection{Maximiser le nombre d'étudiants recevant leur premier choix}
+
+\[
+\max \sum_{i=1}^{n} \sum_{j=1}^{m} \mathbf{1}(r_{i,j} = 1)\, A_{i,j}
+\]
+
+où $\mathbf{1}(r_{i,j} = 1)$ vaut $1$ si le cours $j$ est le premier choix de l'étudiant $i$, et $0$ sinon.
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item permet d'améliorer fortement la satisfaction pour une partie des étudiants
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item peut ignorer complètement les préférences restantes des étudiants
+\item certains étudiants peuvent ne recevoir que des cours très mal classés
+\end{itemize}
+
+\subsection{Minimiser la somme des pires rangs par étudiant}
+
+Soit $w_i$ le pire rang attribué à l'étudiant $i$.
+
+\[
+\min \sum_{i=1}^{n} w_i
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item réduit les mauvaises affectations pour tous les étudiants
+\item plus équilibré que le pire rang global
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item ne garantit pas une satisfaction globale optimale
+\item nécessite d'introduire une variable supplémentaire
+\end{itemize}
+
+\subsection{Maximiser le nombre de rangs faibles}
+
+\[
+\max \sum_{i=1}^{n}\sum_{j=1}^{m} \mathbf{1}(r_{i,j} \leq T) A_{i,j}
+\]
+
+où $T$ est un seuil correspondant à un bon classement.
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item favorise l'attribution de cours bien classés
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item dépend du choix du seuil
+\item ignore les différences entre les rangs
+\end{itemize}
+
+\subsection{Minimiser le nombre de rangs élevés}
+
+\[
+\min \sum_{i=1}^{n}\sum_{j=1}^{m} \mathbf{1}(r_{i,j} \geq T) A_{i,j}
+\]
+
+où $T$ est un seuil correspondant à un mauvais classement.
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item réduit les affectations très peu satisfaisantes
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item dépend du choix du seuil
+\item ignore les différences entre les rangs
+\end{itemize}
+
+\subsection{Minimiser l'écart de la somme des rangs entre étudiants}
+
+On définit la somme des rangs des cours qui sont attribués à un étudiant $i$:
+
+\[
+s_i = \sum_{j=1}^{m} r_{i,j} A_{i,j}
+\]
+
+L'objectif consiste alors à minimiser l'écart entre $S_{\max}$ et $S_{\min}$ respectivement la somme maximal et minimal parmi les étudiants :
+
+\[
+\min (S_{\max} - S_{\min})
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item favorise une répartition plus équitable des affectations
+\item limite les situations où certains étudiants sont très désavantagés
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item peut réduire la satisfaction moyenne globale
+\item nécessite l'introduction de variables supplémentaires
+\end{itemize}
+
+\subsection{Maximiser la satisfaction croissante sur les cours voulus}
+
+On associe à chaque rang $r_{i,j}$ une valeur de satisfaction décroissante
+avec le rang :
+
+\[
+p(r_{i,j}) = \frac{1}{r_{i,j}}
+\]
+
+Ainsi, les cours les mieux classés apportent une satisfaction plus forte
+que les cours moins bien classés.
+
+L'objectif consiste alors à maximiser la somme des satisfactions obtenues :
+
+\[
+\max \sum_{i=1}^{n} \sum_{j=1}^{m} p(r_{i,j}) A_{i,j}
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item valorise fortement l'obtention des cours les plus souhaités
+\item distingue mieux les très bons rangs que la simple somme des rangs
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item le choix de la fonction $p$ reste arbitraire
+\item ne pénalise pas directement les cours très mal classés
+\end{itemize}
+
+\subsection{Minimiser la pénalité croissante des cours non voulus}
+
+On associe à chaque rang $r_{i,j}$ une pénalité croissante avec le rang :
+
+\[
+q(r_{i,j}) = r_{i,j}^2
+\]
+
+Ainsi, les cours mal classés sont beaucoup plus pénalisés que les cours
+moyennement classés.
+
+L'objectif consiste alors à minimiser la somme des pénalités :
+
+\[
+\min \sum_{i=1}^{n} \sum_{j=1}^{m} q(r_{i,j}) A_{i,j}
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item pénalise fortement les affectations très peu souhaitées
+\item réduit les situations où certains étudiants reçoivent uniquement des cours mal classés
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item le choix de la fonction $q$ reste arbitraire
+\item peut réduire la satisfaction moyenne globale si l'objectif est utilisé seul
+\end{itemize}
+
+\subsection{Maximiser une satisfaction pondérée avec pénalité croissante}
+
+On associe à chaque rang $r_{i,j}$ :
+
+\begin{itemize}
+\item une valeur de satisfaction décroissante $p(r_{i,j})$ pour favoriser les cours bien classés
+\item une pénalité croissante $q(r_{i,j})$ pour pénaliser les cours mal classés
+\end{itemize}
+
+Par exemple :
+
+\[
+p(r_{i,j}) = \frac{1}{r_{i,j}}
+\qquad
+q(r_{i,j}) = r_{i,j}^2
+\]
+
+L'objectif consiste alors à maximiser un score combiné :
+
+\[
+\max \sum_{i=1}^{n} \sum_{j=1}^{m}
+\left( \alpha \, p(r_{i,j}) - \beta \, q(r_{i,j}) \right) A_{i,j}
+\]
+
+où $\alpha$ et $\beta$ sont deux coefficients permettant d'équilibrer
+l'importance de la satisfaction et de la pénalité.
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item combine la recherche de bons choix et l'évitement des très mauvais choix
+\item permet de moduler finement le comportement du modèle
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item nécessite de choisir les fonctions $p$ et $q$
+\item nécessite de régler les coefficients $\alpha$ et $\beta$
+\end{itemize}
+
+\subsection{Maximiser le nombre d'étudiants satisfaits}
+
+On définit pour chaque étudiant $i$ le nombre de cours bien classés
+qui lui sont attribués :
+
+\[
+g_i = \sum_{j=1}^{m} \mathbf{1}(r_{i,j} \leq T_{bon}) A_{i,j}
+\]
+
+et le nombre de cours mal classés :
+
+\[
+b_i = \sum_{j=1}^{m} \mathbf{1}(r_{i,j} \geq T_{mauvais}) A_{i,j}
+\]
+
+Un étudiant est considéré comme satisfait si $K \geq g_i$
+et $L \leq b_i$, où :
+\begin{itemize}
+\item K : nombre minimum de cours qu'il voulait
+\item L : nombre maximum de cours qu'il ne voulait pas
+\end{itemize}
+
+\[
+z_i =
+\begin{cases}
+1 & \text{si l'étudiant } i \text{ est satisfait} \\
+0 & \text{sinon}
+\end{cases}
+\]
+
+L'objectif consiste à maximiser le nombre d'étudiants satisfaits :
+
+\[
+\max \sum_{i=1}^{n} z_i
+\]
+
+\textbf{Avantages :}
+
+\begin{itemize}
+\item favorise des affectations globalement acceptables pour un grand nombre d'étudiants
+\end{itemize}
+
+\textbf{Limites :}
+
+\begin{itemize}
+\item dépend du choix des seuils $T_{bon}$, $T_{mauvais}$, $K$ et $L$
+\item ne distingue pas les niveaux de satisfaction au-delà de ces seuils
+\end{itemize}
+
+\section{Sélection de l'objectif}
+
+Les objectifs présentés précédemment seront évalués entre 1 et 10 par les membres du projet selon plusieurs critères :
+
+\begin{itemize}
+
+\item \textbf{Compréhension pour un membre du projet}  
+Le principe de l'objectif est-il clair pour quelqu'un qui travaille sur le projet ?
+
+\item \textbf{Compréhension pour un non-membre du projet}  
+Une personne extérieure (étudiant ou enseignant) peut-elle comprendre facilement l'objectif ?
+
+\item \textbf{Pertinence pour représenter l'équité}  
+L'objectif permet-il de répartir les cours de manière équitable entre les étudiants ?
+
+\item \textbf{Facilité d'implémentation}  
+L'objectif est-il simple à implémenter dans un solveur ?
+
+\item \textbf{Envie d'utiliser cet objectif}  
+Globalement, cet objectif semble-t-il pertinent et intéressant à utiliser ?
+
+\end{itemize}
+
+\end{document}
