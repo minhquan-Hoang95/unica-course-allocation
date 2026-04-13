@@ -325,9 +325,9 @@ def getAdditionalCourseBasedOnCoursesFunction(
     return {"spots": lambda mat: courses["spots"].to_numpy()}
 
 
-def getAdditionalPostCourseBasedOnCoursesFunction() -> (
-    tuple[dict[str, partial | Callable], ...]
-):
+def getAdditionalPostCourseBasedOnCoursesFunction() -> tuple[
+    dict[str, partial | Callable], ...
+]:
     """Additional Post processing functions for courses to feed in `computeBaseVectors`. It includes the number of ***free spots*** for each lecture and the ***loadBalancingDifference*** defined as $diff(j\\in M) = n_m - \\frac{\\sum_{i=1}^m{n_i}}{m}$. See the load balancing problem (here it is a variant, so it might not possess the right information in fine.).
 
     Returns:
