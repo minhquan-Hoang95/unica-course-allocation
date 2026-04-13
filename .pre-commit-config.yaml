@@ -62,11 +62,17 @@ repos:
 #      PYTHON - LINT + FORMAT
 # Ruff remplace flake8, black, isort, etc... pour le linting et le formatage du code Python
 
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.4.0
+  #   hooks:
+  #     - id: ruff
+  #       args: ['--fix']  # Permet de corriger automatiquement les problèmes détectés
+  #     - id: ruff-format
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.4.0
     hooks:
       - id: ruff
-        args: ['--fix']  # Permet de corriger automatiquement les problèmes détectés
+        args: ['--fix']
       - id: ruff-format
 
 #     PYTHON - SECURITY (SAST)
