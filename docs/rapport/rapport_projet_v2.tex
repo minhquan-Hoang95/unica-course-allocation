@@ -634,10 +634,87 @@ Aussi, nous avons introduit précédemment la notion d'<<intégrité>>, mais cel
 
 \section{Solveur -- Méthode d'affectation des UEs}
 
+Cette section décrit la méthode de calcul d'une affectation à partir des données présentées précédemment. L'objectif est double : (i) produire une affectation qui respecte toutes les contraintes métier (capacité, obligations, compatibilités, bornes min/max), et (ii) disposer d'une sortie exploitable par des scripts d'analyse et de visualisation afin d'aider à la décision.
+
+\subsection{Baseline de comparaison : \textit{first-come first-served}}
+
+À des fins de comparaison, nous considérons une baseline simple de type \og premier arrivé, premier servi \fg{} (FCFS). Elle constitue un point de référence utile : elle est facile à implémenter et à expliquer, mais ne garantit pas une bonne satisfaction globale ni une équité satisfaisante.
+
+Dans nos fichiers d'exemple utilisés par les scripts de post-traitement, une affectation FCFS est notamment représentée sous forme CSV (par exemple \texttt{FCFSaffectation.csv}).
+
+\subsection{Solveur exact : modèle de programmation linéaire en nombres entiers (OPL/CPLEX)}
+
+Nous utilisons un modèle OPL résolu par CPLEX. La variable de décision principale est une matrice binaire $A \in \{0,1\}^{n\times m}$ telle que $A_{i,j}=1$ si l'étudiant $i$ est affecté à l'UE $j$.
+
+\paragraph{Données d'entrée du solveur}
+Le solveur attend un fichier \texttt{.dat} contenant les tailles $(n,m,p)$, la capacité $c_j$ de chaque UE, le parcours $p_i$ de chaque étudiant, le nombre maximal d'UE demandées $m\!\max_i$, les bornes globales $(g\!\min,g\!\max)$, la matrice de rangs $r_{i,j}$ (rangs potentiellement non entiers en cas d'ex-æquo), ainsi que deux ensembles de tuples :
+\begin{itemize}
+    \item \texttt{conflicts} : paires d'UE incompatibles (conflits d'emploi du temps), représentées comme des couples $(j,j')$ plutôt que comme une matrice creuse ;
+    \item \texttt{mandatory} : paires (UE, parcours) indiquant les UEs obligatoires d'un parcours.
+\end{itemize}
+
+Le fichier d'entrée inclut également un paramètre \texttt{objType} (choix d'objectif) qui permet de comparer plusieurs critères sans modifier le modèle.
+
+\paragraph{Contraintes}
+Le modèle impose notamment :
+\begin{itemize}
+    \item la contrainte de capacité (C1) : $\sum_i A_{i,j} \le c_j$ ;
+    \item la compatibilité (C2) : pour toute paire en conflit $(j,j')$, $A_{i,j}+A_{i,j'} \le 1$ ;
+    \item les obligations de parcours (C3) : si l'UE $j$ est obligatoire pour le parcours $p_i$, alors $A_{i,j}=1$ ;
+    \item une borne basse globale (C4) : $\sum_j A_{i,j} \ge g\!\min$ ;
+    \item une borne haute individuelle (C5) : $\sum_j A_{i,j} \le m\!\max_i$.
+\end{itemize}
+
+Avant l'optimisation, le modèle exécute des assertions de cohérence sur les données (par exemple $g\!\min\le g\!\max$, $m\!\max_i\in[g\!\min,g\!\max]$, capacités positives). Ces vérifications permettent de diagnostiquer rapidement des cas d'infaisabilité dus à des entrées incohérentes.
+
+\paragraph{Objectifs d'optimisation}
+Deux objectifs (mutuellement exclusifs) sont implémentés, sélectionnés par \texttt{objType} :
+\begin{itemize}
+    \item \textbf{Minimiser la somme des rangs} (\texttt{objType=1}) : $\sum_{i,j} r_{i,j}A_{i,j}$. Cet objectif favorise l'utilité globale (satisfaction moyenne), au risque de pénaliser quelques individus.
+    \item \textbf{Minimiser le pire rang} (\texttt{objType=2}) : $\max_{i,j}\{r_{i,j}A_{i,j}\}$. Cet objectif favorise une forme d'équité en contrôlant la pire affectation observée.
+\end{itemize}
+Dans les deux cas, le solveur produit une affectation optimale au sens du critère sélectionné, sous réserve de faisabilité.
+
+\paragraph{Sorties du solveur}
+En sortie, le modèle exporte une affectation au format CSV (\texttt{affectation.csv}) sous forme d'une matrice binaire : une ligne par étudiant et une colonne par UE (entêtes \texttt{studentID,c1,\ldots,cm}). Un affichage lisible est également produit sur la console (UE attribuées avec leurs rangs), tandis que les statistiques (taux de remplissage, métriques d'équité, etc.) sont volontairement calculées par les scripts externes (voir section \og Métriques d'évaluations et de comparaisons \fg{}).
+
 \section{Sortie -- Visualisation des résultats}
 
+Cette section décrit les fichiers de sortie produits par le solveur et les scripts, ainsi que les visualisations attendues pour soutenir l'analyse et la comparaison d'affectations. Nous ne redéfinissons pas les métriques ici : nous renvoyons à la section \og Métriques d'évaluations et de comparaisons \fg{} pour leur définition précise.
+
+\subsection{Sortie brute : affectation au format CSV}
+
+La sortie primaire du solveur est le fichier \texttt{affectation.csv}, qui représente la matrice d'affectation $A$ (0/1). Ce format est volontairement simple : il permet (i) un contrôle rapide de la faisabilité (nombre d'UE par étudiant, capacité par UE), et (ii) une ingestion directe par les scripts d'analyse.
+
+\subsection{Sorties analytiques : vecteurs et agrégats pour le tableau de bord}
+
+Les scripts de post-traitement lisent l'affectation (CSV) et les préférences (rangs) afin de construire une \emph{matrice des rangs attribués}. Concrètement, on extrait la matrice binaire d'affectation (colonnes \texttt{c\ldots}) et la matrice des rangs (colonnes \texttt{Rg\ldots}), puis on calcule une matrice de rangs attribués par produit terme à terme.
+
+À partir de cette matrice, on calcule des \textbf{vecteurs de métriques} (une ligne par étudiant ou une ligne par UE), par exemple : somme/moyenne/variance des rangs, médiane et quartiles, nombre d'UE reçues, premier rang reçu, dernier rang reçu, etc. Les chemins par défaut montrent notamment une structuration en :
+\begin{itemize}
+    \item entrées : \texttt{srcFiles/\{affectation,preferences,courses,parameters\}.*} ;
+    \item sorties : \texttt{out/studentsVectors.csv} et \texttt{out/coursesVectors.csv}.
+\end{itemize}
+
+Ces sorties vectorielles et leurs agrégations (voir section \og Métriques... \fg{} et annexes associées) constituent une base naturelle pour un \textbf{tableau de bord} permettant de comparer plusieurs affectations (ex. solveur vs baseline, ou plusieurs objectifs).
+
+\subsection{Visualisations minimales (vision tableau de bord)}
+
+Sans ajouter de complexité inutile, un tableau de bord utile pour l'aide à la décision peut se limiter aux vues suivantes, toutes calculables à partir des CSV produits :
+\begin{itemize}
+    \item \textbf{Satisfaction des étudiants} : histogrammes ou boîtes à moustaches de quelques métriques clés (ex. moyenne des rangs, dernier rang, quantiles) ;
+    \item \textbf{Capacité et saturation des UEs} : taux de remplissage par UE, UEs saturées, répartition des demandes vs places ;
+    \item \textbf{Équité} : indicateurs d'inégalités (ex. dispersion, Gini, pire rang) et mise en évidence de cas extrêmes ;
+    \item \textbf{Comparaisons par groupes} (parcours) : mêmes indicateurs, stratifiés par parcours, afin de détecter des biais potentiels.
+\end{itemize}
+
+L'objectif de ces visualisations n'est pas de remplacer le solveur, mais de rendre l'affectation \emph{auditable} et \emph{comparables} : on cherche à comprendre \emph{qui} est pénalisé et \emph{pourquoi}, et à quantifier les compromis utilité/équité entre différentes solutions.
+
 \section{Conclusion}
-Ce projet vise à proposer un mécanisme d'affectation plus satisfaisant que le \og premier arrivé, premier servi \fg{}, tout en restant explicable et directement exploitable.
+Ce projet vise à proposer un mécanisme d'affectation plus satisfaisant que le \og premier arrivé, premier servi \fg{}, tout en restant explicable et directement exploitable. Nous avons (i) formalisé le format des données et les contraintes d'affectation, (ii) proposé un solveur exact sous forme de PLNE (OPL/CPLEX) avec plusieurs objectifs sélectionnables, et (iii) structuré une chaîne de sortie orientée analyse (export CSV puis scripts) afin de soutenir une décision.
+
+L'approche présente deux atouts majeurs : d'une part, la faisabilité est garantie par construction lorsque le modèle admet une solution ; d'autre part, la séparation \og solveur \textrightarrow{} exports CSV \textrightarrow{} métriques/visualisations \fg{} permet de conserver un modèle d'optimisation simple, tout en offrant un espace riche d'évaluation a posteriori (section \og Métriques d'évaluations et de comparaisons \fg{}).
+
 
 
 \bibliographystyle{plain}
