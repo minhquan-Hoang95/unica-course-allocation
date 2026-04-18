@@ -12,6 +12,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathabx}
+\usepackage{listings}
 
 \usepackage{color}
 \usepackage{tabularray}
@@ -36,6 +37,9 @@
 
 \theoremstyle{remark}
 \newtheorem{remark}{Remarque}
+
+\theoremstyle{definition}
+\newtheorem*{Hypothesis}{Hypothèse}
 
 \setlist[itemize,1]{label=\textbullet}
 \setlist[itemize,2]{label=\textendash}
@@ -120,10 +124,11 @@ Ce rapport, volontairement concis (\textasciitilde{}20 pages hors annexes), couv
     \caption{Architecture globale du projet}
 \end{figure}
 
-Après l'introduction du contexte et des objectifs, ci-haut faite, nous présentons dans la suite du rapport le format des données, les contraintes que nous exploiterons, les métriques et mesures de qualités définissant une affectation <<équitable>>, les processus et méthodes employées pour les obtenir, ainsi que les visualisations utiles pour comparer différentes affectations afin de soutenir une décision. 
+Où l'entrée compose sur la récupération des données, leurs gestions et leurs transformations pour leurs exploitations ; le solveur possède l'apanage de la résolution du problème d'affectation ; enfin, la sortie gère la visualisation et l'évaluation des affectations en sortie.
+Dans ce rapport, après l'introduction du contexte et des objectifs, ci-haut faite, nous présentons dans la suite du rapport le format des données, les contraintes que nous exploiterons, les métriques et mesures de qualités définissant une affectation <<équitable>>, les processus et méthodes employées pour les obtenir, ainsi que les visualisations utiles pour comparer différentes affectations afin de soutenir une décision. 
 
 
-\section{Données}
+\section{Données}\label{sec:Data}
 \subsection{Données disponibles}
 Pour mener à bien ce projet, l'IC dispose des informations suivantes :
 \begin{itemize}
@@ -217,7 +222,7 @@ $\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sino
 \end{example}
 
 
-\section{Métriques d'évaluations et de comparaisons}
+\section{Métriques d'évaluations et de comparaisons}\label{sec:Metric}
 
 Dans le cadre de ce projet, être en mesure d'évaluer et de comparer plusieurs instances d'affectations d'étudiant est important. 
 En effet, sans cela, nous serions bien incapable de mesurer une potentielle amélioration du système, actuellement exploité, mais aussi de vérifier l'existence d'éventuels biais
@@ -260,8 +265,8 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
 \end{definition}
 
 \begin{example}\label{ex:running1}
-    Dans le cadre de ce rapport, nous allons développer un example fictif et l'exploiter tout du long à des fins d'illustrations.
-    Pour cet example, nous aurons 5 étudiants : Sophie et Pierre en parcours IA, puis Hugo, Axel et Sabine en parcours Informatique.
+    Dans le cadre de ce rapport, nous allons développer un exemple fictif et l'exploiter tout du long à des fins d'illustrations.
+    Pour cet exemple, nous aurons 5 étudiants : Sophie et Pierre en parcours IA, puis Hugo, Axel et Sabine en parcours Informatique.
     Il y a 4 UEs : AI, obligatoire en IA, Code, obligatoire en Informatique, Éco et Droit. Chaque cours dispose de 4 places (places réservées incluses). 
     Un étudiant doit choisir entre 2 et 3 UEs. Voici les préférences de chaque étudiants, ainsi que le nombre d'UEs qu'ils souhaitent prendre :
     
@@ -343,7 +348,7 @@ nous pouvons montrer que le nombre d'UE minimum pour passer le semestre $m_{\min
 est égal peu importe les parcours.
 
 \begin{example}\label{ex:running2}
-    En se basant sur l'example~\ref{ex:running1}, nous reprenons nos étudiants : Sophie, Pierre, Hugo, Axel et Sabine. Voici l'ensemble ordonnées des affectations, des affectations obligatoires, optionnelles et facultatives pour chacun d'entre eux :
+    En se basant sur l'exemple~\ref{ex:running1}, nous reprenons nos étudiants : Sophie, Pierre, Hugo, Axel et Sabine. Voici l'ensemble ordonnées des affectations, des affectations obligatoires, optionnelles et facultatives pour chacun d'entre eux :
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -390,7 +395,7 @@ Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectori
 \end{metric}
 
 \begin{example}\label{ex:running3}
-    Dans la continuité des examples précédents, nous allons maintenant calculer les métriques cités plus hauts sur nos étudiants :
+    Dans la continuité des exemples précédents, nous allons maintenant calculer les métriques cités plus hauts sur nos étudiants :
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -433,7 +438,7 @@ Contrairement à l'écart-type, celui-ci dispose d'une interprétation naturelle
 Il s'agit donc pour cette raison que nous le mentionnons tout de même.
 
 \begin{example}\label{ex:running4}
-    Encore une fois, comme pour l'example~\ref{ex:running3}, nous allons calculer les nouvelles métriques pour nos étudiants
+    Encore une fois, comme pour l'exemple~\ref{ex:running3}, nous allons calculer les nouvelles métriques pour nos étudiants
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -441,7 +446,7 @@ Il s'agit donc pour cette raison que nous le mentionnons tout de même.
         \text{IQR}(i)   & 1   & 2 & 1   & 1   & 2\\
     \end{bmatrix}
     $$
-    Dans notre petit example, les notions de médiane et d'IQR perdent un peu leurs sens, surtout en considérant que pour atteindre les quantiles désirés via Python ou autre, une correction de continuité est généralement faite. 
+    Dans notre petit exemple, les notions de médiane et d'IQR perdent un peu leurs sens, surtout en considérant que pour atteindre les quantiles désirés via Python ou autre, une correction de continuité est généralement faite. 
     Malgré tout, nous pouvons quand même dire à partir de ces données qui a eu la moins bonne affectation : Pierre et Sabine. 
     En effet, ces derniers ont eu la plus forte médiane 50\% des UEs attribués ont un rang au dessus de 2 et un IQR élevé (dans ce contexte) à 2, c'est à dire que les rangs sont  plus dispersés que pour les autres étudiants.
     Dans l'idéal, nous cherchons une médiane et un IQR sur les rangs non-facultatifs faible.
@@ -458,7 +463,7 @@ Le but que nous nous sommes fixés est d'atteindre une notion d'<<équité>> que
     Sur le dernier rang non-facultatif affecté, par exemple, cela se traduirais par <<le dernier rang non facultatif affecté à un étudiant est le plus faible possible (optimisation) et est similaire à celui des autres étudiants (minimiser les différences)>>.
 \end{definition}
 
-Par cette définition et cet example, nous observons donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant tandis qu'une aggregation de ces métriques (voir Annexe I pour plus de détails) permettent d'évaluer cette notion d'équité (Médianes faibles et IQR faibles ou Moyennes faibles et écarts-types faibles par exemple).
+Par cette définition et cet exemple, nous observons donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant tandis qu'une aggregation de ces métriques (voir Annexe I pour plus de détails) permettent d'évaluer cette notion d'équité (Médianes faibles et IQR faibles ou Moyennes faibles et écarts-types faibles par exemple).
 
 Comme dit plus tôt, la notion d'équité peut se définir en partie par les métriques, mais elle capture également des facteurs plus indirect tel que : <<Est-ce qu'un groupe d'étudiant est plus favorisé qu'un autre>>. À partir d'ici, nous allons voir trois moyens complémentaires d'évaluer cette équité. 
 Commençons directement par une aggregation : le coefficient de Gini.
@@ -478,7 +483,7 @@ Commençons directement par une aggregation : le coefficient de Gini.
 \end{metric}
 
 \begin{example}\label{ex:running5}
-    Toujours dans la continuité des examples, calculons l'indice de Gini pour les métriques calculés dans l'exemple~\ref{ex:running3} sur l'affectations des UEs de Sophie, Pierre, Hugo, Axel et Sabine. 
+    Toujours dans la continuité des exemples, calculons l'indice de Gini pour les métriques calculés dans l'exemple~\ref{ex:running3} sur l'affectations des UEs de Sophie, Pierre, Hugo, Axel et Sabine. 
     Nous avons $\widebar{m_\text{sum}} = \frac{3+4+3+3+4}{5}=3.4$ et $\widebar{m_\text{last}} = \frac{2+3+2+2+3}{2.4}$, avec $\#m_{\text{sum}} = \#m_{\text{sum}} = 5$. 
     Ainsi, nous avons :
     $$
@@ -525,7 +530,7 @@ L'avantage de cette notion est qu'elle nous permet non seulement de dire si une 
 mais aussi de mettre en place, si nous le souhaitons, une recherche locale en effectuant de tels échanges, tant que l'on en trouve, et ce pour maximiser/minimiser des métriques qui ne sont pas nécessairement linéaire.
 
 \begin{example}\label{ex:running6}
-    Maintenant, existe-t-il de tels échanges sur nos affectations des examples précédents ? Pour rappel, nous avions la matrice d'affectation des rangs suivante :
+    Maintenant, existe-t-il de tels échanges sur nos affectations des exemples précédents ? Pour rappel, nous avions la matrice d'affectation des rangs suivante :
     $$
         u_{i,j}\begin{bmatrix}
             \text{UEs} & \text{AI} & \text{Code} & \text{Éco} & \text{Droit}\\
@@ -631,6 +636,119 @@ Maintenant que nous avons des objectifs permettant de s'approcher séparément d
 Aussi, nous avons introduit précédemment la notion d'<<intégrité>>, mais celle-ci est en réalité difficile à définir en termes d'objectifs (d'autant plus linéaires) ; elle restera donc dans le domaine de l'évaluation et de la détection de problèmes a posteriori.
 
 \section{Entrée -- Sondage et Générateur de données synthétiques}
+Cette section décrit la récupération, la génération et la transformation données en entrée pour l'ensemble de ce processus. 
+De fait, les données en entrée peuvent provenir de deux sources fondamentalement différentes : des personnes physiques (les étudiants) ou un générateur de données synthétiques.
+La première est chronophage à obtenir, sujette à des erreurs de formatage et d'entrée, mais sont plus représentatives de la réalité. Les secondes sont plus simples et rapide à obtenir, sans erreurs, mais ne permettent pas de modéliser ce qui se passe réellement lorsqu'un étudiant fait un choix d'UE.
+Nous étudierons donc en premier comment sont générés les données et leurs formats, puis nous nous intéresserons à ce qui a été mis en place pour récupérer les données réelles.
+
+\subsection{Format des données}
+Dans ce rapport, nous avons déjà parlé des données que nous possédons pour le problème (Section~\ref{sec:Data}~\&~\ref{sec:Metric}), mais nous n'avons pas encore réellement discuté de comment elle étaient concrètement représentées. 
+
+Cette représentation se fait sous deux formats principaux : \texttt{csv} pour la compatibilité avec la sortie et \texttt{dat} pour le solveur. 
+Un premier fichier \texttt{csv} contient les informations de base sur les UEs ainsi : \texttt{<courseID}, \texttt{title}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{spots>}, où la première colonne correspond à un ID unique du cours, la deuxième à son nom, les suivantes indiquent par un booléen si l'UE est obligatoire pour chaque parcours (format : nomDuParcours\_track), enfin la dernière colonne affiche le nombre de places maximum pour chaque UE.
+
+\begin{example}[Format CSV des UEs]\end{example}
+\vspace{-\baselineskip}
+\begin{verbatim}
+id, title,                                   AI_track, CS_track, spots
+1,  AI Game Programming,                     true,     false,    45
+16, Container Orchestration and DevOps,      false,    true,     45
+9,  Modelling Distributed Systems (EN),      false,    false,    45
+10, Computational Complexity (EN),           false,    false,    45
+17, Introduction to Multiagent Systems (EN), true,     false,    45
+\end{verbatim}
+
+Un second fichier \texttt{json} contient les paramètres du système : le nombre d'étudiants, d'UEs, de parcours et leurs nombre minimum/maximum d'UEs facultatives et optionnelles. Voici un exemple :
+\begin{example}[Format JSON des spécifications du problème d'affectation]\end{example}
+\vspace{-\baselineskip}
+\begin{lstlisting}[language=python]
+{
+    "n":5,
+    "m":5,
+    "s":2,
+    "spe":{
+        "AI_track":{
+            "minNj":1,
+            "maxNj":3
+        },
+        "CS_track":{
+            "minNj":2,
+            "maxNj":4
+        }
+    }
+}
+\end{lstlisting}
+Un troisième fichier correspond à la matrice d'incompatibilité des UEs que nous représentons au format \texttt{csv} avec l'id de chaque UE sur la première ligne et la première colonne. Le reste de la matrice est remplis de 0 à l'exception des valeurs associées à des paires d'UEs non compatibles (conflits emploi du temps, requis, etc.), représentées par des 1.
+
+Enfin, un dernier fichier fondamental s'occupe de la représentation du rang accordée par chaque étudiants, sous le format \texttt{csv} suivant : <\texttt{studentID}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{maxOptional}, \texttt{Rg1}, $\cdots$, \texttt{RgP}>, où la première colonne correspond à l'id unique de l'étudiant, les colonnes suivantes le parcours de l'étudiant (représenté par des booléens) ; \texttt{maxOptional} le nombre maximum d'UE optionnelle et facultative voulu par l'étudiant. Le reste des colonnes indiquent les préférences de chaque étudiant pour chaque UE.
+\begin{example}[Format CSV des étudiants]
+En se basant sur l'exemple précédemment donné sur le format \texttt{csv} des UEs, nous pourrions avoir la représentation suivante pour les étudiants :
+\end{example}
+\vspace{-\baselineskip}
+\begin{verbatim}
+studentID, AI_track, CS_track, maxOptional, Rg1, Rg9, Rg10, Rg16, Rg17
+1,         true,     false,    1,           1.5, 3,   4,    5,    1.5  
+2,         false,    true,     2,           5,   4,   3,    1,    2
+3,         true,     false,    3,           1.5, 4,   5,    3,    1.5
+4,         false,    true,     3,           2,   3,   4,    1,    5
+5,         false,    true,     4,           3,   4.5, 4.5,  1,    2
+\end{verbatim}
+
+Remarquez dans cet exemple que le rangs dispose d'un format particulier ; en effet, il ne s'agit pas d'un nombre entier, mais d'une valeur réelle. Cette valeur est en fait une conséquence du traitement des égalités.
+Ici, nous utilisons la technique du rang moyen \cite{Philip2021} qui assigne la valeur suivante à chacun des rangs attribués : $\text{midRank}(z_k)=\frac{\#\{z_m\le z_k\}+\#\{z_m < z_k\}+1}{2}$, où le premier terme correspond au nombre de rangs inférieur ou égal au rang $z_k$ et où le second terme est le nombre de rang strictement inférieur à $z_k$. Cette technique du rang moyen nous assure que la somme des rangs est normalisé (identique pour chaque étudiant) et ce peu importe les valeurs initiales (cela permet d'éviter des biais potentielles sur les métriques et objectifs).
+Notez également, que ces égalités, que nous autorisons, se génère de deux manières : soit l'étudiant l'a choisi ainsi, soit l'UE est obligatoire dans son parcours et se retrouve attribuer le rang 1 par défaut (Hypothèse : les UEs obligatoires sont les préférés des étudiants).  
+
+Ces fichiers sont ensuite regroupés et converties dans un fichier \texttt{dat} interprétable par le solveur OPL.
+
+\subsection{Générateur de données synthétiques}
+Pour générer des données synthétiques adéquates pour le choix des étudiants, plusieurs méthodes existent. Une première approche consiste à les générer à la mains, mais cette démarche est bien plus adapté pour des cas de test et peut engendrer des biais en plus d'être chronophage. 
+Une deuxième approche, que nous exploiterons, consiste à la générer de manière aléatoire.
+
+Pour cela, nous pouvons commencer avec une méthode naïve afin de générer nos données en supposant (i) que les étudiants ne communiquent par leurs choix entre-eux (pas d'influences), (ii) que la répartition des rangs est uniforme par rapports aux UEs, excepté pour celles obligatoires (les étudiants n'ont pas de préférences particulières) et (iii) que le nombre d'UE choisi est uniforme (les étudiants n'ont pas de préférences à choisir un nombre d'UE particulier).
+Cette méthode est simple à mettre en place, mais dispose de contraintes fortement irréalistes ; en effet, des groupes d'étudiants peuvent communiquer entre eux pour choisir les mêmes UEs, des UEs peuvent être globalement plus attirantes que d'autres et les étudiants ont des personnalités/préférences différentes se traduisant assez souvent dans des profiles types. Nous allons donc plutôt émettre l'unique hypothèse suivante :
+
+\begin{Hypothesis}[Profiles d'étudiants]
+    Les étudiants peuvent être catégorisés en profil types et avoir par conséquent une préférence plus forte pour certaines UEs.
+\end{Hypothesis}
+
+Pour ce projet, nous définissons donc les profils suivants : \texttt{IA}, \texttt{Systèmes}, \texttt{Cyber}, \texttt{Web} et \texttt{Général} (pas de préférences particulières) ; chaque étudiant est ensuite associé à un profil type selon une distribution paramétrable. Les UEs sont également associés à un unique profil\footnote{Il pourrait être intéressant de voir s'il on peut associer plusieurs profiles à une UE plutôt que un unique.}, ce qui permettra d'orienter artificiellement la préférence des étudiants.
+Le rang attribué par chaque étudiant pour chaque UE avec cette logique de groupe se fait ainsi :
+$$
+    \forall i\in N, \forall j\in N : R_{i,j} = \text{midRank}(1-\text{score}),\ \text{score}=\begin{cases}
+    1&,\ j\in\text{mSet}(i)\\
+    \text{rnd}+\text{pb}&,\ j\not\in\text{mSet}(i)
+    \end{cases} 
+$$
+où $\text{rnd}$ correspond à une base aléatoire entre 0 et 0.5 et $\text{pb}$ à un biais entre 0 et 0.5 définit par la proximité du profil de l'étudiant $i$ à celui de l'UE $j$ (0 = éloignement total, 0.5 = proximité totale). 
+Nous prenons ensuite le rangs moyens de 1 moins le score afin de conserver l'ordre voulue sur les rangs (rang faible = préférence élevé).
+
+Avec cette méthode, entièrement paramétrable, nous sommes capables de nous rapprocher de ce qu'un étudiant pourrait réellement choisir, mais ce n'est évidemment pas parfait. 
+Voyons donc comment nous pouvons récupérer les informations des étudiants.
+
+\subsection{Données réelles}
+Afin de récupérer les données réelle des étudiants, un formulaire Google Form a été mis en place (même s'il n'a pas encore été distribué à date d'écriture du rapport). 
+Ce formulaire est disponible \href{https://docs.google.com/forms/d/1fwVHNHbTxya-Qh55OrPIojUvQd-1lwp7hdd4YcqTsh4/}{ici} et s'assure de récupérer les informations suivantes :
+\begin{itemize}
+    \item Le parcours de l'étudiant (obligatoire),
+    \item Un score de 1 au nombre d'UE définissant la préférence de l'étudiant à chaque UE (un score élevé revient à avoir une préférence élevé), (obligatoire)
+    \item La mention d'éventuelles contraintes particulières de l'étudiants.  
+\end{itemize}
+
+En s'assurant que les étudiant remplissent bien les cases, nous empêchons les valeurs vides, mais nous n'empêchons pas les valeurs invalides (textes, nombre négatifs, etc.). 
+Bien qu'inattendues, ces valeurs sont supportées ; s'il s'agit d'un nombre hors du champs autorisé, ce n'est pas grave, car il sera normalisé par la méthode du rang moyen plus tard ; cependant, s'il s'agit d'une autre valeur (comme un texte), nous attribuerons par défaut le pire rang pour cette UE, car nous la considérerons comme non désiré. 
+Notez qu'il est impossible de prévoir toutes les valeurs invalides, il conviendra donc de vérifier à la main et/ou de bien notifier les étudiants des procédures, afin d'éviter des réponses tel que : <<Je veux absolument cette matière>>, <<Non>>, <<2,0>>, <<2.0>>, etc.
+
+Une fois que les valeurs invalides sont gérées, nous pouvons retourner dans le processus initiale et calculer le rang final ainsi :
+$$
+    \forall i \in N\forall j\in M : R_{i,j} = \text{midRank}(\max\{\text{score}\}-\text{score}),\ \text{score}=\begin{cases}
+        \max\{\text{score}\}+1 &,\ j\in\text{mSet}(i)\\
+        \widehat{\text{score}} &,\ j\not\in\text{mSet}(i)
+    \end{cases}
+$$
+où $\widehat{score}$ correspond au score attribué par l'étudiant $i$ à l'UE $j$. Notez bien que si l'UE est obligatoire pour l'étudiant $i$, nous la forçons à avoir le score le plus élevé afin de garder la cohérence que nous utilisons dans le solveur ou les métriques.
+Le score obtenu est ensuite normalisé en rangs en gardant l'ordre désiré.
+
+À partir de là, il ne nous manque plus qu'à fusionner le résultats avec les fichiers \texttt{csv} et \texttt{json} afin de former le fichier \texttt{dat} dans le solveur.
 
 \section{Solveur -- Méthode d'affectation des UEs}
 
