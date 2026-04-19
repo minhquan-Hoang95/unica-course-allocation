@@ -1,0 +1,117 @@
+/*********************************************
+ * OPL 22.1.0.0 Data
+ * Fichier de test pour l'objectif 1 :
+ *   Minimiser la somme des rangs (utilite globale)
+ *
+ * Scenario : Master Informatique, 2 parcours, 8 etudiants, 10 UE.
+ *   - Parcours 1 (Informatique) : 2 UE obligatoires, entre 6 et 8 optionnelles
+ *   - Parcours 2 (IA)           : 3 UE obligatoires, entre 5 et 7 optionnelles
+ *
+ * Choix des donnees :
+ *   - Capacites volontairement serrees sur certaines UE populaires
+ *     pour creer de la competition et verifier que le solveur arbitre bien.
+ *   - Une paire d'incompatibilites d'emploi du temps.
+ *   - Preferences variees et realistes (pas de cas parfait symetrique).
+ *********************************************/
+
+
+// ---------------------------------------------------------------------------
+// Dimensions
+// ---------------------------------------------------------------------------
+
+n = 8;   // Nombre d'etudiants
+m = 10;  // Nombre d'UE
+p = 2;   // Nombre de parcours (1 = Informatique, 2 = IA)
+
+
+// ---------------------------------------------------------------------------
+// Objectif
+// ---------------------------------------------------------------------------
+
+// objType = 1 : Minimiser la somme des rangs (utilite globale).
+objType = 1;
+
+// rankThreshold : non utilise par l'objectif 1, mais requis par le modele.
+// On lui donne une valeur neutre (moitie des UE).
+rankThreshold = 5;
+
+// minWanted / maxUnwanted : non utilises par l'objectif 1, valeurs neutres.
+minWanted   = 3;
+maxUnwanted = 3;
+
+
+// ---------------------------------------------------------------------------
+// Bornes globales sur le nombre d'UE par etudiant
+// ---------------------------------------------------------------------------
+
+// Conforme au sujet : entre 8 et 10 UE par etudiant.
+gmin = 8;
+gmax = 10;
+
+
+// ---------------------------------------------------------------------------
+// Cours
+// ---------------------------------------------------------------------------
+
+// c[j] : capacite de l'UE j (places disponibles hors places obligatoires).
+// UE 1 a 8 : places limitees.
+// UE 9 et 10 : mineures externalisees, capacite "illimitee" = n.
+//
+//       UE1  UE2  UE3  UE4  UE5  UE6  UE7  UE8  UE9 UE10
+c = [    5,   5,   4,   4,   6,   6,   3,   3,   8,   8  ];
+
+// conflicts : paires d'UE en conflit d'emploi du temps.
+// UE 3 et UE 5 ont lieu au meme creneau -> incompatibles.
+// UE 7 et UE 8 ont lieu au meme creneau -> incompatibles.
+// Format : {<ue1, ue2>} avec ue1 < ue2 par convention.
+conflicts = {<3, 5>, <7, 8>};
+
+
+// ---------------------------------------------------------------------------
+// Parcours
+// ---------------------------------------------------------------------------
+
+// mmin[k] : nombre minimum d'UE optionnelles dans le parcours k.
+// Parcours 1 (Informatique) : au moins 6 optionnelles  (8 total - 2 obligatoires)
+// Parcours 2 (IA)           : au moins 5 optionnelles  (8 total - 3 obligatoires)
+mmin = [6, 5];
+
+// mandatory : paires (UE, parcours) pour lesquelles l'UE est obligatoire.
+// Parcours 1 (Informatique) : UE 1 et UE 2 sont obligatoires.
+// Parcours 2 (IA)           : UE 1, UE 4 et UE 6 sont obligatoires.
+// UE 1 est obligatoire dans les deux parcours (tronc commun).
+mandatory = {<1, 1>, <2, 1>, <1, 2>, <4, 2>, <6, 2>};
+
+
+// ---------------------------------------------------------------------------
+// Etudiants
+// ---------------------------------------------------------------------------
+
+// parc[i] : parcours de l'etudiant i (1 = Informatique, 2 = IA).
+// Etudiants 1 a 5 : Informatique | Etudiants 6 a 8 : IA
+parc = [1, 1, 1, 1, 1, 2, 2, 2];
+
+// mmax[i] : nombre maximum d'UE souhaite par l'etudiant i.
+// Doit etre dans [gmin, gmax] = [8, 10].
+// Chaque etudiant peut demander entre 8 et 10 UE.
+//             E1  E2  E3  E4  E5  E6  E7  E8
+mmax = [        9,  8, 10,  9,  8,  9, 10,  8 ];
+
+// r[i][j] : rang de l'UE j pour l'etudiant i.
+// Convention : rang 1 = cours le plus desire, rang 10 = cours le moins desire.
+// Les UE obligatoires sont classees en priorite haute (rangs 1-3) par convention.
+// Les preferences optionnelles refletent des gouts varies entre etudiants.
+//
+// Lecture : r[i] = [rang_UE1, rang_UE2, ..., rang_UE10]
+//
+//                UE1  UE2  UE3  UE4  UE5  UE6  UE7  UE8  UE9 UE10
+r = [
+  [  1,  2,  3,  8,  4,  9,  5,  6,  7, 10 ],   // Etudiant 1 (Informatique) : UE 1,2 oblig. -> rang 1,2
+  [  1,  2,  5,  9,  3,  8,  4,  7,  6, 10 ],   // Etudiant 2 (Informatique)
+  [  1,  2,  4,  7,  6,  9,  3,  5,  8, 10 ],   // Etudiant 3 (Informatique)
+  [  1,  2,  6,  8,  3,  7,  4,  5,  9, 10 ],   // Etudiant 4 (Informatique)
+  [  1,  2,  3,  9,  5, 10,  6,  4,  7,  8 ],   // Etudiant 5 (Informatique)
+  [  1,  9,  7,  2,  8,  3,  5,  6,  4, 10 ],   // Etudiant 6 (IA) : UE 1,4,6 oblig. -> rang 1,2,3
+  [  1,  8,  6,  2,  9,  3,  4,  7,  5, 10 ],   // Etudiant 7 (IA)
+  [  1, 10,  5,  2,  7,  3,  6,  8,  4,  9 ]    // Etudiant 8 (IA)
+];
