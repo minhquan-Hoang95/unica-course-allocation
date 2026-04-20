@@ -1,0 +1,36 @@
+\babel@toc {french}{}\relax
+\contentsline {section}{\numberline {1}Introduction et problématique}{3}{section.2}%
+\contentsline {subsection}{\numberline {1.1}Description}{3}{subsection.3}%
+\contentsline {subsection}{\numberline {1.2}Objectifs}{3}{subsection.4}%
+\contentsline {subsection}{\numberline {1.3}Organisation du rapport}{4}{subsection.6}%
+\contentsline {section}{\numberline {2}Données}{4}{section.9}%
+\contentsline {subsection}{\numberline {2.1}Données disponibles}{4}{subsection.10}%
+\contentsline {subsection}{\numberline {2.2}Format des données}{4}{subsection.11}%
+\contentsline {subsubsection}{\numberline {2.2.1}Entrée}{5}{subsubsection.12}%
+\contentsline {subsubsection}{\numberline {2.2.2}Sortie}{5}{subsubsection.13}%
+\contentsline {subsubsection}{\numberline {2.2.3}Contraintes}{5}{subsubsection.14}%
+\contentsline {paragraph}{Note.}{6}{section*.15}%
+\contentsline {section}{\numberline {3}Métriques d'évaluations et de comparaisons}{6}{section.17}%
+\contentsline {subsection}{\numberline {3.1}Biais de type I}{7}{subsection.22}%
+\contentsline {subsection}{\numberline {3.2}Métriques vectorielles}{8}{subsection.25}%
+\contentsline {subsection}{\numberline {3.3}Indicateurs de qualité et d'équité}{10}{subsection.29}%
+\contentsline {subsubsection}{\numberline {3.3.1}Le coefficient de Gini}{11}{subsubsection.31}%
+\contentsline {subsubsection}{\numberline {3.3.2}Pareto en tant que mesure d'équité}{12}{subsubsection.34}%
+\contentsline {subsubsection}{\numberline {3.3.3}Tests d'Hypothèses}{13}{subsubsection.38}%
+\contentsline {subsection}{\numberline {3.4}Fonctions objectifs}{14}{subsection.41}%
+\contentsline {section}{\numberline {4}Entrée -- Sondage et Générateur de données synthétiques}{15}{section.42}%
+\contentsline {subsection}{\numberline {4.1}Format des données}{15}{subsection.43}%
+\contentsline {subsection}{\numberline {4.2}Générateur de données synthétiques}{17}{subsection.63}%
+\contentsline {subsection}{\numberline {4.3}Données réelles}{17}{subsection.65}%
+\contentsline {section}{\numberline {5}Solveur -- Méthode d'affectation des UEs}{18}{section.66}%
+\contentsline {subsection}{\numberline {5.1}Baseline de comparaison : \textit {first-come first-served}}{18}{subsection.67}%
+\contentsline {subsection}{\numberline {5.2}Solveur exact : modèle de programmation linéaire en nombres entiers (OPL/CPLEX)}{18}{subsection.68}%
+\contentsline {paragraph}{Données d'entrée du solveur}{18}{section*.69}%
+\contentsline {paragraph}{Contraintes}{19}{section*.70}%
+\contentsline {paragraph}{Objectifs d'optimisation}{19}{section*.71}%
+\contentsline {paragraph}{Sorties du solveur}{19}{section*.72}%
+\contentsline {section}{\numberline {6}Sortie -- Visualisation des résultats}{19}{section.73}%
+\contentsline {subsection}{\numberline {6.1}Sortie brute : affectation au format CSV}{19}{subsection.74}%
+\contentsline {subsection}{\numberline {6.2}Sorties analytiques : vecteurs et agrégats pour le tableau de bord}{20}{subsection.75}%
+\contentsline {subsection}{\numberline {6.3}Visualisations minimales (vision tableau de bord)}{20}{subsection.76}%
+\contentsline {section}{\numberline {7}Conclusion}{20}{section.77}%
