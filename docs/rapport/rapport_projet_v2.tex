@@ -77,7 +77,7 @@
 \begin{abstract}
 Ce document constitue un rapport (version de travail) pour le projet \emph{unica-course-allocation} consacré à l'affectation des unités d'enseignement (UE) du Master Informatique.
 Il présente le contexte et les objectifs, décrit les données disponibles, puis propose une formalisation des principales contraintes du problème.
-L'ambition est de développer une méthode d'affectation explicable qui améliore l'équité tout en servant d'aide à la décision (comparaison et sélection de scénarios d'affectation).
+L'ambition est de développer une méthode d'affectation explicable, qui améliore l'équité, tout en servant d'aide à la décision (comparaison et sélection de scénarios d'affectation).
 Le document vise une longueur d'environ \textasciitilde{}20 pages (hors annexes).
 
 Notez que les annexes ne sont pas nécessaires à la compréhension du sujet, mais constituent des éléments utiles pour une analyse du sujet en plus grande profondeur.
@@ -89,58 +89,58 @@ Notez que les annexes ne sont pas nécessaires à la compréhension du sujet, ma
 
 \section{Introduction et problématique}
 \subsection{Description}
-À l'université Côte d'Azur, les étudiants en Master Informatique structurent leur parcours chaque semestre en choisissant librement les matières qu'ils souhaitent suivre.
-Le master est scindé en deux parcours : Informatique et IA. Peu importe leur spécialité, les étudiants suivent une sélection dans le même ensemble de cours/matières appelés <<unité d'enseignement>> [UE].
-Pour chaque parcours, certaines UE sont obligatoires et d'autres optionnelles. Au total, un étudiant suit entre 8 et 10 UE.  
+À l'université Côte d'Azur, les étudiants en master informatique structurent leur parcours chaque semestre en choisissant librement les matières qu'ils souhaitent suivre.
+Le master est divisé en deux parcours : Informatique et IA. Peu importe leur spécialité, tous les étudiants suivent une sélection de cours/matières appelés << unité d'enseignement >> (UE).
+Pour chaque parcours, certaines UE sont obligatoires et d'autres optionnelles. Au total, un étudiant suit entre 8 et 10 UEs.  
 
 Chaque UE dispose néanmoins d'un nombre de places limité. Comme différentes UE sont obligatoires dans certains parcours, le nombre de places proposées pour les autres parcours diminue également.
-De plus, en raison d'incompatibilités entre certaines UE (conflit d'emploi du temps [EdT], par exemple), le choix des étudiants est réduit.
+De plus, en raison d'incompatibilités entre certaines UE (conflit d'emploi du temps, par exemple), le choix des étudiants est limité.
 
-Aujourd'hui, l'université se repose sur un système simple, explicable et facile à mettre en place pour l'attribution des places, à savoir <<premier arrivé, premier servi>>. 
+Actuellement, l'université repose sur un système simple, compréhensible et facile à mettre en place pour l'attribution des places : << premier arrivé, premier servi >>. 
 Malheureusement, ce système engendre de multiples inégalités. En effet, les étudiants qui s'inscrivent en premier obtiennent toutes les UE qu'ils souhaitent, tandis que les derniers n'en obtiennent aucune.
-À cela peuvent également s'ajouter des facteurs externes susceptibles de retarder le choix des étudiants (contraintes personnelles ou techniques, mauvaise manipulation, faible connexion Internet, etc.). 
-Le système actuel accentue malheureusement aussi l'impact de ces facteurs sur le parcours final de l'étudiant.
+À cela peuvent aussi s'ajouter des facteurs externes susceptibles de retarder le choix des étudiants (contraintes personnelles ou techniques, mauvaise manipulation, faible connexion Internet, etc.). 
+Le système actuel accentue également l'impact de ces facteurs sur le parcours final de l'étudiant.
 
-Des étudiants et des professeurs, informés de cette problématique, lancent une initiative collective [IC] pour trouver une meilleure méthode d'affectation des UE.
+Des étudiants et des professeurs, informés de cette problématique, lancent une initiative collective (IC) pour trouver une meilleure méthode d'affectation des UEs.
 
 \subsection{Objectifs}
 À travers une preuve de concept, l'IC devra répondre aux questions/consignes suivantes :
 \begin{itemize}
-    \item Le problème étant multicritère et multiagent, il n'existe, par nature, pas d'affectation <<optimale>>. L'IC devra donc définir le concept <<d'affectation équitable>> et trouver un moyen de l'évaluer quantitativement.
-    \item Proposez un processus simple à \textbf{mettre en place} et de préférence compréhensible/explicable, permettant d'améliorer le système d'affectation des UE.
+    \item Le problème étant multicritère et multiagent, il n'existe pas d'affectation << optimale >> par nature. L'IC devra donc définir le concept d'<< affectation équitable >> et trouver un moyen de l'évaluer quantitativement.
+    \item Proposez un processus simple à mettre en place, de préférence compréhensible et explicable, permettant d'améliorer le système d'affectation des UEs.
     \item Proposez une preuve de concept flexible à d'autres paramètres (nombre de cours, d'étudiants, de parcours/spécialités, de places, nombre de cours obligatoires, etc.).
     \item Présentez vos résultats de manière à ce que votre système soit \textbf{facilement compréhensible} et \textbf{scientifiquement cohérent}. 
 \end{itemize}
-\textbf{Note 1 :} \underline{\textit{Idéalement}}, le système proposé doit être simple (processus, algorithmes, etc.), facile à comprendre, à vulgariser et à exploiter, mais aussi compréhensible/explicable et <<intègre>> (il n'existe pas de moyens simples de détourner le système afin de s'avantager par rapport aux autres étudiants). 
+\textbf{Note 1 :} \underline{\textit{Idéalement}}, le système proposé doit être simple (processus, algorithmes, etc.), facile à comprendre, à vulgariser et à exploiter, mais aussi compréhensible, explicable et << intègre >> (il ne doit pas être possible de le détourner facilement pour obtenir un avantage par rapport aux autres étudiants). 
 
 \begin{definition}[Équité (définition opérationnelle)]
-    Dans ce rapport, nous proposons pour commencer une définition simple d'équité que nous développerons au fur-et-à-mesure de celui-ci. Ainsi, nous qualifierons, dans un premier temps, d'affectation \textit{équitable} toutes affectations (i) respectant les contraintes du problème énoncé, (ii) garantissant un niveau de satisfaction <<acceptable>> pour l'ensemble des étudiants (éviter les situations très défavorisées), (iii) limitant les écarts de satisfactions entre les étudiants, (iv) tout en restant compatible avec une interprétation simple par les responsables de formation.
+    Dans ce rapport, nous proposons pour commencer une définition simple de l'équité, que nous développerons au fur-et-à-mesure de celui-ci. Ainsi, nous qualifierons, dans un premier temps, d'affectation << équitable >> toutes affectations (i) respectant les contraintes du problème énoncé, (ii) garantissant un niveau de satisfaction << acceptable >> pour l'ensemble des étudiants (éviter les situations très défavorisées), (iii) limitant les écarts de satisfactions entre les étudiants, (iv) tout en restant compatible avec une interprétation simple par les responsables de formation.
 \end{definition}
 
 \subsection{Organisation du rapport}
-Ce rapport, volontairement concis (\textasciitilde{}20 pages hors annexes), couvre l'architecture globale du projet:
+Ce rapport, volontairement concis (\textasciitilde{}20 pages hors annexes), couvre l'architecture globale du projet :
 \begin{figure}[H]
     \includegraphics[width=\textwidth]{img/Project Flow Diagram.png}
     \caption{Architecture globale du projet}
 \end{figure}
 
-Où l'entrée compose sur la récupération des données, leurs gestions et leurs transformations pour leurs exploitations ; le solveur possède l'apanage de la résolution du problème d'affectation ; enfin, la sortie gère la visualisation et l'évaluation des affectations en sortie.
-Dans ce rapport, après l'introduction du contexte et des objectifs, ci-haut faite, nous présentons dans la suite du rapport le format des données, les contraintes que nous exploiterons, les métriques et mesures de qualités définissant une affectation <<équitable>>, les processus et méthodes employées pour les obtenir, ainsi que les visualisations utiles pour comparer différentes affectations afin de soutenir une décision. 
+L'entrée traite de la récupération, de la gestion et de la transformation des données pour leur exploitation ; le solveur résout le problème d'affectation ; enfin, la sortie gère la visualisation et l'évaluation des affectations.
+Dans ce rapport, après l'introduction du contexte et des objectifs, nous présentons le format des données, les contraintes que nous exploiterons, les métriques et mesures de qualité définissant une affectation << équitable >>, les processus et méthodes employés pour les obtenir, ainsi que les visualisations utiles pour comparer différentes affectations et soutenir une décision. 
 
 
 \section{Données}\label{sec:Data}
 \subsection{Données disponibles}
 Pour mener à bien ce projet, l'IC dispose des informations suivantes :
 \begin{itemize}
-    \item La liste complète des UE obligatoires et optionnelles pour chaque parcours, ainsi que le nombre de places disponibles (hors places réservées pour les UEs obligatoires).
-    \item L'EdT du semestre afin d'observer les potentiels conflits entre les UE.
+  \item La liste complète des UEs obligatoires et optionnelles pour chaque parcours, ainsi que le nombre de places disponibles (hors places réservées pour les UE obligatoires) ;
+    \item L'EdT du semestre, afin d'observer les potentiels conflits entre les UEs ;
     \item La liste des préférences de chaque étudiant pour chaque UE proposée, le nombre d'UE qu'il souhaite suivre et sa spécialité.
 \end{itemize}
 
 Notes :
 \begin{itemize}
-    \item Certaines UE externes au processus principal d'affectation peuvent être considérées à capacité <<illimitée>>,
-    \item Toute UE non obligatoire dans un parcours est considérée comme optionnelle.
+    \item Certaines UE externes au processus principal d'affectation peuvent être considérées comme ayant une capacité << illimitée >>,
+    \item Toutes les UEs non obligatoires dans un parcours sont considérées comme optionnelles.
 \end{itemize}
 
 \subsection{Format des données}
@@ -224,19 +224,18 @@ $\mathbf{1}_{a=b}$ est la fonction indicatrice définie par 1 si $a=b$ et 0 sino
 
 \section{Métriques d'évaluations et de comparaisons}\label{sec:Metric}
 
-Dans le cadre de ce projet, être en mesure d'évaluer et de comparer plusieurs instances d'affectations d'étudiant est important. 
-En effet, sans cela, nous serions bien incapable de mesurer une potentielle amélioration du système, actuellement exploité, mais aussi de vérifier l'existence d'éventuels biais
-dans les affectations et donc d'établir si une affectation est << équitable >>.
+Dans le cadre de ce projet, il est important de pouvoir évaluer et comparer plusieurs instances d'affectation d'étudiants. 
+Sans cela, nous serions en effet incapables de mesurer une potentielle amélioration du système actuellement exploité, mais aussi de vérifier l'existence d'éventuels biais dans les affectations, et donc d'établir si une affectation est << équitable >>.
 
-Afin de réaliser cet objectif d'évaluation, nous devons développer des métriques et des indicateurs adéquats au problème.
-Dans ce rapport, nous nous concentrons sur les métriques vectorielles, contenant une valeur pour chaque entité mesuré, mais aussi sur d'autres indicateurs nous permettant d'évaluer les potentiels biais d'une affectation. 
+Pour atteindre cet objectif, nous devons développer des métriques et des indicateurs adaptés au problème.
+Dans ce rapport, nous nous concentrons sur les métriques vectorielles contenant une valeur pour chaque entité mesurée, mais aussi sur d'autres indicateurs nous permettant d'évaluer les biais potentiels d'une affectation. 
 
 \begin{remark}
-    Dans ce document, nous avons concentré les informations les plus importantes, mais un gros travail de réflexion sur les métriques, les éventuelles alternatives et biais induits a été mené. Celui-ci est disponible sous la forme d'une annexe (\textbf{\textit{Annexe I - Brouillon et Réflexions sur les Métriques}}), dont cette partie est un résumé.
+    Ce document concentre les informations les plus importantes, mais un important travail de réflexion sur les métriques, les éventuelles alternatives et les biais induits a été mené. Il est disponible sous la forme d'une annexe (\textbf{\textit{Annexe I - Brouillon et Réflexions sur les Métriques}}), dont cette partie constitue un résumé.
 \end{remark}
 
-Dans la suite de cette section, nous présentons une partie des métriques développées, leurs avantages et leurs défauts.
-Avant cela, nous devons néanmoins définir plusieurs notions :
+Dans la suite de cette section, nous présentons certaines des métriques développées, ainsi que leurs avantages et leurs inconvénients.
+Avant cela, nous devons toutefois définir plusieurs notions :
 
 \begin{definition}[Produit de Schur]
     Soit $X$ et $Y$ deux matrices de même dimension dans $\mathbb{R}_{n,m}$, nous définissons le produit de Schur $\odot$
@@ -265,10 +264,10 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
 \end{definition}
 
 \begin{example}\label{ex:running1}
-    Dans le cadre de ce rapport, nous allons développer un exemple fictif et l'exploiter tout du long à des fins d'illustrations.
-    Pour cet exemple, nous aurons 5 étudiants : Sophie et Pierre en parcours IA, puis Hugo, Axel et Sabine en parcours Informatique.
-    Il y a 4 UEs : AI, obligatoire en IA, Code, obligatoire en Informatique, Éco et Droit. Chaque cours dispose de 4 places (places réservées incluses). 
-    Un étudiant doit choisir entre 2 et 3 UEs. Voici les préférences de chaque étudiants, ainsi que le nombre d'UEs qu'ils souhaitent prendre :
+    Dans le cadre de ce rapport, nous allons développer un exemple fictif que nous exploiterons tout au long de l'étude à des fins d'illustration.
+    Pour cet exemple, nous aurons cinq étudiants : Sophie et Pierre, suivant le parcours IA, puis Hugo, Axel et Sabine, suivant le parcours Informatique.
+    Il y a 4 UEs : AI est obligatoire en IA, Code est obligatoire en Informatique, Éco et Droit sont optionnels. Chaque cours dispose de quatre places (places réservées incluses). 
+    Un étudiant doit choisir entre deux et trois UEs. Voici les préférences de chaque étudiant, ainsi que le nombre d'UEs qu'ils souhaitent prendre :
     
     $$
     \begin{aligned}
@@ -317,24 +316,24 @@ Avant cela, nous devons néanmoins définir plusieurs notions :
         \end{bmatrix}
     \end{aligned}
     $$
-    Avec celle ci, nous pouvons donc voir que tous les étudiants se sont fait affecté leurs UEs obligatoires et que Sabine et Pierre n'ont pas eu leurs deuxièmes choix. 
-    Nous pouvons également observer que les cours AI, et Code sont complets. 
+    Grâce à celle-ci, nous pouvons donc voir que tous les étudiants se sont vu attribuer leurs UEs obligatoires, et que Sabine et Pierre n'ont pas obtenu leur deuxième choix. 
+    Nous pouvons également constater que les cours AI et Code sont complets. 
 \end{example}
 
-Maintenant que nous avons introduit la matrice des rangs d'affectation, nous serons en capacité d'introduire les métriques vectorielles que nous utiliserons dans ce projet. 
-Néanmoins, avant cela, nous devons réfléchir à la nature des données et leurs biais intrinsèques.
+Maintenant que nous avons introduit la matrice des rangs d'affectation, nous pouvons présenter les métriques vectorielles que nous utiliserons dans ce projet. 
+Toutefois, avant cela, nous devons réfléchir à la nature des données et à leurs biais intrinsèques.
 
 \subsection{Biais de type I}
-Dans la majorité des mesures auxquels nous souhaiterions recourir (moyenne, somme, écart-type, etc.), nous observons premièrement que nous travaillerons sur des rangs, qui, par nature, augmentent avec le nombre d'entité classés. 
-De plus, nous observons que chaque étudiant dispose d'une certaine liberté dans le nombre d'UEs qu'il choisit. Malheureusement, bien que cela soit bénéfique pour l'étudiant, cela rend propice l'apparition de biais sur nos futures mesures.
+Dans la plupart des mesures auxquelles nous souhaiterions recourir (moyenne, somme, écart-type, etc.), nous constatons tout d'abord que nous travaillerons sur des rangs qui, par nature, augmentent avec le nombre d'entités classées. 
+De plus, nous observons que chaque étudiant dispose d'une certaine liberté dans le choix du nombre d'UEs. Si cela est bénéfique pour l'étudiant, cela rend toutefois propice l'apparition de biais dans nos futures mesures.
 
-Ainsi, si nous avons un étudiant $E_1$ choisissant 9 UEs et un autre $E_2$ en choisissant 7, $E_1$ se verra octroyer des rangs supplémentaires dans la matrice d'affectation des rangs (pour la huitième et la neuvième UE) ; or, par nature des rangs, ceux-ci sont plus élevé que le septième rang lui étant été attribué.
-Des métriques qui pourraient êtres intéressantes, comme le dernier rang, la somme/moyenne des rangs ou l'écart-type, se voient donc artificiellement augmentées. $E_2$ ne se voyant pas attribué un huitième et neuvième rang, celui-ci aura en général des valeurs plus faibles pour les métriques citées que $E_1$.
+Ainsi, si un étudiant $E_1$ choisit 9 UEs et un autre $E_2$ en choisit 7, $E_1$ se verra octroyer des rangs supplémentaires dans la matrice d'affectation des rangs (pour la huitième et la neuvième UE) ; or, par nature, ces rangs sont plus élevés que le septième rang qui lui a été attribué.
+Des métriques intéressantes, comme le dernier rang, la somme ou la moyenne des rangs, ou encore l'écart-type, se voient donc artificiellement augmentées. Comme $E_2$ ne se voit pas attribuer de huitième et de neuvième rang, il aura en général des valeurs plus faibles pour les métriques citées que $E_1$.
 
-Bien que cette remarque semble innocente, elle pose en réalité un vrai problème, car elle s'étend aux optimisations que nous chercherons à faire pour obtenir la <<meilleure>> affectation possible.
-En effet, nous cherchons généralement à minimiser une métrique sur les rangs ; ainsi, $E_1$ ayant pour cette métrique une valeur plus élevé se verra probablement priorisé par rapport à $E_2$ et ce même si celui-ci pourrait avoir une moins bonne affectation en général.
-Nous désignerons ce biais comme un biais de <<\textbf{Type I}>> (un biais de Type II existe également sur des instances particulières, voir Annexe I pour plus d'information).
-Pour réduire ce biais au plus possible, nous allons tout d'abord devoir mieux préciser la nature des UEs.
+Bien que cette remarque semble anodine, elle pose en réalité un véritable problème, car elle s'étend aux optimisations que nous chercherons à effectuer pour obtenir la << meilleure >> affectation possible.
+En effet, nous cherchons généralement à minimiser une métrique sur les rangs ; ainsi, $E_1$ aura une valeur plus élevée pour cette métrique et sera probablement priorisé par rapport à $E_2$, même si celui-ci pourrait avoir une moins bonne affectation en général.
+Nous désignerons ce biais comme un biais de <<\textbf{Type I}>> (un biais, dit de Type II, existe également sur des instances particulières ; voir l'Annexe I pour plus d'informations).
+Pour réduire ce biais au maximum, nous devons tout d'abord mieux préciser la nature des UEs.
 
 \begin{definition}
     Soit $\text{aSet(i)}\subseteq M=\arg_j\left\{\mathbf{1}_{A_{i,j}=1}\right\}$, l'ensemble, ordonné par rangs, des UEs affectés à un étudiant $i\in N$, nous pouvons distinguer trois types d'UEs : 
@@ -348,7 +347,7 @@ nous pouvons montrer que le nombre d'UE minimum pour passer le semestre $m_{\min
 est égal peu importe les parcours.
 
 \begin{example}\label{ex:running2}
-    En se basant sur l'exemple~\ref{ex:running1}, nous reprenons nos étudiants : Sophie, Pierre, Hugo, Axel et Sabine. Voici l'ensemble ordonnées des affectations, des affectations obligatoires, optionnelles et facultatives pour chacun d'entre eux :
+    En se basant sur l'exemple~\ref{ex:running1}, nous reprenons nos étudiants : Sophie, Pierre, Hugo, Axel et Sabine. Voici l'ensemble ordonné des affectations, des affectations obligatoires, optionnelles et facultatives pour chacun d'entre eux :
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -358,44 +357,44 @@ est égal peu importe les parcours.
         \text{fSet}(i) & \emptyset & \{\text{Droit}\} & \{\text{Éco}\} & \{\text{Droit}\} & \{\text{Droit}\}
     \end{bmatrix}
     $$
-    Ici, nous pouvons, en quelques sortes, voir la nature de <<tiroir>> de ces catégories, nous remplissons en effet d'abord l'ensemble des UEs obligatoires, puis des UEs optionnelles et enfin des UEs facultatives s'il y en a. 
+    Ici, nous pouvons voir la nature de << tiroir >> de ces catégories : nous remplissons d'abord l'ensemble des UEs obligatoires, puis les UEs optionnelles, et enfin les UEs facultatives, s'il y en a. 
 \end{example}
 
-Dans notre cadre, où nous émettons l'hypothèse que le nombre d'UE dans l'union de $\text{mSet}$ et de $\text{oSet}$ est identique pour chaque étudiant et parcours (il s'agit bien de notre cas dans notre Master, mais attention, ce n'est pas forcément le cas dans le cadre général), alors nous disposons maintenant d'une borne fixe sur le nombre d'UE plutôt que d'une borne variant selon le désir des étudiants. 
-Ainsi, les étudiants étant placés à la même enseigne, le biais de Type I ne fait plus effet si nous calculons nos métrique sur l'ensemble des affectations non facultatives.
+Dans notre cas, où nous émettons l'hypothèse que le nombre d'UE dans l'union de $\text{mSet}$ et de $\text{oSet}$ est identique pour chaque étudiant et parcours (ce qui est bien le cas dans notre master, mais attention, ce n'est pas forcément le cas dans le cadre général), nous disposons maintenant d'une borne fixe sur le nombre d'UE plutôt que d'une borne variant selon les souhaits des étudiants. 
+Ainsi, les étudiants étant placés à la même enseigne, le biais de Type I n'a plus d'effet si nous calculons nos métriques sur l'ensemble des affectations non facultatives.
 
-À noter néanmoins que cela a une implication forte : \textbf{Les UEs facultatives sont moins importantes que les UEs non facultatives}. 
-De ce fait, nous pouvons nous permettre une moins bonne affectations pour les UEs facultatives, pour lequel l'étudiant pourra l'abandonner sans conséquences, si cela nous permet d'avoir une meilleur affectation des UEs obligatoires et optionnelles que l'étudiant ne pourra pas abandonner s'il veut passer son semestre.
+À noter néanmoins que cela a une forte implication : \textbf{Les UEs facultatives sont moins importantes que les UEs non facultatives}. 
+Nous pouvons donc nous permettre une moins bonne affectation des UEs facultatives, que l'étudiant pourra abandonner sans conséquences, si cela nous permet d'avoir une meilleure affectation des UEs obligatoires et optionnelles, que l'étudiant ne pourra pas abandonner s'il veut valider son semestre.
 
 Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectorielles.
 
 \subsection{Métriques vectorielles}
 \begin{metric}[Dernier rang non facultatif affecté]
-    Définit pour les étudiants uniquement, le dernier rang non facultatif affecté correspond pour chaque étudiant $i$ au rang maximum des $m_{\min}(i)$ UEs au rang le plus faible.
+    Définie pour les étudiants uniquement, le dernier rang non facultatif affecté correspond pour chaque étudiant $i$ au rang maximum des $m_{\min}(i)$ UEs au rang le plus faible.
     Elle se formalise ainsi :
     $$
         \forall i\in N : \text{lastMandatoryRank}(i) = \max_{j\in \text{mSet}(i)\cup\text{oSet}(i)} U_{i,j}  
     $$
-    En prenant le dernier rangs des UEs requises pour passer le semestre, cette métrique fait la promesse d'être intuitive, compréhensible et simple à calculer tout en nous donnant une borne supérieure sur les rangs affectés (ce qui peut être utile à des fins de minimisations). 
-    Malheureusement, celle-ci ne capture pas la distribution des rangs affectés inférieurs. 
-    En d'autre termes, un étudiant peut se voir affecter un dernier rang élevé, mais n'avoir que des UEs de rangs faibles pour ces autres affectations ; à l'inverse, un étudiant peut aussi avoir un dernier rang affecté moyen, mais avoir ces autres affectations très concentrées autours de cette borne, rendant ainsi l'affectation non satisfaisante pour l'étudiant. 
-    Nous devons donc trouver une autre métrique permettant de prendre en compte cette distribution, même ne serait-ce qu'implicitement. 
+    En prenant le dernier rang des UEs requises pour valider le semestre, cette métrique est intuitive, compréhensible et simple à calculer, tout en fournissant une borne supérieure sur les rangs affectés (ce qui peut être utile pour des minimisations). 
+    Malheureusement, elle ne prend pas en compte la distribution des rangs inférieurs. 
+    Autrement dit, un étudiant peut se voir attribuer un dernier rang élevé, mais avoir des UEs de rangs faibles pour les autres affectations ; inversement, un étudiant peut avoir un dernier rang moyen, mais voir ses autres affectations très concentrées autour de cette borne, ce qui rend l'affectation insatisfaisante pour lui. 
+    Nous devons donc trouver une autre métrique qui tienne compte de cette distribution, ne serait-ce qu'implicitement. 
 \end{metric}
 
 \begin{metric}[Somme des rangs non facultatifs]
-    Définit pour les étudiants, la somme des rangs non facultatifs est la métrique sommant les rangs de l'ensemble des UEs non facultatives affectés pour chaque étudiant. 
+    Définie pour les étudiants, la somme des rangs non facultatifs correspond à la métrique qui additionne les rangs de l'ensemble des UEs non facultatives affectées à chaque étudiant. 
     Elle se formalise ainsi :
     $$
         \forall i\in N : \text{correctedRankSum}(i) = \sum_{j\in M} U_{i,j}-\sum_{j\in\text{fSet}(i)} U_{i,j}
     $$
-    Cette métrique à plusieurs avantages.
-    Premièrement, elle dispose d'une interprétabilité simple : plus la valeur est élevé, plus l'étudiant est lésé ; plus la valeur faible, meilleur la satisfaction de l'étudiant. 
-    Deuxièmement, la métrique est rapide, simple à calculer et permet de prendre en compte la distribution sous-jacente des rangs non-facultatifs affectés de manière implicite. 
-    Enfin, elle reste intuitive, simple à accepter, à comprendre et à expliquer ; cela rendant ainsi le système plus abordable pour les exploitants.
+    Cette métrique présente plusieurs avantages.
+    Premièrement, elle est facilement interprétable : plus la valeur est élevée, plus l'étudiant est lésé ; plus la valeur est faible, meilleure est la satisfaction de l'étudiant. 
+    Deuxièmement, cette métrique est rapide et simple à calculer, et permet de prendre en compte la distribution sous-jacente des rangs non facultatifs affectés de manière implicite. 
+    Enfin, elle reste intuitive, simple à accepter, à comprendre et à expliquer, ce qui rend le système plus abordable pour les exploitants.
 \end{metric}
 
 \begin{example}\label{ex:running3}
-    Dans la continuité des exemples précédents, nous allons maintenant calculer les métriques cités plus hauts sur nos étudiants :
+    Dans la continuité des exemples précédents, nous allons maintenant calculer les métriques citées précédemment sur nos étudiants :
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -403,13 +402,13 @@ Maintenant que cela est dit, nous pouvons enfin passer à nos métriques vectori
         \text{correctedRankSum}(i) & 3 & 4 & 3 & 3 & 4\\
     \end{bmatrix}
     $$
-    Ici, nous observons bien que les dernières UEs affectés n'ont pas eu d'impacts sur la sommes des rangs non facultatifs ou le dernier rang non facultatif. Cela rends dans notre cas des valeurs similaires pour chacun des étudiants, ce qui est une bonne chose en constituant une première piste pour la notion d'équité que nous n'avons toujours pas définit formellement.
-    Aussi, nous pouvons bien mesurer l'intérêt de prendre ces métriques corrigés du biais de Type I au lieu de prendre leurs consœurs non corrigés. Ainsi, dans cette example, Sophie aurait toujours eu une somme de 3, tandis que Hugo aurait eu une somme de 6 alors que leur affectation regardant les UEs non facultatives sont sensiblement identique.   
+    Nous observons ici que les dernières UE affectées n'ont pas eu d'impact sur la somme des rangs non facultatifs ou sur le dernier rang non facultatif. Cela donne dans notre cas des valeurs similaires pour chacun des étudiants, ce qui est une bonne chose et constitue une première piste pour la notion d'équité, que nous n'avons pas encore définie formellement.
+    Nous pouvons également constater l'intérêt de prendre en compte ces métriques corrigées du biais de Type I plutôt que les métriques non corrigées. Ainsi, dans cet exemple, Sophie aurait toujours obtenu une somme de 3, tandis que Hugo aurait obtenu une somme de 6, alors que leur affectation concernant les UEs non facultatives est sensiblement identique.   
 \end{example}
 
-À partir de là, il peut également être intéressant d'établir une moyenne et un écart-type afin de mieux comprendre la distributions des rangs non-facultatifs affectés ; néanmoins, cela alourdirais beaucoup trop l'analyse des affectations pour l'opérateur (si l'on considère que la somme et la moyenne sont les mêmes choses à une constante multiplicative près). Malgré tous, cela étant intéressant d'un point de vue statistiques, celles-ci sont implémentés au côté d'autres métriques (voir Annexe I pour plus de détails). 
+À partir de là, il peut également être intéressant d'établir une moyenne et un écart-type afin de mieux comprendre la distribution des rangs non facultatifs affectés ; toutefois, cela alourdirait considérablement l'analyse des affectations pour l'opérateur (si l'on considère que la somme et la moyenne sont la même chose, à une constante multiplicative près). Malgré tout, cela reste intéressant d'un point de vue statistique, et ces métriques sont implémentées aux côtés d'autres métriques (voir l'Annexe I pour plus de détails). 
 
-Les métriques cités plus hauts sont directement utilisables dans un solveur linéaire, mais il existe aussi des métriques non-linéaires qui peuvent être intéressantes pour leurs interprétations, c'est ce que nous allons voir maintenant.
+Les métriques développées plus haut sont directement utilisables dans un solveur linéaire, mais il existe aussi des métriques non linéaires qui peuvent être intéressantes pour leur interprétation. C'est ce que nous allons voir maintenant.
 
 \begin{definition}
     Soit $X$ une variable aléatoire et $x\in]0,1[$. Le quantile d'ordre $x$ de la distribution de $X$, noté $Q_x$, est définit par : $Q_x = \min\{y\in\mathbb{R} : \mathbb{P}[X\le y]\ge x\}$.
@@ -419,26 +418,24 @@ Les métriques cités plus hauts sont directement utilisables dans un solveur li
 \end{definition}
 
 \begin{metric}[Médianes et Quartiles des rangs non-facultatifs affectés]
-    Définit pour les étudiants, le premier, deuxième et troisième quartiles des rangs non-facultatifs affectés sont formalisés ainsi (par abus de langage) :
+    Définie pour les étudiants, le premier, le deuxième et le troisième quartile des rangs non facultatifs sont formalisés ainsi (par abus de langage) :
     $$
     \forall i\in N : Q_{0.25|0.5|0.75}(i) = \min\{y : \mathbb{P}[\text{aSet}(i)\setminus\text{fSet}(i)\le y]\ge 0.25|0.5|0.75\}
     $$
-    Bien que non linéaires et plus compliquées à calculer que la moyenne (en pratique, il y a souvent une fonction pour les calculer simplement), cette famille de métrique offre de nombreux avantages.
-    En effet, elle permet de disposer d'une mesure de centralité résistante à de potentielles valeurs extrêmes (voir biais de Type II, Annexe I), 
-    d'une interprétation intéressante, tout particulièrement la médiane qui permet de séparer 50\% de la population, 
-    mais aussi de prendre en compte la distribution sous-jacente via l'analyse des quantiles. 
-    Par exemple si $Q_1$ est élevé (par rapport au rang minimum), nous savons d'or et déjà que la distribution est étalé sur la gauche (ce qui est une mauvaise chose). 
-    De même si $Q_3$ est faible nous observons que la distribution est étalé sur la droite (ce qui est une bonne chose).
+    Bien que non linéaires et plus compliquées à calculer que la moyenne (en pratique, il existe souvent une fonction, dans le langage de programmation utilisé, permettant de les calculer simplement), cette famille de métriques offre de nombreux avantages.
+    En effet, elle permet de disposer d'une mesure de centralité résistante aux valeurs extrêmes (voir le biais de Type II dans l'Annexe I pour plus de détails), d'une interprétation intéressante, notamment la médiane qui permet de séparer 50\% de la population, mais aussi de prendre en compte la distribution sous-jacente grâce à l'analyse des quantiles. 
+    Par exemple, si $Q_1$ est élevé par rapport au rang minimum, nous savons d'emblée que la distribution est étalée sur la gauche (ce qui est une mauvaise chose). 
+    De même, si $Q_3$ est faible, nous observons que la distribution est étalée sur la droite (ce qui est une bonne chose).
 
-    Dans les faits, nous n'irons généralement pas aussi loin et resterons sur l'interprétation de la médiane uniquement. 
+    Dans les faits, nous n'irons généralement pas aussi loin et nous contenterons de l'interprétation de la médiane. 
 \end{metric}
 
-À noter que comme pour la moyenne, la médiane possède une mesure de dispersion au doux nom d'Écart Interquartile ($\text{IQR}(i) = Q_3(i)-Q_1(i)$). 
-Contrairement à l'écart-type, celui-ci dispose d'une interprétation naturelle en explicitant la dispersion des 50\% de la population autours de la médiane. 
-Il s'agit donc pour cette raison que nous le mentionnons tout de même.
+À noter que, comme pour la moyenne, la médiane possède une mesure de dispersion appelée écart interquartile (ou $\text{IQR}(i) = Q_3(i) - Q_1(i)$). 
+Contrairement à l'écart-type, celui-ci dispose d'une interprétation naturelle qui permet d'expliciter la dispersion des 50\% de la population autour de la médiane. 
+C'est pour cette raison que nous le mentionnons tout de même.
 
 \begin{example}\label{ex:running4}
-    Encore une fois, comme pour l'exemple~\ref{ex:running3}, nous allons calculer les nouvelles métriques pour nos étudiants
+    Encore une fois, comme pour l'exemple~\ref{ex:running3}, nous allons calculer les nouvelles métriques pour nos étudiants.
     $$
     \begin{bmatrix}
         \text{Étudiant} & \text{Sophie} & \text{Pierre} & \text{Hugo} & \text{Axel} & \text{Sabine}\\
@@ -446,27 +443,27 @@ Il s'agit donc pour cette raison que nous le mentionnons tout de même.
         \text{IQR}(i)   & 1   & 2 & 1   & 1   & 2\\
     \end{bmatrix}
     $$
-    Dans notre petit exemple, les notions de médiane et d'IQR perdent un peu leurs sens, surtout en considérant que pour atteindre les quantiles désirés via Python ou autre, une correction de continuité est généralement faite. 
-    Malgré tout, nous pouvons quand même dire à partir de ces données qui a eu la moins bonne affectation : Pierre et Sabine. 
-    En effet, ces derniers ont eu la plus forte médiane 50\% des UEs attribués ont un rang au dessus de 2 et un IQR élevé (dans ce contexte) à 2, c'est à dire que les rangs sont  plus dispersés que pour les autres étudiants.
-    Dans l'idéal, nous cherchons une médiane et un IQR sur les rangs non-facultatifs faible.
+    Dans notre petit exemple, les notions de médiane et d'IQR perdent un peu de leur sens, surtout si l'on considère qu'une correction de continuité est généralement effectuée pour atteindre les quantiles désirés via Python ou tout autre langage de programmation. 
+    Malgré tout, nous pouvons dire à partir de ces données qui ont eu la moins bonne affectation : Pierre et Sabine. 
+    En effet, ces derniers ont obtenu la médiane la plus élevée : 50\% des UEs attribuées ont un rang supérieur à 2, et leur IQR est élevé (dans ce contexte), ce qui signifie que leurs rangs sont plus dispersés que ceux des autres étudiants.
+    Idéalement, nous chercherions une médiane et un IQR faibles sur les rangs non-facultatifs.
 \end{example}
 
 \subsection{Indicateurs de qualité et d'équité}
-Les métriques que nous développons peuvent servir à plusieurs desseins incluant : réduction des biais, optimisation des affectations en tant qu'heuristique et évidemment évaluation des affectation.
-Le but que nous nous sommes fixés est d'atteindre une notion d'<<équité>> que nous allons enfin définir.
+Les métriques que nous développons peuvent servir à plusieurs fins, notamment la réduction des biais, l'optimisation des affectations en tant qu'heuristique, et bien sûr l'évaluation des affectations.
+Notre objectif est d'atteindre une notion d'<< équité >> que nous allons enfin définir.
 
 \begin{definition}[Équité]
-    D'après le Larousse, l'équité est définit comme une <<Qualité consistant à attribuer à chacun ce qui lui est dû par référence aux principes de la justice naturelle ; impartialité>>. 
-    En d'autres mots, nous chercherons à produire des affectations tel que celles-ci ne soient influencés qu'uniquement par le choix des étudiants. Le but est donc de faire en sorte qu'aucun étudiant ne soit avantagé par rapport à un autre lors de l'affectations des UEs.
+    Selon le Larousse, l'équité se définit comme << la qualité consistant à attribuer à chacun ce qui lui est dû, conformément aux principes de la justice naturelle ; impartialité >>. 
+    En d'autres termes, nous chercherons à ce que les affectations ne soient influencées que par le choix des étudiants. L'objectif est donc de faire en sorte qu'aucun étudiant ne soit avantagé par rapport à un autre lors de l'affectation des UEs.
 
-    Sur le dernier rang non-facultatif affecté, par exemple, cela se traduirais par <<le dernier rang non facultatif affecté à un étudiant est le plus faible possible (optimisation) et est similaire à celui des autres étudiants (minimiser les différences)>>.
+    Concrètement, sur le dernier rang non facultatif affecté, cela se traduirait par << le dernier rang non facultatif affecté à un étudiant est le plus faible possible (optimisation) et similaire à celui des autres étudiants (minimiser les différences) >>.
 \end{definition}
 
-Par cette définition et cet exemple, nous observons donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant tandis qu'une aggregation de ces métriques (voir Annexe I pour plus de détails) permettent d'évaluer cette notion d'équité (Médianes faibles et IQR faibles ou Moyennes faibles et écarts-types faibles par exemple).
+Cette définition et cet exemple montrent donc que les métriques vectorielles permettent généralement d'attribuer un score à l'affectation d'un étudiant, tandis qu'une agrégation de ces métriques (voir l'Annexe I pour plus de détails) permet d'évaluer la notion d'équité (par exemple, des médianes faibles et un écart interquartile faible, ou des moyennes faibles et des écarts-types faibles).
 
-Comme dit plus tôt, la notion d'équité peut se définir en partie par les métriques, mais elle capture également des facteurs plus indirect tel que : <<Est-ce qu'un groupe d'étudiant est plus favorisé qu'un autre>>. À partir d'ici, nous allons voir trois moyens complémentaires d'évaluer cette équité. 
-Commençons directement par une aggregation : le coefficient de Gini.
+Comme mentionné précédemment, la notion d'équité peut être définie en partie par des métriques, mais elle prend également en compte des facteurs plus indirects, tels que la question de savoir si un groupe d'étudiants est plus favorisé qu'un autre. À partir de maintenant, nous allons examiner trois méthodes complémentaires pour évaluer cette équité. 
+Commençons directement par une agrégation : le coefficient de Gini.
 
 \subsubsection{Le coefficient de Gini}
 \begin{metric}[Coefficient de Gini]
@@ -474,12 +471,12 @@ Commençons directement par une aggregation : le coefficient de Gini.
     $$
         \text{Gini}(m_v) = \frac{\sum_{i=1}^{\#m_v}\sum_{j=1}^{\#m_v}\left|x_i-x_j\right|}{2\left[\#m_v\right]^2\widebar{m_v}}
     $$
-    Cet indice, initialement très utilisé pour la comparaison de la répartition des richesse, peut aussi être utilisé dans un cadre générale comme mesure d'inégalité. 
-    Bien que complexe à calculer, son interprétation reste simple : si le coefficient de Gini approche 0, alors toutes les valeurs de la métrique vectorielle sont identiques ; autrement, dans le cas où l'indice s'approche de 1, alors nous pouvons interpréter qu'un unique individu possède l'intégralité des richesse tandis que les autres ne possèdent rien.
+    Initialement très utilisé pour comparer la répartition des richesses, cet indice peut aussi être utilisé dans un cadre général comme mesure d'inégalité. 
+    Bien que complexe à calculer, son interprétation reste simple : si le coefficient de Gini approche 0, alors toutes les valeurs de la métrique vectorielle sont identiques ; dans le cas contraire, si l'indice s'approche de 1, alors un individu possède l'intégralité des richesses tandis que les autres ne possèdent rien.
 
-    Dans notre contexte, si l'on utilise la somme des rangs non facultatif affectés, un coefficient de Gini proche de 0 est visé et indique une égalité parfaite des affectations. 
-    Attention tous de même, dans ce contexte, un coefficient de 1 n'indique pas qu'un individu est grandement bénéficiaire du système au détriment des autres, mais plutôt que si un tel individu existait, alors il serait certainement le plus lésé. 
-    En d'autres mots, si le coefficient de Gini est proche de 1 sur une métrique telle que la somme des rangs, alors la personne concentrant les << richesses >> serait en réalité une personne dont l'affectation a été créé de manière sciemment mauvaise afin de faire bénéficier le reste du groupe de son <<sacrifice>>.
+    Dans notre contexte, si l'on utilise la somme des rangs non facultatifs affectés, un coefficient de Gini proche de 0 indique une égalité parfaite des affectations. 
+    Attention toutefois, dans ce contexte, un coefficient de 1 n'indique pas qu'un individu est grandement bénéficiaire du système au détriment des autres, mais plutôt que, s'il existait, il serait certainement le plus lésé. 
+    En d'autres termes, si le coefficient de Gini est proche de 1 sur une métrique telle que la somme des rangs, alors la personne concentrant les << richesses >> serait en réalité une personne dont l'affectation a été créée de manière intentionnellement mauvaise afin de faire bénéficier le reste du groupe de son << sacrifice >>.
 \end{metric}
 
 \begin{example}\label{ex:running5}
@@ -493,21 +490,21 @@ Commençons directement par une aggregation : le coefficient de Gini.
     $$
     \text{Gini}(m_{\text{last}}) = \frac{3\cdot\left(3\cdot|2-2|+2\cdot|2-3|\right)+2\cdot\left(3\cdot|3-2|+2\cdot|3-3|\right)}{2\cdot5^2\cdot2.4} = \frac{12}{120} = 0.1
     $$
-    Ici, comme nous pouvions nous y attendre, l'indice de Gini pour les deux métriques est faible et s'approche de 0. Cela nous indique que l'affectation effectué est équitable.
+    Comme nous pouvions nous y attendre, l'indice de Gini pour les deux métriques est faible et s'approche de 0, ce qui indique que l'affectation est équitable.
 \end{example}
 
 \begin{remark}[Optimalité et Équité]
-    Attention, l'équité n'implique pas l'optimalité. Ainsi, nous pouvons avoir une affectation équitablement mauvaise pour tous. 
-    La réciproque est aussi vrai, nous pourrions, en fonction des métriques utilisés, avoir une affectation optimale (bonne en générale), mais inéquitable avec un groupe discriminé.
+    Attention, l'équité n'implique pas l'optimalité. Ainsi, il est possible d'avoir une affectation équitablement mauvaise pour tous. 
+    La réciproque est également vraie : en fonction des métriques utilisées, nous pourrions avoir une affectation optimale (généralement bonne), mais inéquitable pour un groupe discriminé.
 \end{remark}
 
-Bien que l'indice de Gini est intéressant pour détecter les affectations lésant fortement un/des étudiant(s), il ne permet pas de conclure sur l'affectation de manière globale.
+Bien que l'indice de Gini soit intéressant pour détecter les affectations lésant fortement un ou plusieurs étudiants, il ne permet pas de conclure sur l'affectation de manière globale.
 Pour cela, nous pouvons utiliser un autre indicateur basé sur le front de Pareto.
 
 \subsubsection{Pareto en tant que mesure d'équité}
-Dans notre situation, où nous cherchons à offrir une affectation à chaque étudiant, plusieurs solutions plus ou moins bonne existent parallèlement. 
-Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affectation d'un étudiant avec celle d'un autre.
-À partir de cela, nous pouvons avoir une définition alternative de l'équité d'une affectation comme étant une affectation où de tels échanges n'existent pas. 
+Dans notre situation, où nous cherchons à offrir une affectation à chaque étudiant, plusieurs solutions plus ou moins bonnes coexistent. 
+Il est parfois possible de passer d'une solution à une autre en échangeant l'affectation d'un étudiant avec celle d'un autre.
+À partir de là, nous pouvons définir l'équité d'une affectation comme l'absence de tels échanges. 
 
 \begin{definition}[Échange technique]
     Soit deux étudiants différents $\left(i_a,i_b\right)\in N^2_{a\ne b}$ où $n$ est le nombre d'étudiant. 
@@ -516,8 +513,8 @@ Parfois, nous pouvons passer d'une solution à une autre en échangeant l'affect
     On notera le prédicat $i_a\stackrel{T}{\longleftrightarrow} i_b$ valant 0 s'il n'existe pas d'échange technique entre le couple $(i_a, i_b)$ et 1 autrement.  
 \end{definition}
 
-Bien que la définition d'échange technique permet de s'assurer qu'un échange d'affectation soit techniquement faisable, il ne nous permet pas de dire si un étudiant est bénéficiaire ou lésé par celui-ci. 
-À partir de cette observation, nous pouvons nous rappeler la définition l'utilité de Pareto.
+Si la définition de l'échange technique permet de s'assurer qu'un échange d'affectation soit techniquement faisable, elle ne permet pas de déterminer si un étudiant est bénéficiaire ou lésé par celui-ci. 
+À partir de cette observation, nous pouvons nous rappeler la définition de l'utilité de Pareto.
 \begin{definition}[Échange de Pareto]
     Soit deux étudiants différents $\left(i_a,i_b\right)\in N^2_{a\ne b}$ et une métrique vectorielle $m_v$.
     Nous définissons un échange de Pareto comme un échange technique tel que si l'échange est opérant, alors $m_{v_{i_{a\to b}}} \ge m_{v_{i_a}}\text{ (resp.}\le\text{)}$ et $m_{v_{i_{b\to a}}} \ge m_{v_{i_b}}\text{ (resp.}\le\text{)}$ pour une métrique à maximiser (resp. à minimiser),
@@ -526,11 +523,10 @@ Bien que la définition d'échange technique permet de s'assurer qu'un échange 
     On qualifiera de front de Pareto l'ensemble des solutions tels qu'aucun échanges de Pareto existe pour une métrique donnée.
 \end{definition}
 
-L'avantage de cette notion est qu'elle nous permet non seulement de dire si une affectation est équitable (plus il y a d'échanges de Pareto possibles, moins elle l'est), 
-mais aussi de mettre en place, si nous le souhaitons, une recherche locale en effectuant de tels échanges, tant que l'on en trouve, et ce pour maximiser/minimiser des métriques qui ne sont pas nécessairement linéaire.
+L'avantage de cette notion est qu'elle nous permet non seulement de dire si une affectation est équitable (plus il y a d'échanges de Pareto possibles, moins elle l'est), mais aussi de mettre en place, si nous le souhaitons, une recherche locale en effectuant de tels échanges, tant que l'on en trouve, afin de maximiser ou de minimiser des métriques qui ne sont pas nécessairement linéaires.
 
 \begin{example}\label{ex:running6}
-    Maintenant, existe-t-il de tels échanges sur nos affectations des exemples précédents ? Pour rappel, nous avions la matrice d'affectation des rangs suivante :
+    Maintenant, existe-t-il de tels échanges sur nos affectations ? Pour rappel, nous disposions de la matrice d'affectation des rangs suivante :
     $$
         u_{i,j}\begin{bmatrix}
             \text{UEs} & \text{AI} & \text{Code} & \text{Éco} & \text{Droit}\\
@@ -541,111 +537,111 @@ mais aussi de mettre en place, si nous le souhaitons, une recherche locale en ef
             \text{Sabine} & 0 & 1 & 3 & 4
         \end{bmatrix}
     $$
-    Ici, nous allons vérifier cela sur le dernier rangs non-facultatif affecté. Pour commencer, Sophie ne souhaite échanger avec personne, car elle ne souhaite pas avoir plus d'UEs que ce qu'elle voulait initialement. Pour Pierre, celui-ci ne peut échanger qu'avec Hugo et Axel, car ce sont les seuls, à part Sophie, qui ont son UE obligatoire. Cependant, ces derniers ne peuvent pas échanger (car Pierre n'a pas leurs UEs obligatoires). 
-    Hugo et Axel ont déjà leurs derniers rangs non-facultatifs optimales, il ne veulent donc pas échanger. Enfin, Sabine ne peut échanger avec personne, car personne ne souhaite échanger. 
-    Il n'y a donc, ici, pas d'échanges de Pareto. L'affectation est donc équitable.
+    Ici, nous allons vérifier cela sur le dernier rang non facultatif affecté. Sophie ne souhaite pas échanger, car elle ne veut pas avoir plus UEs qu'elle ne le souhaitait initialement. Pierre ne peut échanger qu'avec Hugo et Axel, car ce sont les seuls, à part Sophie, à avoir son UE obligatoire. Cependant, ces derniers ne peuvent pas non plus échanger, car Pierre n'a pas leurs UEs obligatoires. 
+    Hugo et Axel ont déjà trouvé leurs derniers rangs non-facultatifs optimaux, ils ne souhaitent donc pas échanger. Enfin, Sabine ne peut échanger avec personne, car personne ne souhaite le faire. 
+    Il n'y a donc pas d'échange de Pareto ici. L'affectation est donc équitable.
 \end{example}
 
-Enfin, il existe d'autres indicateurs plus formels, mais beaucoup plus strictes pour détecter de potentiels biais sur des groupes désignés qui briserait cette notion d'équité.
+Enfin, il existe d'autres indicateurs plus formels, mais beaucoup plus stricts, pour détecter d'éventuels biais concernant des groupes désignés, qui briseraient cette notion d'équité.
 
 \subsubsection{Tests d'Hypothèses}
-Dans cette sous-sections, nous assurons l'intégrité de la méthode d'affectation en regardant directement des biais extérieurs et plus précisément : << Y-a-t'il une façon permettant de prendre avantage de la méthode d'affectation à ses propres fins ? >>.
+Dans cette sous-section, nous assurons l'intégrité de la méthode d'affectation en examinant les biais extérieurs, plus précisément en nous demandant s'il existe une façon de tirer avantage de la méthode d'affectation à ses propres fins.
 Si nous souhaitons atteindre l'équité, nous devons éviter cela.
 
 Les trois facteurs les plus importants à vérifier sont : \textbf{(1)} << Est-ce que l'ordre de remplissage du formulaire par les étudiants est déterminant pour avoir une meilleure affectation ? >>,
-\textbf{(2)} << Est-ce que le parcours des étudiants impacte la qualité des affectations ? >> et bien sûr, en lien avec le biais de Type I, 
+\textbf{(2)} << Est-ce que le parcours des étudiants impacte la qualité des affectations ? >> Et bien sûr, en lien avec le biais de Type I, 
 \textbf{(3)} << Est-ce que le nombre d'UEs choisies par les étudiants impacte la qualité de leurs affectations par rapport à d'autres ? >>.
 
-Dans l'idéal, l'affectation proposé vérifie que les trois proposition ci-dessus soient fausses. Pour cela, nous pourrons utiliser les tests d'hypothèses et plus particulièrement le test H de Kruskal-Wallis \cite{Kruskal1952}, suivi éventuellement du test U de Mann-Whitney \cite{Whitney1947}. 
+Dans l'idéal, l'affectation proposée vérifie que les trois propositions ci-dessus soient fausses. Pour cela, nous pourrons utiliser les tests d'hypothèses et plus particulièrement le test H de Kruskal-Wallis \cite{Kruskal1952}, suivi éventuellement du test U de Mann-Whitney \cite{Whitney1947}. 
 \begin{definition}[Test H de Kruskal-Wallis]
-    Le test H de Kruskal-Wallis est un test statistique de comparaison non paramétrique de plusieurs groupes portant les hypothèses suivantes :
+    Le test H de Kruskal-Wallis est un test statistique de comparaison non paramétrique de plusieurs groupes, portant les hypothèses suivantes :
     $$
     \begin{matrix}
         H_0 : & \ll\text{ La distribution des groupes se faisant comparés sont les mêmes. } \gg\\
         H_1 : & \ll\text{ Au moins une distribution des groupes se faisant comparés est différente. }\gg
     \end{matrix}
     $$
-    Ce test nous est utile, car il nous permettrait dans un premier temps de vérifier si la distribution pour une certaine métrique vectorielle donnée (mesures) dépends d'un facteur extérieur (groupes comme le nombre d'UEs choisies, le parcours de l'étudiant, etc.). 
-    Un autre avantage non négligeable d'implémenter ce test est qu'il ne requiert pas de propriétés contraignantes dans notre cas : la normalité n'est pas assumé (ok), les mesures sont continues (ok), les mesures sont indépendantes entres-elles (nous pouvons l'assumer), les groupes sont indépendants (oui).
-    Dans la mesure où il serait trop lourd de rédiger l'intégralité du fonctionnement du test, nous ne l'expliquerons pas ici. Concernant l'implémentation en Python, celle-ci est possible via la librairie Scipy et la commande \texttt{scipy.stats.kruskal} (\texttt{kruskal.test} en R).
+    Ce test nous est utile, car il nous permettrait, dans un premier temps, de vérifier si la distribution, pour une certaine métrique vectorielle donnée (mesures), dépend d'un facteur extérieur (groupes, comme le nombre d'UEs choisies, le parcours de l'étudiant, etc.). 
+    Un autre avantage non négligeable d'implémenter ce test est qu'il ne requiert pas de propriétés contraignantes dans notre cas : la normalité n'est pas assumée (OK), les mesures sont continues (OK), les mesures sont indépendantes entre elles (nous pouvons l'assumer), les groupes sont indépendants (oui).
+    Dans la mesure où il serait trop lourd de rédiger l'intégralité du fonctionnement du test, nous ne l'expliquerons pas ici. Concernant l'implémentation en Python, celle-ci est possible via la librairie SciPy et la commande \texttt{scipy.stats.kruskal}. (\texttt{kruskal.test} en R).
 
-    \textbf{Interprétation :} Bien qu'un peu plus complexe que çà, nous simplifierons l'interprétation du test d'Hypothèse ainsi : << Si la p-value est inférieur à 5\%, alors nous rejetons $H_0$ et concluons $H_1$. >>. Attention, si la p-value est au dessus du seuil critique 0.05, nous ne pouvons pas conclure en l'absence de différences entre les distributions, juste ne pas rejeter l'hypothèse pour l'instant.
+    \textbf{Interprétation :} Bien qu'un peu plus complexe que ça, nous simplifierons l'interprétation du test d'Hypothèse ainsi : << Si la p-value est inférieur à 5\%, alors nous rejetons $H_0$ et concluons $H_1$. >>. Attention, si la p-value est au-dessus du seuil critique 0.05, nous ne pouvons pas conclure en l'absence de différences entre les distributions, juste ne pas rejeter l'hypothèse pour l'instant.
 \end{definition}
 
-Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu'une distribution est différente, mais pas laquelle. Il est donc important, s'il on souhaite enquêter plus en détail d'exécuter un test U de Mann-Whitney pour chacune des paires de groupe possible.
+Si l'on rejette $H_0$ sur le test H de Kruskal-Wallis, nous savons uniquement qu'une distribution est différente, mais pas laquelle. Il est donc important, si l'on souhaite enquêter plus en détail, d'exécuter un test U de Mann-Whitney pour chacune des paires de groupes possibles.
 \begin{definition}[Test U de Mann-Whitney]
-    Le test U de Mann-Whitney est un test statistique de comparaison non paramétrique sur deux groupes portant les hypothèses suivantes :
+    Le test U de Mann-Whitney est un test statistique de comparaison non paramétrique sur deux groupes, portant les hypothèses suivantes :
     $$
     \begin{matrix}
         H_0 : & << \text{ Les distributions X et Y sont égales en loi } >>\\
         H_1 : & << \text{ X est stochastiquement supérieur à Y, ou } F_X<F_Y >>\\
     \end{matrix}
     $$
-    Plus simplement l'hypothèse alternative utilisée ici veut dire que la distribution de $X$ a généralement de plus grande valeurs que celle de $Y$. 
-    Concernant les requis pour ce test, celui-ci ne requiert pas de normalité pour les distributions (ok), requiert que les valeurs étudiées soient continues (ok) et que les mesures soient indépendantes (chose que nous assumons).
+    Plus simplement, l'hypothèse alternative utilisée ici veut dire que la distribution de $X$ a généralement de plus grandes valeurs que celle de $Y$. 
+    Concernant les requis pour ce test, celui-ci ne requiert pas de normalité pour les distributions (OK), requiert que les valeurs étudiées soient continues (OK) et que les mesures soient indépendantes (chose que nous assumons).
     Pour les mêmes raisons que le test H de Kruskal-Wallis, nous n'allons pas détailler son fonctionnement, mais mentionner les implémentations en Python (\texttt{scipy.stats.mannwhitneyu}) et en R (\texttt{wilcox.test}). 
-    Les remarques sur l'interprétations sont également sensiblement identique que pour le test précédemment présenté. 
+    Les remarques sur l'interprétation sont également sensiblement identiques que pour le test précédemment présenté. 
 \end{definition}
 
-Ainsi, en utilisant ces deux tests, en plus des autres indicateurs et métriques, nous sommes maintenant capable de dire si une affectation est optimale, équitable et intègre (si nous pouvons la détourner). 
+Ainsi, en utilisant ces deux tests, en plus des autres indicateurs et métriques, nous sommes maintenant capables de dire si une affectation est optimale, équitable et intègre (si nous pouvons la détourner). 
 
 \subsection{Fonctions objectifs}
-Dans le cadre de ce projet, plusieurs fonctions objectifs ont été développées afin d'atteindre un affectation <<optimale>> et <<équitable>>. 
-Tous ces objectifs n'ont pas été conservés dans le rendu final, pour des raisons de praticité, de simplification ou d'application difficile dans le cadre de solveur linéaire (voir \textbf{\textit{Annexe II - Brouillon et Réflexions sur les Objectifs}} pour plus de détails); nous présentons ici donc, les plus importantes. 
+Dans le cadre de ce projet, plusieurs fonctions objectifs ont été développées afin d'atteindre une affectation << optimale >> et << équitable >>. 
+Tous ces objectifs n'ont pas été conservés dans le rendu final, pour des raisons de praticité, de simplification ou d'application difficile dans le cadre du solveur linéaire (voir \textbf{\textit{Annexe II - Brouillon et Réflexions sur les Objectifs}} pour plus de détails) ; nous présentons ici donc les plus importantes. 
 Commençons sans plus tarder avec notre premier objectif :
 
 \begin{goal}[Minimisation de la somme des rangs non facultatifs]
-    Définit pour les étudiants, la minimisation de la somme des rangs non facultatifs se caractérise ainsi:
+    Définie pour les étudiants, la minimisation de la somme des rangs non facultatifs se caractérise ainsi :
     $$
         \min_{\forall i\in N}\left\{\text{correctedRankSum}(i)\right\}
     $$
     Cet objectif est extrêmement simple, ce qui en fait sa force. Ici, nous avons l'avantage que chaque étudiant voit sa propre somme des rangs diminuer.
-    Intuitivement, cet objectif permet à ce que les étudiants ayant les sommes maximum se voient minimiser en priorité leurs propres sommes.
+    Intuitivement, cet objectif permet que les étudiants ayant les sommes maximales se voient minimiser en priorité leurs propres sommes.
     Malheureusement, cet objectif peut engendrer des inégalités en cas d'égalité des sommes : qui faut-il privilégier en premier ?
     
-    Notez qu'en effectuant la somme de la somme des rangs non facultatifs de chaque étudiants, nous obtenons une valeur unique nous indiquant si une affectation est globalement bonne ou non.
+    Notez qu'en effectuant la somme de la somme des rangs non facultatifs de chaque étudiant, nous obtenons une valeur unique nous indiquant si une affectation est globalement bonne ou non.
 \end{goal}
 
-De la même manière, nous pouvons décider de minimiser le pire rang non facultatif émis pour chaque étudiant.
+De la même manière, nous pouvons décider de minimiser le pire rang non facultatif attribué à chaque étudiant.
 \begin{goal}[Minimisation du dernier rang non facultatif]
-    Définit pour les étudiants, la minimisation du dernier rangs non facultatif se détermine ainsi :
+    Définie pour les étudiants, la minimisation du dernier rang non facultatif se détermine comme suit :
     $$
         \min_{\forall i\in N}\left\{\text{lastMandatoryRank}(i)\right\}
     $$
-    Ici, nous nous attendons à des résultats similaires à l'objectif précédent, avec néanmoins une subtilité importante. 
-    En effet nous souhaitons, ici, explicitement viser le rang de la pire affectation non facultative. 
-    En cela, nous émettons l'hypothèse, à travers objectif, qu'un étudiant est moins satisfait d'avoir une UE obligatoire de très mauvais rang qu'un lot d'UEs de rangs moyens.
-    Cette hypothèse est débattable et est ce qui rend l'utilisation de cet objectif intéressant.
+    Ici, nous nous attendons à des résultats similaires à ceux de l'objectif précédent, avec néanmoins une subtilité importante. 
+    En effet, nous souhaitons explicitement viser le rang de la pire affectation non facultative. 
+    En d'autres termes, nous émettons l'hypothèse, à travers cet objectif, qu'un étudiant est moins satisfait d'avoir une UE obligatoire de très mauvais rang qu'un lot d'UEs de rangs moyens.
+    Cette hypothèse est débattable, ce qui rend l'utilisation de cet objectif intéressante.
 
-    De manière similaire à l'objectif précédent, la somme des dernier rangs non facultatifs de chaque étudiants, correspond à une métrique que nous pouvons aussi minimiser en tant qu'objectif (agrégation ou une sorte d'optimisation multicritère en somme). 
+    De manière similaire à l'objectif précédent, la somme des derniers rangs non facultatifs de chaque étudiant correspond à une métrique que nous pouvons également minimiser en tant qu'objectif (agrégation ou une sorte d'optimisation multicritère, en somme). 
 \end{goal}
 
-Avec ces objectifs, nous nous approchons d'une affectation que nous pouvons qualifier d'<<optimal>>, mais comment pouvons nous garantir son <<équité>>. En effet, même si les objectifs précédents prennent en compte, au moins implicitement, cette notion ; elles en n'ont qu'une représentation partielle. 
-C'est pourquoi il peut également être important d'intégrer une composante permettant de vérifier qu'un étudiant n'est pas fortement lésé par rapport à un autre.
+Avec ces objectifs, nous nous approchons d'une affectation que nous pouvons qualifier d'<< optimale >>, mais comment pouvons-nous garantir son << équité >> ? En effet, même si les objectifs précédents tiennent compte, au moins implicitement, de cette notion, ils n'en offrent qu'une représentation partielle. 
+C'est pourquoi il peut également être important d'intégrer une composante permettant de vérifier qu'un étudiant n'est pas défavorisé par rapport à un autre.
 \begin{goal}[Minimisation de l'écart entre la somme des rangs non facultatifs des différents étudiants]
-    Soit $S_{\max}$ la somme des rangs non facultatifs la plus élevé parmi les étudiants. Soit $S_{\min}$ la somme des rangs non facultatifs la plus faible parmi les étudiants. 
-    Nous définissons cet objectif ainsi:
+    Soit $S_{\max}$ la somme des rangs non facultatifs la plus élevée parmi les étudiants. Soit $S_{\min}$ la somme des rangs non facultatifs la plus faible parmi les étudiants. 
+    Nous définissons cet objectif de la manière suivante :
     $$
         \min\left\{S_{\max}-S_{\min}\right\}
     $$
-    Cet objectif a plusieurs avantages : il permet non seulement de se rapprocher de la notion d'<<équité>>, mais aussi d'éviter les situation où un étudiant est très désavantagé par rapport à un autre.
-    Néanmoins, il dispose d'un désavantage majeur : utilisé seul, cet objectif peut entraîner une baisse potentiellement conséquente de la qualité de l'affectation en terme d'<<optimalité>>. 
+    Cet objectif présente plusieurs avantages : il permet non seulement de se rapprocher de la notion d'<< équité >>, mais aussi d'éviter les situations où un étudiant est très désavantagé par rapport à un autre.
+    Il présente toutefois un inconvénient majeur : utilisé seul, il peut entraîner une baisse conséquente de la qualité de l'affectation en termes d'<< optimalité >>. 
 \end{goal}
 
-Maintenant que nous avons des objectifs permettant de s'approcher séparément de l'<<optimalité>> et de l'<<équité>>, il sera intéressant de les combiner pour pouvoir faire un compromis entre les deux.
-Aussi, nous avons introduit précédemment la notion d'<<intégrité>>, mais celle-ci est en réalité difficile à définir en termes d'objectifs (d'autant plus linéaires) ; elle restera donc dans le domaine de l'évaluation et de la détection de problèmes a posteriori.
+Maintenant que nous disposons d'objectifs permettant d'approcher séparément l'<< optimalité >> et l'<< équité >>, il sera intéressant de les combiner pour trouver un compromis entre les deux.
+Nous avons également introduit précédemment la notion d'<< intégrité >>, mais celle-ci est difficile à définir en termes d'objectifs linéaires ; elle restera donc dans le domaine de l'évaluation et de la détection a posteriori des problèmes.
 
 \section{Entrée -- Sondage et Générateur de données synthétiques}
-Cette section décrit la récupération, la génération et la transformation données en entrée pour l'ensemble de ce processus. 
-De fait, les données en entrée peuvent provenir de deux sources fondamentalement différentes : des personnes physiques (les étudiants) ou un générateur de données synthétiques.
-La première est chronophage à obtenir, sujette à des erreurs de formatage et d'entrée, mais sont plus représentatives de la réalité. Les secondes sont plus simples et rapide à obtenir, sans erreurs, mais ne permettent pas de modéliser ce qui se passe réellement lorsqu'un étudiant fait un choix d'UE.
-Nous étudierons donc en premier comment sont générés les données et leurs formats, puis nous nous intéresserons à ce qui a été mis en place pour récupérer les données réelles.
+Cette section décrit la récupération, la génération et la transformation des données d'entrée pour l'ensemble du processus. 
+Les données d'entrée peuvent en effet provenir de deux sources fondamentalement différentes : des personnes physiques (les étudiants) ou un générateur de données synthétiques.
+La première est chronophage à obtenir, sujette aux erreurs de formatage et d'entrée, mais elle est plus représentative de la réalité. Les secondes sont plus simples et rapides à obtenir, sans erreur, mais ne permettent pas de modéliser ce qui se passe réellement lorsqu'un étudiant fait un choix d'UE.
+Nous étudierons d'abord la génération des données et leurs formats, puis nous nous intéresserons à la récupération des données réelles.
 
 \subsection{Format des données}
-Dans ce rapport, nous avons déjà parlé des données que nous possédons pour le problème (Section~\ref{sec:Data}~\&~\ref{sec:Metric}), mais nous n'avons pas encore réellement discuté de comment elle étaient concrètement représentées. 
+Dans ce rapport, nous avons déjà évoqué les données dont nous disposons pour résoudre le problème (voir les Section~\ref{sec:Data} et Section~\ref{sec:Metric}). Toutefois, nous n'avons pas encore abordé la manière dont elles sont concrètement représentées. 
 
-Cette représentation se fait sous deux formats principaux : \texttt{csv} pour la compatibilité avec la sortie et \texttt{dat} pour le solveur. 
-Un premier fichier \texttt{csv} contient les informations de base sur les UEs ainsi : \texttt{<courseID}, \texttt{title}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{spots>}, où la première colonne correspond à un ID unique du cours, la deuxième à son nom, les suivantes indiquent par un booléen si l'UE est obligatoire pour chaque parcours (format : nomDuParcours\_track), enfin la dernière colonne affiche le nombre de places maximum pour chaque UE.
+Cette représentation se fait sous deux formats principaux : Le format CSV est utilisé pour la compatibilité avec la sortie, et le format DAT pour le solveur. 
+Un premier fichier CSV contient les informations de base sur les UE, à savoir : \texttt{<courseID}, \texttt{title}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{spots>}, où la première colonne correspond à un ID unique du cours, la deuxième le nom de l'UE,  les suivantes indiquent, sous forme de booléen, si l'UE est obligatoire pour chaque parcours (format : nomDuParcours\_track), enfin,  la dernière colonne affiche le nombre de places maximum pour chaque UE.
 
 \begin{example}[Format CSV des UEs]\end{example}
 \vspace{-\baselineskip}
@@ -658,7 +654,7 @@ id, title,                                   AI_track, CS_track, spots
 17, Introduction to Multiagent Systems (EN), true,     false,    45
 \end{verbatim}
 
-Un second fichier \texttt{json} contient les paramètres du système : le nombre d'étudiants, d'UEs, de parcours et leurs nombre minimum/maximum d'UEs facultatives et optionnelles. Voici un exemple :
+Un second fichier JSON contient les paramètres du système, à savoir le nombre d'étudiants, d'UEs, de parcours, ainsi que leur nombre minimum et maximum d'UEs facultatives et optionnelles. Voici un exemple :
 \begin{example}[Format JSON des spécifications du problème d'affectation]\end{example}
 \vspace{-\baselineskip}
 \begin{lstlisting}[language=python]
@@ -678,11 +674,11 @@ Un second fichier \texttt{json} contient les paramètres du système : le nombre
     }
 }
 \end{lstlisting}
-Un troisième fichier correspond à la matrice d'incompatibilité des UEs que nous représentons au format \texttt{csv} avec l'id de chaque UE sur la première ligne et la première colonne. Le reste de la matrice est remplis de 0 à l'exception des valeurs associées à des paires d'UEs non compatibles (conflits emploi du temps, requis, etc.), représentées par des 1.
+Un troisième fichier correspond à la matrice d'incompatibilité des UEs, que nous représentons au format CSV, avec l'identifiant de chaque UE sur la première ligne et la première colonne. Le reste de la matrice est rempli de 0, à l'exception des valeurs associées à des paires d'UEs non compatibles (conflits d'emploi du temps, de prérequis, etc.), qui sont représentées par des 1.
 
-Enfin, un dernier fichier fondamental s'occupe de la représentation du rang accordée par chaque étudiants, sous le format \texttt{csv} suivant : <\texttt{studentID}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{maxOptional}, \texttt{Rg1}, $\cdots$, \texttt{RgP}>, où la première colonne correspond à l'id unique de l'étudiant, les colonnes suivantes le parcours de l'étudiant (représenté par des booléens) ; \texttt{maxOptional} le nombre maximum d'UE optionnelle et facultative voulu par l'étudiant. Le reste des colonnes indiquent les préférences de chaque étudiant pour chaque UE.
+Enfin, un dernier fichier fondamental s'occupe de la représentation du rang accordé par chaque étudiant, sous le format CSV suivant : <\texttt{studentID}, \texttt{XYZ\_track}, $\cdots$, \texttt{XYZ\_track}, \texttt{maxOptional}, \texttt{Rg1}, $\cdots$, \texttt{RgP}>, où la première colonne correspond à l'ID unique de l'étudiant, les colonnes suivantes le parcours de l'étudiant (représenté par des booléens) ; \texttt{maxOptional} le nombre maximum d'UE optionnelle et facultative voulu par l'étudiant. Le reste des colonnes indiquent les préférences de chaque étudiant pour chaque UE.
 \begin{example}[Format CSV des étudiants]
-En se basant sur l'exemple précédemment donné sur le format \texttt{csv} des UEs, nous pourrions avoir la représentation suivante pour les étudiants :
+En nous basant sur l'exemple précédemment donné concernant le format CSV des UEs, nous pourrions obtenir la représentation suivante pour les étudiants :
 \end{example}
 \vspace{-\baselineskip}
 \begin{verbatim}
@@ -694,25 +690,25 @@ studentID, AI_track, CS_track, maxOptional, Rg1, Rg9, Rg10, Rg16, Rg17
 5,         false,    true,     4,           3,   4.5, 4.5,  1,    2
 \end{verbatim}
 
-Remarquez dans cet exemple que le rangs dispose d'un format particulier ; en effet, il ne s'agit pas d'un nombre entier, mais d'une valeur réelle. Cette valeur est en fait une conséquence du traitement des égalités.
-Ici, nous utilisons la technique du rang moyen \cite{Philip2021} qui assigne la valeur suivante à chacun des rangs attribués : $\text{midRank}(z_k)=\frac{\#\{z_m\le z_k\}+\#\{z_m < z_k\}+1}{2}$, où le premier terme correspond au nombre de rangs inférieur ou égal au rang $z_k$ et où le second terme est le nombre de rang strictement inférieur à $z_k$. Cette technique du rang moyen nous assure que la somme des rangs est normalisé (identique pour chaque étudiant) et ce peu importe les valeurs initiales (cela permet d'éviter des biais potentielles sur les métriques et objectifs).
-Notez également, que ces égalités, que nous autorisons, se génère de deux manières : soit l'étudiant l'a choisi ainsi, soit l'UE est obligatoire dans son parcours et se retrouve attribuer le rang 1 par défaut (Hypothèse : les UEs obligatoires sont les préférés des étudiants).  
+Remarquez, dans cet exemple, que les rangs disposent d'un format particulier ; en effet, il ne s'agit pas d'un nombre entier, mais d'une valeur réelle. Cette valeur est, en fait, une conséquence du traitement des égalités.
+Ici, nous utilisons la technique du rang moyen, \cite{Philip2021}, qui assigne la valeur suivante à chacun des rangs attribués : $\text{midRank}(z_k)=\frac{\#\{z_m\le z_k\}+\#\{z_m<z_k\}+1}{2}$, où le premier terme correspond au nombre de rangs inférieur ou égal au rang $z_k$, et où le second terme est le nombre de rangs strictement inférieur à $z_k$. Cette technique du rang moyen nous assure que la somme des rangs est normalisée (identique pour chaque étudiant), et ce, peu importe les valeurs initiales (cela permet d'éviter des biais potentiels sur les métriques et objectifs).
+Notez également que ces égalités, que nous autorisons, se génèrent de deux manières : soit l'étudiant l'a choisi ainsi, soit l'UE est obligatoire dans son parcours et se retrouve attribuer le rang 1 par défaut (Hypothèse : les UEs obligatoires sont les préférées des étudiants).  
 
-Ces fichiers sont ensuite regroupés et converties dans un fichier \texttt{dat} interprétable par le solveur OPL.
+Ces fichiers sont ensuite regroupés et convertis dans un fichier DAT interprétable par le solveur OPL/CPLEX.
 
 \subsection{Générateur de données synthétiques}
-Pour générer des données synthétiques adéquates pour le choix des étudiants, plusieurs méthodes existent. Une première approche consiste à les générer à la mains, mais cette démarche est bien plus adapté pour des cas de test et peut engendrer des biais en plus d'être chronophage. 
-Une deuxième approche, que nous exploiterons, consiste à la générer de manière aléatoire.
+Plusieurs méthodes permettent de générer des données synthétiques adéquates pour le choix des étudiants. Une première approche consiste à les générer manuellement, mais cette méthode est davantage adaptée aux cas de test et peut engendrer des biais, sans compter qu'elle est chronophage. 
+Une deuxième approche, que nous exploiterons, consiste à les générer de manière aléatoire.
 
-Pour cela, nous pouvons commencer avec une méthode naïve afin de générer nos données en supposant (i) que les étudiants ne communiquent par leurs choix entre-eux (pas d'influences), (ii) que la répartition des rangs est uniforme par rapports aux UEs, excepté pour celles obligatoires (les étudiants n'ont pas de préférences particulières) et (iii) que le nombre d'UE choisi est uniforme (les étudiants n'ont pas de préférences à choisir un nombre d'UE particulier).
-Cette méthode est simple à mettre en place, mais dispose de contraintes fortement irréalistes ; en effet, des groupes d'étudiants peuvent communiquer entre eux pour choisir les mêmes UEs, des UEs peuvent être globalement plus attirantes que d'autres et les étudiants ont des personnalités/préférences différentes se traduisant assez souvent dans des profiles types. Nous allons donc plutôt émettre l'unique hypothèse suivante :
+Pour cela, nous pouvons commencer avec une méthode naïve en supposant que les étudiants ne communiquent pas leurs choix entre eux (pas d'influences), que la répartition des rangs est uniforme par rapport aux UEs, excepté pour les UEs obligatoires (les étudiants n'ont pas de préférences particulières), et que le nombre d'UE choisi est uniforme (les étudiants n'ont pas de préférences pour un nombre d'UE particulier).
+Cette méthode est simple à mettre en place, mais elle présente des contraintes très irréalistes : des groupes d'étudiants peuvent en effet communiquer entre eux pour choisir les mêmes UEs, certaines UEs peuvent être plus attrayantes que d'autres et les étudiants ont des personnalités et des préférences différentes qui se traduisent souvent par des profils types. Nous émettrons donc l'hypothèse suivante :
 
 \begin{Hypothesis}[Profiles d'étudiants]
-    Les étudiants peuvent être catégorisés en profil types et avoir par conséquent une préférence plus forte pour certaines UEs.
+    Les étudiants peuvent être classés dans des profils types et avoir par conséquent une préférence plus marquée pour certaines UEs.
 \end{Hypothesis}
 
-Pour ce projet, nous définissons donc les profils suivants : \texttt{IA}, \texttt{Systèmes}, \texttt{Cyber}, \texttt{Web} et \texttt{Général} (pas de préférences particulières) ; chaque étudiant est ensuite associé à un profil type selon une distribution paramétrable. Les UEs sont également associés à un unique profil\footnote{Il pourrait être intéressant de voir s'il on peut associer plusieurs profiles à une UE plutôt que un unique.}, ce qui permettra d'orienter artificiellement la préférence des étudiants.
-Le rang attribué par chaque étudiant pour chaque UE avec cette logique de groupe se fait ainsi :
+Pour ce projet, nous définissons donc les profils suivants : \texttt{IA}, \texttt{Systèmes}, \texttt{Cyber}, \texttt{Web} et \texttt{Général}. (pas de préférences particulières). Chaque étudiant est ensuite associé à un profil type selon une distribution paramétrable. Les UEs sont également associées à un profil unique, ce qui permet d'orienter artificiellement les préférences des étudiants.
+Le rang attribué par chaque étudiant à chaque UE selon cette logique de groupe se fait ainsi :
 $$
     \forall i\in N, \forall j\in N : R_{i,j} = \text{midRank}(1-\text{score}),\ \text{score}=\begin{cases}
     1&,\ j\in\text{mSet}(i)\\
@@ -722,50 +718,52 @@ $$
 où $\text{rnd}$ correspond à une base aléatoire entre 0 et 0.5 et $\text{pb}$ à un biais entre 0 et 0.5 définit par la proximité du profil de l'étudiant $i$ à celui de l'UE $j$ (0 = éloignement total, 0.5 = proximité totale). 
 Nous prenons ensuite le rangs moyens de 1 moins le score afin de conserver l'ordre voulue sur les rangs (rang faible = préférence élevé).
 
-Avec cette méthode, entièrement paramétrable, nous sommes capables de nous rapprocher de ce qu'un étudiant pourrait réellement choisir, mais ce n'est évidemment pas parfait. 
-Voyons donc comment nous pouvons récupérer les informations des étudiants.
+Cette méthode entièrement paramétrable nous permet de nous rapprocher de ce qu'un étudiant pourrait réellement choisir, mais elle n'est évidemment pas parfaite. 
+Voyons donc comment récupérer les informations des étudiants.
 
 \subsection{Données réelles}
-Afin de récupérer les données réelle des étudiants, un formulaire Google Form a été mis en place (même s'il n'a pas encore été distribué à date d'écriture du rapport). 
+Afin de récupérer les données réelles des étudiants, un formulaire Google Form a été mis en place (même s'il n'a pas encore été distribué à date d'écriture du rapport). 
 Ce formulaire est disponible \href{https://docs.google.com/forms/d/1fwVHNHbTxya-Qh55OrPIojUvQd-1lwp7hdd4YcqTsh4/}{ici} et s'assure de récupérer les informations suivantes :
 \begin{itemize}
     \item Le parcours de l'étudiant (obligatoire),
-    \item Un score de 1 au nombre d'UE définissant la préférence de l'étudiant à chaque UE (un score élevé revient à avoir une préférence élevé), (obligatoire)
-    \item La mention d'éventuelles contraintes particulières de l'étudiants.  
+    \item Un score de 1 au nombre d'UE définissant la préférence de l'étudiant à chaque UE (un score élevé revient à avoir une préférence élevée), (obligatoire)
+    \item La mention d'éventuelles contraintes particulières de l'étudiant.  
 \end{itemize}
 
-En s'assurant que les étudiant remplissent bien les cases, nous empêchons les valeurs vides, mais nous n'empêchons pas les valeurs invalides (textes, nombre négatifs, etc.). 
-Bien qu'inattendues, ces valeurs sont supportées ; s'il s'agit d'un nombre hors du champs autorisé, ce n'est pas grave, car il sera normalisé par la méthode du rang moyen plus tard ; cependant, s'il s'agit d'une autre valeur (comme un texte), nous attribuerons par défaut le pire rang pour cette UE, car nous la considérerons comme non désiré. 
-Notez qu'il est impossible de prévoir toutes les valeurs invalides, il conviendra donc de vérifier à la main et/ou de bien notifier les étudiants des procédures, afin d'éviter des réponses tel que : <<Je veux absolument cette matière>>, <<Non>>, <<2,0>>, <<2.0>>, etc.
+En s'assurant que les étudiants remplissent bien les cases, nous empêchons les valeurs vides, mais nous n'empêchons pas les valeurs invalides (textes, nombres négatifs, etc.). 
+Bien qu'inattendues, ces valeurs sont supportées ; s'il s'agit d'un nombre hors du champ autorisé, ce n'est pas grave, car il sera normalisé par la méthode du rang moyen plus tard ; cependant, s'il s'agit d'une autre valeur (comme un texte), nous attribuerons par défaut le pire rang pour cette UE, car nous la considérerons comme non désirée. 
+Notez qu'il est impossible de prévoir toutes les valeurs invalides, il conviendra donc de vérifier à la main et/ou de bien notifier les étudiants des procédures, afin d'éviter des réponses telles que : << Je veux absolument cette matière >>, << Non >>, << 2,0 >>, << 2.0 >>, etc.
 
-Une fois que les valeurs invalides sont gérées, nous pouvons retourner dans le processus initiale et calculer le rang final ainsi :
+Une fois que les valeurs invalides sont gérées, nous pouvons retourner dans le processus initial et calculer le rang final, ainsi :
 $$
     \forall i \in N\forall j\in M : R_{i,j} = \text{midRank}(\max\{\text{score}\}-\text{score}),\ \text{score}=\begin{cases}
         \max\{\text{score}\}+1 &,\ j\in\text{mSet}(i)\\
         \widehat{\text{score}} &,\ j\not\in\text{mSet}(i)
     \end{cases}
 $$
-où $\widehat{score}$ correspond au score attribué par l'étudiant $i$ à l'UE $j$. Notez bien que si l'UE est obligatoire pour l'étudiant $i$, nous la forçons à avoir le score le plus élevé afin de garder la cohérence que nous utilisons dans le solveur ou les métriques.
-Le score obtenu est ensuite normalisé en rangs en gardant l'ordre désiré.
+où $\widehat{score}$ correspond au score attribué par l'étudiant $i$ à l'UE $j$. Notez que si l'UE est obligatoire pour l'étudiant $i$, nous lui attribuons le score le plus élevé afin de préserver la cohérence utilisée dans le solveur ou les métriques.
+Le score obtenu est ensuite normalisé en rangs, tout en conservant l'ordre souhaité.
 
-À partir de là, il ne nous manque plus qu'à fusionner le résultats avec les fichiers \texttt{csv} et \texttt{json} afin de former le fichier \texttt{dat} dans le solveur.
+Il ne nous reste plus qu'à fusionner les résultats avec les fichiers CSV et JSON pour former le fichier DAT dans le solveur.
 
 \section{Solveur -- Méthode d'affectation des UEs}
 
-Cette section décrit la méthode de calcul d'une affectation à partir des données présentées précédemment. L'objectif est double : (i) produire une affectation qui respecte toutes les contraintes métier (capacité, obligations, compatibilités, bornes min/max), et (ii) disposer d'une sortie exploitable par des scripts d'analyse et de visualisation afin d'aider à la décision.
+Cette section décrit la méthode de calcul d'une affectation à partir des données présentées précédemment. L'objectif est double : (i) produire une affectation qui respecte toutes les contraintes métier (capacité, obligations, compatibilités et bornes min/max) et (ii) disposer d'une sortie exploitable par des scripts d'analyse et de visualisation pour aider à la prise de décision.
 
 \subsection{Baseline de comparaison : \textit{first-come first-served}}
 
-À des fins de comparaison, nous considérons une baseline simple de type \og premier arrivé, premier servi \fg{} (FCFS). En effet, ce système constitue un point de référence utile pour plusieurs raisons (i) il est facile à implémenter, (ii) il est facile à expliquer, (iii) il s'agit du système couramment mis en place. Néanmoins, la méthode d'affectation ne garantit pas une bonne satisfaction globale ni une équité satisfaisante.
+À des fins de comparaison, nous considérons une baseline simple de type << premier arrivé, premier servi >>. (FCFS). Ce système constitue en effet un point de référence utile pour plusieurs raisons :
+(i) il est facile à implémenter, (ii) il est facile à expliquer,
+(iii) il s'agit du système couramment mis en place. Néanmoins, cette méthode d'affectation ne garantit ni une satisfaction globale optimale, ni une équité satisfaisante.
 
-Dans nos fichiers d'exemple utilisés par les scripts de post-traitement, une affectation FCFS est notamment représentée sous forme CSV (par exemple \texttt{FCFSaffectation.csv}).
+Dans nos fichiers d'exemple utilisés par les scripts de post-traitement, une affectation FCFS est notamment représentée sous forme de fichier CSV (par exemple \texttt{FCFSaffectation.csv}).
 
 \subsection{Solveur exact : modèle de programmation linéaire en nombres entiers (OPL/CPLEX)}
 
 Nous utilisons un modèle OPL résolu par CPLEX. La variable de décision principale est une matrice binaire $A \in \{0,1\}^{n\times m}$ telle que $A_{i,j}=1$ si l'étudiant $i$ est affecté à l'UE $j$.
 
 \paragraph{Données d'entrée du solveur}
-Le solveur attend un fichier \texttt{.dat} contenant les tailles $(n,m,p)$, la capacité $c_j$ de chaque UE, le parcours $p_i$ de chaque étudiant, le nombre maximal d'UE demandées $m\!\max_i$, les bornes globales $(g\!\min,g\!\max)$, la matrice de rangs $r_{i,j}$ (rangs potentiellement non entiers en cas d'ex-æquo), ainsi que deux ensembles de tuples :
+Le solveur attend un fichier \texttt{.dat} contenant les tailles $(n,m,p)$, la capacité $c_j$ de chaque UE, le parcours $p_i$ de chaque étudiant, le nombre maximal d'UE demandées $m\!\max_i$, les bornes globales $(g\!\min,g\!\max)$, la matrice de rangs $r_{i,j}$ (rangs potentiellement non entiers en cas d'ex æquo), ainsi que deux ensembles de tuples :
 \begin{itemize}
     \item \texttt{conflicts} : paires d'UE incompatibles (incluant notamment les conflits d'EdT), représentées comme des couples $(j,j')$ plutôt que comme une matrice creuse ;
     \item \texttt{mandatory} : paires (UE, parcours) indiquant les UEs obligatoires d'un parcours.
@@ -784,7 +782,7 @@ Le modèle impose notamment :
 \end{itemize}
 
 Avant l'optimisation, le modèle exécute des assertions de cohérence sur les données (par exemple $g\!\min\le g\!\max$, $m\!\max_i\in[g\!\min,g\!\max]$, capacités positives). Ces vérifications permettent de diagnostiquer rapidement des cas d'infaisabilité dus à des entrées incohérentes.
-Avec ce modèle, nous émettons l'hypothèse simplificatrice, mais cohérente, que peu importe le parcours, le nombre minimum d'UEs pour passer un semestre ne change pas. En pratique, cette hypothèse est vérifié, car toutes les UEs sont de 3 crédits ECTS, exceptés les projets DS4H et TER comptant pour 6 crédits ECTS indépendamment des parcours. 
+Avec ce modèle, nous émettons l'hypothèse simplificatrice, mais cohérente, que peu importe le parcours, le nombre minimum d'UEs pour passer un semestre ne change pas. En pratique, cette hypothèse est vérifiée, car toutes les UEs sont de 3 crédits ECTS, exceptés les projets DS4H et TER comptant pour 6 crédits ECTS indépendamment des parcours. 
 
 \paragraph{Objectifs d'optimisation}
 Nos trois objectifs (mutuellement exclusifs), présentés précédemment, sont implémentés et sélectionnés par \texttt{objType} :
@@ -794,15 +792,15 @@ Nos trois objectifs (mutuellement exclusifs), présentés précédemment, sont i
     \item \textbf{Minimiser l'écart de la somme des rangs non facultatifs entre les étudiants} (\texttt{objType=6}) : Cet objectif favorise grandement l'équité entre les étudiants au regard des affectations d'UEs, mais ne garantie aucunement la satisfaction (nous pourrions tout aussi bien être équitable avec de bon rangs, qu'avec de mauvais rangs).
 \end{itemize}
 
-Dans ces trois cas, le solveur produit une affectation optimale au sens du critère sélectionné, sous réserve de faisabilité.
-Aussi, comme vous l'aurez remarquez, d'autres objectifs sont également implémentés ; en tout une dizaine minimisant ou maximisant certains critères le sont. Dans notre cas, nous avons présenté les plus simples et compréhensible, mais d'autres pourraient êtres plus adaptés. Dans l'annexe II, vous retrouverez l'intégralité des objectifs implémentés (dans OPL, ils sont implémentés sous leur forme de rangs non facultatifs).
+Dans ces trois cas, le Solveur produit une affectation optimale au sens du critère sélectionné, sous réserve de faisabilité.
+Aussi, comme vous l'aurez remarqué, d'autres objectifs sont également implémentés ; en tout, une dizaine minimisant ou maximisant certains critères, le sont. Dans notre cas, nous avons présenté les plus simples et compréhensibles, mais d'autres pourraient être plus adaptés. Dans l'Annexe II, vous retrouverez l'intégralité des objectifs implémentés (dans OPL, ils sont implémentés sous leur forme de rangs non facultatifs).
 
 \paragraph{Sorties du solveur}
-En sortie, le modèle exporte une affectation au format CSV (\texttt{affectation.csv}) sous forme d'une matrice binaire : une ligne par étudiant et une colonne par UE (entêtes \texttt{studentID,c1,\ldots,cm}). Un affichage lisible est également produit sur la console (UE attribuées avec leurs rangs), tandis que les statistiques (taux de remplissage, métriques d'équité, etc.) sont volontairement calculées par les scripts externes (voir section \og Métriques d'évaluations et de comparaisons \fg{}).
+En sortie, le modèle exporte une affectation au format CSV (\texttt{affectation.csv}) sous forme d'une matrice binaire : une ligne par étudiant et une colonne par UE (entêtes : \texttt{studentID, c1, \ldots, cm}). Un affichage lisible est également produit sur la console (UE attribuées avec leurs rangs), tandis que les statistiques (taux de remplissage, métriques d'équité, etc.) sont volontairement calculées par les scripts externes (voir section \og Métriques d'évaluations et de comparaisons \fg{})).
 
 \section{Sortie -- Visualisation des résultats}
 
-Cette section décrit les fichiers de sortie produits par le solveur et les scripts, ainsi que les visualisations attendues pour soutenir l'analyse et la comparaison d'affectations. Nous ne redéfinissons pas les métriques ici : nous renvoyons à la section \og Métriques d'évaluations et de comparaisons \fg{} pour leur définition précise.
+Cette section décrit les fichiers de sortie produits par le solveur et les scripts, ainsi que les visualisations attendues pour soutenir l'analyse et la comparaison des affectations. Nous ne redéfinissons pas les métriques ici ; nous renvoyons à la Section~\ref{sec:Metric} pour leur définition précise.
 
 \subsection{Sortie brute : affectation au format CSV}
 
@@ -812,20 +810,20 @@ La sortie primaire du solveur est le fichier \texttt{affectation.csv}, qui repr�
 
 Les scripts de post-traitement lisent l'affectation (CSV) et les préférences (rangs) afin de construire une \emph{matrice des rangs attribués}. Concrètement, on extrait la matrice binaire d'affectation (colonnes \texttt{c\ldots}) et la matrice des rangs (colonnes \texttt{Rg\ldots}), puis on calcule une matrice de rangs attribués par produit terme à terme (le fameux produit de Schur).
 
-À partir de cette matrice, on calcule des \textbf{vecteurs de métriques} (une ligne par étudiant ou une ligne par UE), par exemple : somme/moyenne/variance des rangs, médiane et quartiles, nombre d'UE reçues, premier rang reçu, dernier rang reçu, etc. Les chemins par défaut montrent notamment une structuration en :
+À partir de cette matrice, on calcule des \textbf{vecteurs de métriques} (une ligne par étudiant ou une ligne par UE), par exemple : somme, moyenne, variance des rangs, médiane et quartiles, nombre d'UE reçues, premier rang reçu, dernier rang reçu, etc. Les chemins par défaut montrent notamment une structuration en :
 \begin{itemize}
     \item entrées : \texttt{srcFiles/\{affectation,preferences,courses,parameters\}.*} ;
     \item sorties : \texttt{out/studentsVectors.csv} et \texttt{out/coursesVectors.csv}.
 \end{itemize}
 
-Ces sorties vectorielles et leurs agrégations (voir section \og Métriques... \fg{} et annexes associées) constituent une base naturelle pour un \textbf{tableau de bord} permettant de comparer plusieurs affectations (ex. solveur vs baseline, ou plusieurs objectifs).
+Ces sorties vectorielles et leurs agrégations (voir Section~\ref{sec:Metric} et annexes associées) constituent une base naturelle pour des visualisations poussées permettant de comparer plusieurs affectations (par exemple, un modèle par rapport à une valeur de référence ou plusieurs objectifs).
 
 \subsection{Visualisation des données}
-Bien que nous ayons la capacité de comparer des affectations en se basant uniquement sur des métriques, cela peut poser des difficultés. En effet, en plus du temps demandé pour l'interprétation et la comparaison de celles-ci entre plusieurs affectations, il est aisé de faire des erreurs d'inattention ou d'interprétation menant au choix d'une affectation sous-optimale.
+Bien que nous puissions comparer des affectations en nous basant uniquement sur des métriques, cela peut poser des difficultés. En effet, outre le temps nécessaire à l'interprétation et à la comparaison de ces métriques entre plusieurs affectations, il est facile de commettre des erreurs d'inattention ou d'interprétation qui peuvent conduire à choisir une affectation sous-optimale.
 Dans cette perspective, il est essentiel de mettre en place les visualisations nécessaires pour faciliter cette interprétation.
 
-Pour cela, l'étudiant en charge de cette partie à mis en place divers graphiques sur les différentes métriques vectorielles : bar plot, box plot, scatter plot, etc. 
-Ces graphique vise à mesurer rapidement et efficacement les aspects suivants :
+Pour ce faire, l'étudiant en charge de cette partie a créé divers graphiques représentant les différentes métriques vectorielles : bar plot, box plot, scatter plot, etc. 
+Ces graphiques visent à mesurer rapidement et efficacement les aspects suivants :
 
 \begin{itemize}
     \item \textbf{Satisfaction des étudiants} : histogrammes ou boîtes à moustaches de quelques métriques clés (ex. moyenne des rangs, dernier rang, quantiles) ;
@@ -834,34 +832,34 @@ Ces graphique vise à mesurer rapidement et efficacement les aspects suivants :
     \item \textbf{Comparaisons par groupes} (parcours) : mêmes indicateurs, stratifiés par parcours, afin de détecter des biais potentiels.
 \end{itemize}
 
-Le graphique le plus parlant (même si non abouti) reste néanmoins celui-ci :
+Le graphique le plus parlant (même s'il demeure incomplet/inabouti) reste néanmoins le suivant :
 \begin{figure}[H]
     \includegraphics[width=\textwidth]{img/heatmapMedian.png}
     \caption{Heatmap des affectations}
 \end{figure}
 
-Sur celui-ci, les UEs obligatoires sont retirées, car elles possèdent le meilleur rang possible quoi qu'il arrive. De plus, les deux parcours n'ayant pas nécessairement le même nombre d'UEs obligatoires, nous séparons les parcours pour avoir un résultat plus représentatif. Il ne reste donc plus que le rang normalisé à examiné. 
-Ainsi, nous pouvons comparer deux affectations à vu d'œil juste en regardant à quel point l'une est plus "verte" que l'autre. Intuitivement, nous prendrons l'affectation ayant le plus d'étudiant satisfait. À noter que cette visualisation peut changer, en n'affichant qu'un parcours, en ne considérant qu'un parcours en particulier, en remettant les UEs obligatoires ou en changeant l'ordre qui par défaut se fait par la médiane des rangs non facultatifs en ordre croissant.
+Sur ce tableau, les UEs obligatoires sont retirées, car elles ont le meilleur rang possible quoi qu'il arrive. De plus, comme les deux parcours n'ont pas nécessairement le même nombre d'UEs obligatoires, nous les séparons pour obtenir un résultat plus représentatif. Il ne reste donc plus que le rang normalisé à examiner. 
+Ainsi, nous pouvons comparer deux affectations à vue d'œil, en observant simplement laquelle est la plus << verte >>. Intuitivement, nous choisirons l'affectation qui satisfait le plus d'étudiants. À noter que cette visualisation peut changer en n'affichant qu'un parcours, en ne considérant pas de parcours en particulier, en remettant les UEs obligatoires ou en changeant l'ordre, qui est par défaut la médiane des rangs non facultatifs en ordre croissant.
 
 L'objectif de ces visualisations n'est pas de remplacer le solveur, mais de rendre l'affectation \emph{auditable} et \emph{comparables} : on cherche à comprendre \emph{qui} est pénalisé et \emph{pourquoi}, et à quantifier les compromis utilité/équité entre différentes solutions.
-À ces fins, regrouper les métriques vectorielles, certains indicateurs et graphiques, dans un tableau de bord, pourrait être également une bonne option. Nous pouvons imaginer assez facilement quelque chose ainsi :
+Pour ce faire, regrouper les métriques vectorielles, certains indicateurs et graphiques dans un tableau de bord pourrait également être une bonne option. Nous pouvons aisément imaginer quelque chose comme ceci :
 \begin{figure}[H]
     \includegraphics[width=\textwidth]{img/Dashboard UI Diagram.drawio.png}
     \caption{Schéma conceptuel d'un tableau de bord hypothétique}
 \end{figure}
-Où nous serions capable d'accéder facilement par un filtre à toutes les métriques agrégées, par un histogramme au remplissage des UEs/leurs saturations ; par des tests d'hypothèses sur l'ordre, le parcours ou le nombre d'UE choisies et l'indice de Gini si une affectation présente des propriétés non souhaitables sur des métriques choisies (indiqué par des pastilles de couleurs vert/jaune/rouge par exemple), les paramètres de notre affectation, ainsi que la heatmap de l'affectation des étudiants aux UEs en fonction du parcour et triée par la métrique choisie.
+Où nous pourrions facilement accéder à toutes les métriques agrégées par un filtre, à l'histogramme de remplissage des UEs/leurs saturations, à des tests d'hypothèses sur l'ordre, le parcours ou le nombre d'UE choisies, ainsi qu'à l'indice de Gini si une affectation présente des propriétés non souhaitables sur des métriques choisies (indiquées par des pastilles de couleur verte, jaune ou rouge, par exemple). Nous pourrions également consulter les paramètres de notre affectation, ainsi que la heatmap de l'affectation des étudiants aux UEs en fonction du parcours et triée par la métrique choisie.
 
-Ce tableau de bord, n'a malheureusement pas vu le jour en raison de contraintes de temps.
+Ce tableau de bord n'a malheureusement pas pu être réalisé en raison de contraintes de temps.
 
 \section{Conclusions}
-En conclusion, ce projet vise à proposer un mécanisme d'affectation plus << satisfaisant >> que le système en place : << premier arrivé, premier servi >>, le tout en restant interprétable (au mieux explicable), en introduisant la notions d'équité et en la différenciant avec d'autres notions tels que l'optimalité ou l'intégrité.
+En conclusion, ce projet vise à proposer un mécanisme d'affectation plus << satisfaisant >> que le système en place : << premier arrivé, premier servi >>, le tout en restant interprétable (au mieux explicable), en introduisant la notion d'équité et en la différenciant avec d'autres notions tels que l'optimalité ou l'intégrité.
 
-Pour cela, le format de donnée à d'abord été formalisé tout comme les l'ont été les contraintes ; les notions d'équité et d'optimalité ont été fortement étudié afin de déterminer les métriques et objectifs les plus proche de ce que l'on juge d'affectation <<satisfaisante>>.
-Dans un second temps, un modèle linéaire, pour lequel l'objectif est sélectionnable, a été créé et utilisé au sein d'un solveur exact (OPL/CPLEX). Les affectations sortantes (au format CSV) sont ensuite analysé à l'aide des métriques pré-citées et visualisés afin de soutenir une décision d'affectation finale pour les étudiants. 
+Pour cela, le format des données a d'abord été formalisé, de même que les contraintes. Les notions d'équité et d'optimalité ont été étudiées en profondeur afin de déterminer les métriques et les objectifs les plus proches de ce que l'on considère comme une affectation << satisfaisante >>.
+Dans un second temps, un modèle linéaire dont l'objectif est sélectionnable a été créé et utilisé au sein d'un solveur exact (OPL/CPLEX). Les affectations sortantes (au format CSV) sont ensuite analysées à l'aide des métriques précitées, puis visualisées afin de soutenir une décision d'affectation finale pour les étudiants. 
 
 L'approche présente deux atouts majeurs : d'une part, la faisabilité est garantie par construction lorsque le modèle admet une solution ; d'autre part, la séparation \og solveur \textrightarrow{} exports CSV \textrightarrow{} métriques/visualisations \fg{} permet de conserver un modèle d'optimisation simple, tout en offrant un espace riche d'évaluation a posteriori (Section~\ref{sec:Metric}).
 
-\paragraph{Contributeurs} Les contributes aux projets sont les suivants : 
+\paragraph{Contributeurs} Les contributeurs aux projets sont les suivants : 
 Arezzoug Mounia (Entrée, génération pondérée),
 Claveille Hugo (Entrée, Gestion de projet, gestion du git),
 Cuvilliez Fiona (Entrée, génération uniforme, lien solveur),
