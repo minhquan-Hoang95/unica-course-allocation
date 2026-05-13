@@ -109,7 +109,7 @@ jobs:
       # Lancer le scan
       - name: Scan Semgrep
         run: |
-          semgrep --config=p/security-audit severity ERROR \
+          semgrep --config=p/security-audit --severity ERROR \
                   --error \
                   --json \
                   -o semgrep-results.json \
