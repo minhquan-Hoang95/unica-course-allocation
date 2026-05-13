@@ -21,7 +21,7 @@ pandas==3.0.1
 pip-api==0.0.34
 pip-requirements-parser==32.0.1
 pip_audit==2.10.0
-platformdirs==4.9.4
+platformdirs==4.9.6
 plotly==6.1.2
 pluggy==1.6.0
 py-serializable==2.1.0
