@@ -25,8 +25,8 @@ def pack_row(row):
 
 STRATEGIES = {
     "mean_std": (["optionalCorrectedMean", "optionalCorrectedStd"], [True, False]),
-    "median":   (["optionalCorrectedMedian"],                       [True]),
-    "ranksum":  (["optionalCorrectedRankSum"],                      [True]),
+    "median": (["optionalCorrectedMedian"], [True]),
+    "ranksum": (["optionalCorrectedRankSum"], [True]),
 }
 
 TRACK_COLORS = {
@@ -50,15 +50,18 @@ def create_split_heatmaps(
 ):
     tracks = student_metrics["track"].unique()
 
-    global_max = preferences.loc[:, preferences.columns.str.startswith("Rg")].max().max()
+    global_max = (
+        preferences.loc[:, preferences.columns.str.startswith("Rg")].max().max()
+    )
 
     for strategy_name, (sort_cols, ascending) in STRATEGIES.items():
-
         fig = plt.figure(figsize=(20, 10))
         suffix = " (optional courses only)" if exclude_mandatory else ""
         fig.suptitle(
             f"Student Satisfaction Heatmap by Track  |  sorted by {' + '.join(sort_cols)}{suffix}",
-            fontsize=14, fontweight="bold", y=1.01,
+            fontsize=14,
+            fontweight="bold",
+            y=1.01,
         )
 
         norm = Normalize(vmin=0, vmax=1)
@@ -68,7 +71,6 @@ def create_split_heatmaps(
         track_list = sorted(tracks)
 
         for ax_idx, track in enumerate(track_list):
-
             ax = fig.add_subplot(1, len(track_list), ax_idx + 1)
             axes.append(ax)
 
@@ -90,10 +92,12 @@ def create_split_heatmaps(
                 cols_to_drop = [c for c in mandatory_cols if c in sub_matrix.columns]
                 sub_matrix = sub_matrix.drop(columns=cols_to_drop)
 
-            df_norm = sub_matrix.apply(lambda row: normalize_row(row, global_max), axis=1)
+            df_norm = sub_matrix.apply(
+                lambda row: normalize_row(row, global_max), axis=1
+            )
 
             df_packed = df_norm.apply(pack_row, axis=1)
-            df_packed.columns = [f"rank {i+1}" for i in range(df_packed.shape[1])]
+            df_packed.columns = [f"rank {i + 1}" for i in range(df_packed.shape[1])]
 
             color = TRACK_COLORS.get(track, "gray")
             label = TRACK_LABELS.get(track, track)
@@ -119,11 +123,14 @@ def create_split_heatmaps(
             ax.tick_params(axis="x", labelsize=8)
 
             ax.text(
-                0.99, 0.01,
+                0.99,
+                0.01,
                 f"n = {len(sorted_ids)}",
                 transform=ax.transAxes,
-                ha="right", va="bottom",
-                fontsize=8, color="white",
+                ha="right",
+                va="bottom",
+                fontsize=8,
+                color="white",
                 bbox=dict(boxstyle="round,pad=0.2", fc=color, alpha=0.7),
             )
 
@@ -138,5 +145,3 @@ def create_split_heatmaps(
         plt.savefig(filename, dpi=150, bbox_inches="tight")
         plt.close()
         print(f"Saved: {filename}")
-
-

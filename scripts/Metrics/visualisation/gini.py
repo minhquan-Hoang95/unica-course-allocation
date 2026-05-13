@@ -20,7 +20,7 @@ def gini(values):
     if mean == 0:
         return 0.0
     diff_sum = np.sum(np.abs(values[:, None] - values[None, :]))
-    return diff_sum / (2 * n ** 2 * mean)
+    return diff_sum / (2 * n**2 * mean)
 
 
 def lorenz(values):
@@ -39,12 +39,23 @@ def create_gini_plot(
 ):
     fig, ax = plt.subplots(figsize=(8, 6))
 
-    ax.plot([0, 1], [0, 1], color="black", linestyle="--", linewidth=1, label="Perfect equality")
+    ax.plot(
+        [0, 1],
+        [0, 1],
+        color="black",
+        linestyle="--",
+        linewidth=1,
+        label="Perfect equality",
+    )
 
     tracks = sorted(student_metrics["track"].unique())
 
     for track in tracks:
-        values = student_metrics.loc[student_metrics["track"] == track, metric].dropna().values
+        values = (
+            student_metrics.loc[student_metrics["track"] == track, metric]
+            .dropna()
+            .values
+        )
         x, y = lorenz(values)
         g = gini(values)
         color = TRACK_COLORS.get(track, "gray")
