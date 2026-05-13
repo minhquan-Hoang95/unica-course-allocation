@@ -11,7 +11,7 @@ idna==3.11
 iniconfig==2.3.0
 license-expression==30.4.4
 markdown-it-py==4.0.0
-matplotlib==3.10.1
+matplotlib==3.10.9
 mdurl==0.1.2
 msgpack==1.1.2
 numpy==2.4.3
