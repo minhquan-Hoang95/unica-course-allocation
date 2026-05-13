@@ -25,9 +25,9 @@ platformdirs==4.9.4
 plotly==6.1.2
 pluggy==1.6.0
 py-serializable==2.1.0
-Pygments==2.19.2
+Pygments==2.20.0
 pyparsing==3.3.2
-pytest==9.0.2
+pytest==9.0.3
 pytest-cov==7.1.0
 python-dateutil==2.9.0.post0
 PyYAML==6.0.3
@@ -43,4 +43,4 @@ stevedore==5.7.0
 tomli==2.4.1
 tomli_w==1.2.0
 typing_extensions==4.15.0
-urllib3==2.6.3
+urllib3==2.7.0
