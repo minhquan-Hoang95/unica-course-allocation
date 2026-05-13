@@ -1,8 +1,6 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-
+import numpy as np
+import pandas as pd
 
 TRACK_COLORS = {
     "AI_track": "steelblue",

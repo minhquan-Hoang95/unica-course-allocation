@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
@@ -86,7 +85,7 @@ def create_split_heatmaps(
             sub_matrix = sub_matrix[cols_used]
 
             if exclude_mandatory and courses is not None:
-                mandatory_ids = courses.loc[courses[track] == True, "courseID"].tolist()
+                mandatory_ids = courses.loc[courses[track], "courseID"].tolist()
                 mandatory_cols = [f"c{cid}" for cid in mandatory_ids]
                 cols_to_drop = [c for c in mandatory_cols if c in sub_matrix.columns]
                 sub_matrix = sub_matrix.drop(columns=cols_to_drop)

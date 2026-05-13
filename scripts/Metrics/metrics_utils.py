@@ -1,16 +1,15 @@
-import pandas as pd
-import numpy as np
-from typing import Optional, Callable
-from functools import partial
 import json
+from collections.abc import Callable
+from functools import partial
 
+import numpy as np
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-import plotly.express as px
 
-from visualisation.split_heatmap import create_split_heatmaps
 from visualisation.gini import create_gini_plot
+from visualisation.split_heatmap import create_split_heatmaps
 
 
 DEFAULT_IN_AFFECTATIONS_PATH = "srcFiles/FCFSaffectation.csv"
@@ -20,7 +19,6 @@ DEFAULT_IN_PARAMETERS_PATH = "srcFiles/parameters.json"
 
 DEFAULT_OUT_COURSES_VEC_PATH = "out/coursesVectors.csv"
 DEFAULT_OUT_STUDENTS_VEC_PATH = "out/studentsVectors.csv"
-
 
 
 def getData(*paths:str) -> tuple[pd.DataFrame, ...]:
@@ -44,7 +42,7 @@ def getStudentsTrackFromPreferences(preferences:pd.DataFrame) -> list[str]:
     trackCols = preferences.loc[:,preferences.columns.str.endswith("track")]
     
     # Get the track name of each student, then return it
-    trackIndices = np.where(trackCols.to_numpy()==True)[1]
+    trackIndices = np.where(trackCols.to_numpy())[1]
     return [trackCols.columns[i] for i in trackIndices]
 
 # Just an helper function
@@ -53,13 +51,13 @@ def getStudentsMandatoryLecturesFromTrack(courses:pd.DataFrame, studentsTrack:li
     mandatoryCourses = []
     for track in studentsTrack:
         # Get the course for each tracks
-        trackCourses = courses.loc[courses[track]==True,"courseID"].tolist()
+        trackCourses = courses.loc[courses[track],"courseID"].tolist()
         # Add it to the list of mandatory course with Rg[x] for each course so that it is easier to interact with the preferences dataframe afterward
         mandatoryCourses.append(list(map(lambda x: f"Rg{x}", trackCourses)))
     return mandatoryCourses
 
 def computeBaseVectors(rankMatrix:np.ndarray,
-                       additional_fnc:Optional[dict[str, partial | Callable]] = None,
+                       additional_fnc:dict[str, partial | Callable] | None = None,
                        *post_df_fnc:dict[str, partial | Callable],
                        onStudent:bool = True
                        ) -> pd.DataFrame:
@@ -202,7 +200,7 @@ def getAdditionalCoursesBasedOnStudentsFunction(preferences:pd.DataFrame, course
         # Get the number of mandatory optional lectures (the minimum number of lecture to pass the semester)
         mandatoryOptional = countMandatoryOptional(mat)
         
-        # Initialise the coreected quantile
+        # Initialise the corrected quantile
         rankQuantile = []
         for studentID, row in enumerate(mat):
             # Compute the corrected quantile
@@ -318,13 +316,10 @@ def sort_students(student_metrics,strategy:list, order_statements:list):
 
 
 def createHeatmap(df_colors:pd.DataFrame, name_file, strategy):
-    cmap = ListedColormap(["green", "orange", "red"])
-
     plt.figure(figsize=(12, 8))
     sns.heatmap(
         df_colors,
         cmap="RdYlGn_r",
-        #cbar=False,
         linewidths=0.5,
         linecolor='gray'
     )
@@ -334,7 +329,6 @@ def createHeatmap(df_colors:pd.DataFrame, name_file, strategy):
     plt.ylabel("Students (most satisfied -> least satisfied)")
     plt.savefig(name_file+".png")
     plt.close()
-
 
 
 if __name__ == "__main__":
@@ -362,7 +356,7 @@ if __name__ == "__main__":
     student_metrics.index = df_matrix.index
     """
     sorted_students = student_metrics.sort_values(
-        by=["optionalCorrectedMean", "optionalCorrectedStd"], #consistency + IQR as a" tie-breaker
+        by=["optionalCorrectedMean", "optionalCorrectedStd"], #consistency + IQR as a tie-breaker
         ascending=[True, False]
     ).index
     """
@@ -389,10 +383,8 @@ if __name__ == "__main__":
                         exclude_mandatory=True, courses=courses)
     """
 
-    
     create_split_heatmaps(df_matrix, student_metrics, preferences, output_prefix="visualisation/out/split_heatmap")
     create_split_heatmaps(df_matrix, student_metrics, preferences, output_prefix="visualisation/out/split_heatmap_optional", exclude_mandatory=True, courses=courses)
-    
 
     create_gini_plot(
         student_metrics=student_metrics,
