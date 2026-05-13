@@ -2,15 +2,12 @@ import json
 from collections.abc import Callable
 from functools import partial
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
-
 from visualisation.gini import create_gini_plot
 from visualisation.split_heatmap import create_split_heatmaps
-
 
 DEFAULT_IN_AFFECTATIONS_PATH = "srcFiles/FCFSaffectation.csv"
 DEFAULT_IN_PREFERENCES_PATH = "srcFiles/studentsRandom.csv"

@@ -1,9 +1,9 @@
-import pandas as pd
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
+import numpy as np
+import pandas as pd
+import seaborn as sns
 from matplotlib.cm import ScalarMappable
+from matplotlib.colors import Normalize
 
 
 def normalize_row(row, global_max=None):
