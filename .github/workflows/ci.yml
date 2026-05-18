@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Harden the runner
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # 0080882f6c36860b6ba35c610c98ce87d4e2f26f
         with:
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Harden the runner
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # 0080882f6c36860b6ba35c610c98ce87d4e2f26f
         with:
@@ -85,7 +85,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
@@ -104,7 +104,7 @@ jobs:
     steps:
       # Récupérer le code
       - name: Checkout du code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # 11bd71901bbe5b1630ceea73d27597364c9af683
 
       # Lancer le scan
       - name: Scan Semgrep
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Harden the runner
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450
